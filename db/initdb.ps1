@@ -38,9 +38,10 @@ if ($r)
 }
 
 $scriptAbsolutePath = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$parentDir = Split-Path -Parent $scriptAbsolutePath
 $sqlAbsolutePath = $scriptAbsolutePath+"/db.sql"
 $SqlProcedureAbsolutePath = $scriptAbsolutePath+"/sp.sql"
-$envAbsolutePath = $scriptAbsolutePath+"/.env"
+$envAbsolutePath = $parentDir+"/.env"
 
 #tests
 $sqlFileExists = Test-Path -Path $sqlAbsolutePath
@@ -66,10 +67,10 @@ if(!$ni)
     {
         #injects sql db to container
         Write-Host "Injecting db.sql from @ $sqlAbsolutePath to container..."
-        docker cp $sqlAbsolutePath is309_db:/db.sql
+        docker cp $sqlAbsolutePath swinv-db:/db.sql
 
         Write-Host "Injecting sp.sql from @ $SqlProcedureAbsolutePath to container..."
-        docker cp $SqlProcedureAbsolutePath is309_db:/sp.sql
+        docker cp $SqlProcedureAbsolutePath swinv-db:/sp.sql
 
     }
     catch
@@ -106,14 +107,14 @@ CREATE DATABASE $($envHash['POSTGRES_DB']);
         $dropSqlContent | Out-File -FilePath $dropsqlAbsolutePath -Encoding UTF8 -Force
 
         Write-Host "    Injecting sql from @ $dropsqlAbsolutePath to container..."
-        docker cp -q $dropsqlAbsolutePath is309_db:/
+        docker cp -q $dropsqlAbsolutePath swinv-db:/
 
         Write-Host "    Executing database sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db env PGPASSWORD=$($envHash['POSTGRES_PASSWORD']) psql -U $($envHash['POSTGRES_USER']) -d postgres -f /dropdb.sql
+        docker exec -i swinv-db env PGPASSWORD=$($envHash['POSTGRES_PASSWORD']) psql -U $($envHash['POSTGRES_USER']) -d postgres -f /dropdb.sql
 
         Write-Host "    Removing used db from @ $dropsqlAbsolutePath..."
         Remove-Item -Path $dropsqlAbsolutePath -ErrorAction SilentlyContinue
-        docker exec -i is309_db rm -f /dropdb.sql
+        docker exec -i swinv-db rm -f /dropdb.sql
         Write-Host "    Database dropped and recreated!"
 
     }
@@ -129,24 +130,12 @@ if(!$ne)
     {
         #runs sql db on container
         Write-Host "Executing database sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /db.sql"
+        docker exec -i  sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /db.sql"
         Write-Host "    Sql db executed, tables built"
 
-        Write-Host "Executing seeddata sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /seeddata.sql"
-        Write-Host "    Sql db executed, tables populated"
-
         Write-Host "Executing stored procedures sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /sp.sql"
+        docker exec -i swinv-db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /sp.sql"
         Write-Host "    Sql db executed, procedures created"
-
-        Write-Host "Executing roles sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /roles_and_privileges.sql"
-        Write-Host "    Sql db executed, roles and privileges created"
-
-        Write-Host "Executing meta data sql db on $($envHash['POSTGRES_DB'])..."
-        docker exec -i is309_db sh -c "PGPASSWORD='$($envHash['POSTGRES_PASSWORD'])' psql -U $($envHash['POSTGRES_USER']) -d $($envHash['POSTGRES_DB']) -f /meta.sql"
-        Write-Host "    Sql db executed, meta data created"
     }
     catch
     {
