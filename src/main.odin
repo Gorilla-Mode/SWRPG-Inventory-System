@@ -11,7 +11,7 @@ main :: proc()
 {
     defer rl.CloseWindow()
 
-    primary_color := util.hex_to_col(ui.color_scheme_instance.surface)
+    palette:= ui.load_color_palette()
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -33,7 +33,7 @@ main :: proc()
     for !rl.WindowShouldClose()
     {
         rl.BeginDrawing()
-        rl.ClearBackground(primary_color)
+        rl.ClearBackground(palette.surface)
         rl.EndDrawing()
     }
 }
