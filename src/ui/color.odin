@@ -1,6 +1,10 @@
 ﻿package ui
+
 import rl "vendor:raylib"
 import util "../utils"
+import rt "base:runtime"
+import fmt "core:fmt"
+import "core:reflect"
 
 // Define hexadecimal color values for the UI palette.
 color_hex :: enum {
@@ -21,11 +25,25 @@ color_palette :: struct {
 }
 
 // Loads the color palette for the UI by converting hexadecimal color values to rl.Color
-// structs and populating a color_palette struct.
+// and populating a color_palette struct.
 load_color_palette :: proc() -> color_palette {
     palette := color_palette{}
 
+    struct_info := type_info_of(color_palette)
+    named_type := struct_info.variant.(rt.Type_Info_Named)
+    struct_type := named_type.base.variant.(rt.Type_Info_Struct)
+
+    enum_count := len(color_hex)
+    assert(struct_type.field_count == i32(enum_count),
+    "color_palette struct fields must match color_hex enum variants")
+
     for field, i in color_hex {
+        field_name := struct_type.names[i]
+        enum_name := reflect.enum_field_names(color_hex)[i]
+        assert(field_name == enum_name,
+        fmt.tprintf("Field mismatch at index %d: expected '%s', got '%s'", i, enum_name, field_name))
+
+
         hex_value := u32(field)
         color := util.hex_to_col(hex_value)
         field_ptr := cast(^rl.Color)(uintptr(&palette) + uintptr(i) * size_of(rl.Color))
