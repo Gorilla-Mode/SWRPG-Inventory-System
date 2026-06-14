@@ -40,26 +40,27 @@ if ($c)
 }
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$parentDir = Split-Path -Parent $scriptDir
 
 if (!$r)
 {
     if($f)
     {
         # overwrites file if it exists
-        New-Item -Path $scriptDir -Name ".env" -ItemType "File" -Force
+        New-Item -Path $parentDir -Name ".env" -ItemType "File" -Force
     }
     else
     {
-        Write-Host $scriptDir
+        Write-Host $parentDir
         # checks if file already exists
-        if((Test-Path -Path ($scriptDir + "/.env")))
+        if((Test-Path -Path ($parentDir + "/.env")))
         {
             Write-Output "ERROR: .env file aready exists in directory, use -f to overwrite"
             return
         }
         else
         {
-            New-Item -Path $scriptDir -Name ".env" -ItemType "File"
+            New-Item -Path $parentDir -Name ".env" -ItemType "File"
         }
     }
     
@@ -73,15 +74,15 @@ if (!$r)
     try
     {
         #populates env file
-        Write-Host "    Populating .env @ $scriptDir"
+        Write-Host "    Populating .env @ $parentDir"
 
-        Add-Content -Path ($scriptDir + "/.env") -Value ("POSTGRES_USER=postgres")
+        Add-Content -Path ($parentDir + "/.env") -Value ("POSTGRES_USER=postgres")
         Write-Host "        - Postgres root username inserted"
-        Add-Content -Path ($scriptDir + "/.env") -Value ("POSTGRES_PASSWORD=$rootPwd")
+        Add-Content -Path ($parentDir + "/.env") -Value ("POSTGRES_PASSWORD=$rootPwd")
         Write-Host "        - Postgres root password inserted"
-        Add-Content -Path ($scriptDir + "/.env") -Value ("POSTGRES_DB=$databaseName")
+        Add-Content -Path ($parentDir + "/.env") -Value ("POSTGRES_DB=$databaseName")
         Write-Host "        - Postgres database name inserted"
-        Add-Content -Path ($scriptDir + "/.env") -Value ("EXTERNALCONNECTION=postgresql://$($appUserName):$($appPwd)@localhost:5432/$databaseName")
+        Add-Content -Path ($parentDir + "/.env") -Value ("EXTERNALCONNECTION=postgresql://$($appUserName):$($appPwd)@localhost:5432/$databaseName")
         Write-Host "        - External connection string inserted"
 
         Write-Host "    .env populated successfully"
