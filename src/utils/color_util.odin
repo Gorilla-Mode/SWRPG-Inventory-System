@@ -2,6 +2,7 @@
 
 import rl "vendor:raylib"
 
+// Converts a hexadecimal color value to an rl.Color struct, with an optional alpha component.
 hex_to_col :: proc (hex: u32, alpha: u8 = 255) -> rl.Color
 {
     r := u8((hex >> 16) & 0xFF)
