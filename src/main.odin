@@ -22,7 +22,7 @@ main :: proc()
     util.SetDarkTitlebar()
 
     images := ui.LoadImages()
-    rl.SetWindowIcon(images[ui.icons.app])
+    rl.SetWindowIcon(images[ui.icons.app_icon])
 
     fnt := ui.LoadFont()
 
