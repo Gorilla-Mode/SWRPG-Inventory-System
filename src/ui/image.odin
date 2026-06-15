@@ -6,14 +6,21 @@ icons :: enum {
     app,
 }
 
-// Loads the images for the application and returns a map of icons to their corresponding rl.Image objects.
-LoadImages :: proc() -> map[icons]rl.Image{
-    images := make(map[icons]rl.Image)
-    defer delete(images)
+IconMetadata :: struct {
+    path: cstring,
+}
 
-    icon: rl.Image = rl.LoadImage("src/assets/icon/app/cryo-chamber.png")
-    rl.ImageFormat(&icon, .UNCOMPRESSED_R8G8B8A8)
-    images[.app] = icon
+LoadImages :: proc() -> map[icons]rl.Image {
+    icon_paths := make(map[icons]IconMetadata)
+    icon_paths[.app] = {path = "src/assets/icon/app/cryo-chamber.png"}
+
+    images := make(map[icons]rl.Image)
+
+    for icon, metadata in icon_paths {
+        loaded_image := rl.LoadImage(metadata.path)
+        rl.ImageFormat(&loaded_image, .UNCOMPRESSED_R8G8B8A8)
+        images[icon] = loaded_image
+    }
 
     return images
 }
