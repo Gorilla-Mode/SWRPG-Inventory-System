@@ -7,3 +7,4 @@ All icons used are from [Game Icons](https://game-icons.net/)
 
 ## Authors
 - Delapouite
+- Skoll
