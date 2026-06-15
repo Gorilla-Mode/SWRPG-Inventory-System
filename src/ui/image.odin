@@ -30,9 +30,9 @@ ICON_NAMES := [?]string{
     "damage",
     "pistol",
     "rifle",
-    "gunnery",
-
+    "gunnery"
 }
+
 // Struct to hold the file path for each icon to be loaded.
 IconMetadata :: struct {
     path: cstring,
