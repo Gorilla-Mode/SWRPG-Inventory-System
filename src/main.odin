@@ -31,6 +31,10 @@ main :: proc()
     {
         rl.BeginDrawing()
         rl.ClearBackground(palette.surface)
+
+        rl.DrawText("SWIS", 20, 10, 24, palette.text)
+        ui.draw_palette(palette, offset_y = 34)
+
         rl.EndDrawing()
     }
 }
