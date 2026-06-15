@@ -24,6 +24,8 @@ main :: proc()
     images := ui.LoadImages()
     rl.SetWindowIcon(images[ui.icons.app])
 
+    fnt := ui.LoadFont()
+
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
 
@@ -32,7 +34,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(palette.surface)
 
-        rl.DrawText("SWIS", 20, 10, 24, palette.text)
+        rl.DrawTextEx(fnt.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, palette.text)
         ui.DrawPalette(palette, offset_y = 34)
 
         rl.EndDrawing()
