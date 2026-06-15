@@ -7,7 +7,7 @@ icons :: enum {
 }
 
 // Loads the images for the application and returns a map of icons to their corresponding rl.Image objects.
-load_images :: proc() -> map[icons]rl.Image{
+LoadImages :: proc() -> map[icons]rl.Image{
     images := make(map[icons]rl.Image)
     defer delete(images)
 

@@ -11,7 +11,7 @@ main :: proc()
 {
     defer rl.CloseWindow()
 
-    palette:= ui.load_color_palette()
+    palette:= ui.LoadColorPalette()
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -19,9 +19,9 @@ main :: proc()
 
     rl.SetConfigFlags(window_flags)
     rl.InitWindow(window_width, window_height, "SWIS")
-    util.set_dark_title_bar()
+    util.SetDarkTitlebar()
 
-    images := ui.load_images()
+    images := ui.LoadImages()
     rl.SetWindowIcon(images[ui.icons.app])
 
     rl.SetTargetFPS(60)
@@ -33,7 +33,7 @@ main :: proc()
         rl.ClearBackground(palette.surface)
 
         rl.DrawText("SWIS", 20, 10, 24, palette.text)
-        ui.draw_palette(palette, offset_y = 34)
+        ui.DrawPalette(palette, offset_y = 34)
 
         rl.EndDrawing()
     }

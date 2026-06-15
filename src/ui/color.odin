@@ -32,7 +32,7 @@ color_palette :: struct {
 
 // Loads the color palette for the UI by converting hexadecimal color values to rl.Color
 // and populating a color_palette struct.
-load_color_palette :: proc() -> color_palette {
+LoadColorPalette :: proc() -> color_palette {
     palette := color_palette{}
 
     struct_info := type_info_of(color_palette)
@@ -51,7 +51,7 @@ load_color_palette :: proc() -> color_palette {
 
 
         hex_value := u32(field)
-        color := util.hex_to_col(hex_value)
+        color := util.HexToCol(hex_value)
         field_ptr := cast(^rl.Color)(uintptr(&palette) + uintptr(i) * size_of(rl.Color))
         field_ptr^ = color
     }
@@ -60,7 +60,7 @@ load_color_palette :: proc() -> color_palette {
 }
 
 // Renders the current color palette as 100x100 rectangles.
-draw_palette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0) {
+DrawPalette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0) {
     rl.DrawText("Color palette", 20, 5 + offset_y, 24, palette.text)
 
     rl.DrawRectangle(20 + offset_x, 34 + offset_y, 100, 100, palette.primary)
