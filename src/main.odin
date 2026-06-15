@@ -19,13 +19,10 @@ main :: proc()
 
     rl.SetConfigFlags(window_flags)
     rl.InitWindow(window_width, window_height, "SWIS")
-
     util.set_dark_title_bar()
 
-    icon: rl.Image = rl.LoadImage("src/assets/icon/app/cryo-chamber.png")
-    rl.ImageFormat(&icon, .UNCOMPRESSED_R8G8B8A8)
-    rl.SetWindowIcon(icon)
-    rl.UnloadImage(icon)
+    images := ui.load_images()
+    rl.SetWindowIcon(images[ui.icons.app])
 
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
