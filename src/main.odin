@@ -11,7 +11,7 @@ main :: proc()
 {
     defer rl.CloseWindow()
 
-    palette:= ui.load_color_palette()
+    palette:= ui.LoadColorPalette()
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -19,10 +19,12 @@ main :: proc()
 
     rl.SetConfigFlags(window_flags)
     rl.InitWindow(window_width, window_height, "SWIS")
-    util.set_dark_title_bar()
+    util.SetDarkTitlebar()
 
-    images := ui.load_images()
-    rl.SetWindowIcon(images[ui.icons.app])
+    images := ui.LoadImages()
+    rl.SetWindowIcon(images[ui.icons.app_icon])
+
+    fnt := ui.LoadFont()
 
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
@@ -31,6 +33,10 @@ main :: proc()
     {
         rl.BeginDrawing()
         rl.ClearBackground(palette.surface)
+
+        rl.DrawTextEx(fnt.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, palette.text)
+        ui.DrawPalette(palette, offset_y = 34)
+
         rl.EndDrawing()
     }
 }
