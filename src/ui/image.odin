@@ -2,14 +2,16 @@
 
 import rl "vendor:raylib"
 
+// Definiton of icons loaded, and to be used across the UI
 icons :: enum {
-    app,
+    app
 }
-
+// Struct to hold the file path for each icon to be loaded.
 IconMetadata :: struct {
     path: cstring,
 }
 
+// Loads all icons defined in the icons enum, and returns a map of icons to their corresponding rl.Image objects.
 LoadImages :: proc() -> map[icons]rl.Image {
     icon_paths := make(map[icons]IconMetadata)
     icon_paths[.app] = {path = "src/assets/icon/app/cryo-chamber.png"}
