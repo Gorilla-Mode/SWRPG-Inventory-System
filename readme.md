@@ -17,4 +17,5 @@ All icons used are from [Game Icons](https://game-icons.net/)
 ## About
 
 SWIS is a GUI for a homebrew grid and slot-based inventory system for SW RPG. It does not use the standard encumbrance system.
-Further, it handles inventories for the party, vehicles, bases and encounters.
+
+SWIS handles inventories for the party, vehicles, bases and encounters.
