@@ -16,7 +16,6 @@ ItemTag :: enum{
 }
 
 //Item model, as it exists in database
-//Todo: add filtering support, tags, cateogy, subcategory
 Item :: struct{
     id:            string,
     name:          string,
