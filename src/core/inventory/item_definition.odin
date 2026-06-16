@@ -1,5 +1,20 @@
 ﻿package inventory
 
+//Top level category of the item, used for filtering and organization
+ItemCategory :: enum{
+    Weapon,
+    Armor,
+    Gear
+}
+
+//Tags for the item, used for filtering and organization
+ItemTag :: enum{
+    Blaster,
+    Slugthrower,
+    Ranged,
+    Melee,
+}
+
 //Item model, as it exists in database
 //Todo: add filtering support, tags, cateogy, subcategory
 Item :: struct{
@@ -15,7 +30,6 @@ Item :: struct{
     features:      []string,
 
     category:      ItemCategory,
-    sub_category:  ItemSubCategory,
     tags:          []ItemTag,
 
     data:          ItemData
@@ -26,31 +40,14 @@ ItemData :: union{
     WeaponData,
 }
 
-//Top level category of the item, used for filtering and organization
-ItemCategory :: enum{
-    Weapon,
-    Armor,
-    Gear
-}
-
-//Sub category of the item, used for filtering and organization
-ItemSubCategory :: enum{
-    Ranged,
-    Melee,
-}
-
-//Tags for the item, used for filtering and organization
-ItemTag :: enum{
-    Blaster,
-    Slugthrower
-}
-
 WeaponData :: struct{
-    damage: i16,
-    range:  i16,
-    crit:   i8,
-    type:   WeaponSkill,
-    scale:  WeaponScale
+    damage:       i16,
+    range:        i16,
+    crit:         i8,
+    type:         WeaponSkill,
+    scale:        WeaponScale,
+
+    sub_category: WeaponSubCategory,
 }
 
 //The skill used to operate the weapon
@@ -67,4 +64,22 @@ WeaponSkill :: enum{
 WeaponScale :: enum{
     Personal,
     Planetary
+}
+
+WeaponRangebands :: enum{
+    Engaged,
+    Close,
+    Short,
+    Medium,
+    Long,
+    Extreme,
+    Strategic
+}
+
+WeaponSubCategory :: enum{
+    Pistol,
+    Rifle,
+    Carbine,
+    Blade,
+    Blunt,
 }
