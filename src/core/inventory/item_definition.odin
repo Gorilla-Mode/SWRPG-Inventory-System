@@ -14,6 +14,10 @@ Item :: struct{
     qualities:     []string,
     features:      []string,
 
+    category:      ItemCategory,
+    sub_category:  ItemSubCategory,
+    tags:          []ItemTag,
+
     data:          ItemData
 }
 
@@ -22,20 +26,41 @@ ItemData :: union{
     WeaponData,
 }
 
+//Top level category of the item, used for filtering and organization
+ItemCategory :: enum{
+    Weapon,
+    Armor,
+    Gear
+}
+
+//Sub category of the item, used for filtering and organization
+ItemSubCategory :: enum{
+    Ranged,
+    Melee,
+}
+
+//Tags for the item, used for filtering and organization
+ItemTag :: enum{
+    Blaster,
+    Slugthrower
+}
+
 WeaponData :: struct{
     damage: i16,
     range:  i16,
     crit:   i8,
-    type:   WeaponType,
+    type:   WeaponSkill,
     scale:  WeaponScale
 }
 
 //The skill used to operate the weapon
-WeaponType :: enum{
+WeaponSkill :: enum{
     Light,
     Heavy,
     Gunnery,
-    Brawl
+    Brawl,
+    Melee,
+    Mechanics
 }
 
 //Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale

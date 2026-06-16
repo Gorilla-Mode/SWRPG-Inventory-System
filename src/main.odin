@@ -40,8 +40,4 @@ main :: proc()
 
         rl.EndDrawing()
     }
-
-    gun := inv.Item{
-        id = "gun",
-    }
 }
