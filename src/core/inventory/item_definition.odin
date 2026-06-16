@@ -8,8 +8,9 @@ Item :: struct{
     description:   string,
     width, height: i8,
     base_rarity:   i8,
-    base_price:    i32,
+    hardpoints:    i8,
     restricted:    bool,
+    base_price:    i32,
     qualities:     []string,
     features:      []string,
 
@@ -19,7 +20,6 @@ Item :: struct{
 //Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
-
 }
 
 WeaponData :: struct{
