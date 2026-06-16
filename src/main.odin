@@ -3,6 +3,7 @@
 import rl "vendor:raylib"
 import util "utils"
 import ui "ui"
+import inv "core/inventory"
 
 window_width: i32 = 1280
 window_height: i32 = 720
@@ -38,5 +39,9 @@ main :: proc()
         ui.DrawPalette(palette, offset_y = 34)
 
         rl.EndDrawing()
+    }
+
+    gun := inv.Item{
+        id = "gun",
     }
 }
