@@ -5,6 +5,7 @@ import os "core:os"
 import "core:path/filepath"
 import strings "core:strings"
 
+// region Image Definitions
 // Definiton of icons loaded, and to be used across the UI
 // Names should correspond to file path of the icon
 icons :: enum {
@@ -16,7 +17,14 @@ icons :: enum {
     item_weapon_type_pistol,
     item_weapon_type_rifle,
     item_weapon_type_gunnery,
-
+    item_weapon_type_shotgun,
+    item_weapon_type_melee,
+    item_generic_hardpoint,
+    item_weapon_stat_range,
+    economy_wallet,
+    economy_credit,
+    economy_rarity,
+    effect_restricted,
 }
 
 // Array of icon names corresponding to the icons enum variants, used for matching file names when loading icons.
@@ -30,8 +38,17 @@ ICON_NAMES := [?]string{
     "damage",
     "pistol",
     "rifle",
-    "gunnery"
+    "gunnery",
+    "shotgun",
+    "melee",
+    "hardpoint",
+    "range",
+    "wallet",
+    "credit",
+    "rarity",
+    "restricted",
 }
+//endregion
 
 // Struct to hold the file path for each icon to be loaded.
 IconMetadata :: struct {
