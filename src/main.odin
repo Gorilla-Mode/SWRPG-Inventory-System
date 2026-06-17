@@ -3,7 +3,6 @@
 import rl "vendor:raylib"
 import util "utils"
 import ui "ui"
-import inv "core/inventory"
 
 window_width: i32 = 1280
 window_height: i32 = 720
