@@ -31,12 +31,14 @@ TestItem :: proc() -> struct{
     rifle_instance.pos_x = 0
     rifle_instance.pos_y = 0
     rifle_instance.id = 1
+    rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
     sword_instance.definition = sword
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
     sword_instance.id = 2
+    sword_instance.rotated = false
 
     append_elem(&backpack.items, sword_instance)
 
@@ -116,12 +118,13 @@ ContainerToString :: proc(container: ^Container) -> string {
 
     for item, i in container.items {
         symbol := rune(symbols[i % len(symbols)])
+        b := GetBounds(item)
 
-        for y in 0..<item.definition.height {
-            for x in 0..<item.definition.width {
+        for y in 0..<b.height {
+            for x in 0..<b.width {
 
-                gx := item.pos_x + x
-                gy := item.pos_y + y
+                gx := b.pos_x + x
+                gy := b.pos_y + y
 
                 if gx < 0 || gx >= container.width ||
                 gy < 0 || gy >= container.height {
