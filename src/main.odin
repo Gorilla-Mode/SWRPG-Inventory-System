@@ -40,4 +40,6 @@ main :: proc()
 
         rl.EndDrawing()
     }
+
+    inv.TestInv()
 }
