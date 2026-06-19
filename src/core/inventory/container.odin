@@ -1,7 +1,5 @@
 ﻿package inventory
 
-import fmt "core:fmt"
-
 ContainerType :: enum{
     Backpack,
     Belt,
