@@ -55,6 +55,19 @@ main :: proc()
             }
         }
 
+        if rl.IsKeyPressed(rl.KeyboardKey.LEFT)
+        {
+            if inv.ContainerCanPlaceAt(items.backpack,
+            items.rifle_instance.definition,
+            items.rifle_instance.pos_x - 1,
+            items.rifle_instance.pos_y,
+            items.rifle_instance.id)
+            {
+                items.rifle_instance.pos_x -= 1
+                state.InventoryGrid = string.clone_to_cstring(inv.ContainerToString(items.backpack))
+            }
+        }
+
         rl.BeginDrawing()
         rl.ClearBackground(palette.surface)
 
