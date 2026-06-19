@@ -32,10 +32,7 @@ main :: proc()
     rl.SetWindowIcon(images[ui.icons.app_icon])
 
     fnt := ui.LoadFont()
-    defer delete(fnt.regular)
-    defer delete(fnt.bold)
-    defer delete(fnt.medium)
-    defer delete(fnt.semibold)
+    defer ui.FreeFont(fnt)
 
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
