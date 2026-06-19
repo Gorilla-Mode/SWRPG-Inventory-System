@@ -46,54 +46,27 @@ main :: proc()
     {
         if rl.IsKeyPressed(rl.KeyboardKey.RIGHT)
         {
-            if inv.ContainerCanPlaceAt(items.backpack,
-            items.rifle_instance.definition,
-            items.rifle_instance.pos_x + 1,
-            items.rifle_instance.pos_y,
-            items.rifle_instance.id)
-            {
-                items.rifle_instance.pos_x += 1
-                state.InventoryGrid = inv.ContainerToString(items.backpack)
-            }
+            inv.ContainerMovieItem(items.backpack, items.rifle_instance, 1)
+            state.InventoryGrid = inv.ContainerToString(items.backpack)
         }
 
         if rl.IsKeyPressed(rl.KeyboardKey.LEFT)
         {
-            if inv.ContainerCanPlaceAt(items.backpack,
-            items.rifle_instance.definition,
-            items.rifle_instance.pos_x - 1,
-            items.rifle_instance.pos_y,
-            items.rifle_instance.id)
-            {
-                items.rifle_instance.pos_x -= 1
-                state.InventoryGrid = inv.ContainerToString(items.backpack)
-            }
+            inv.ContainerMovieItem(items.backpack, items.rifle_instance, -1)
+            state.InventoryGrid = inv.ContainerToString(items.backpack)
         }
 
         if rl.IsKeyPressed(rl.KeyboardKey.UP)
         {
-            if inv.ContainerCanPlaceAt(items.backpack,
-            items.rifle_instance.definition,
-            items.rifle_instance.pos_x,
-            items.rifle_instance.pos_y - 1,
-            items.rifle_instance.id)
-            {
-                items.rifle_instance.pos_y -= 1
-                state.InventoryGrid = inv.ContainerToString(items.backpack)
-            }
+            inv.ContainerMovieItem(items.backpack, items.rifle_instance, delta_y = -1)
+            state.InventoryGrid = inv.ContainerToString(items.backpack)
         }
 
-        if rl.IsKeyDown(rl.KeyboardKey.DOWN)
+
+        if rl.IsKeyPressed(rl.KeyboardKey.DOWN)
         {
-            if inv.ContainerCanPlaceAt(items.backpack,
-            items.rifle_instance.definition,
-            items.rifle_instance.pos_x,
-            items.rifle_instance.pos_y + 1,
-            items.rifle_instance.id)
-            {
-                items.rifle_instance.pos_y += 1
-                state.InventoryGrid = inv.ContainerToString(items.backpack)
-            }
+            inv.ContainerMovieItem(items.backpack, items.rifle_instance, delta_y = 1)
+            state.InventoryGrid = inv.ContainerToString(items.backpack)
         }
 
         grid := str.clone_to_cstring(state.InventoryGrid, context.allocator)

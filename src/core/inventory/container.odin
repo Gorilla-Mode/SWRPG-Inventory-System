@@ -35,7 +35,7 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
             continue
         }
 
-        if RectOverlap(item.pos_x,
+        if ContainerRectOverlap(item.pos_x,
         item.pos_y,
         item.definition.width,
         item.definition.height,
@@ -49,7 +49,12 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     return true
 }
 
-ContainerCanPlaceAt :: proc(container: ^Container, Item: ^Item, x: i16, y: i16, id: u64) -> bool{
+ContainerCanPlaceAt :: proc(container: ^Container,
+    Item: ^Item,
+    x: i16,
+    y: i16,
+    id: u64
+) -> bool{
     temp_instance := new(ItemInstance)
     defer free(temp_instance)
 
@@ -61,9 +66,9 @@ ContainerCanPlaceAt :: proc(container: ^Container, Item: ^Item, x: i16, y: i16, 
     return ContainerCanPlace(container, temp_instance)
 }
 
-RectOverlap :: proc(
-ax, ay, aw, ah: i16,
-bx, by, bw, bh: i16,
+ContainerRectOverlap :: proc(
+    ax, ay, aw, ah: i16,
+    bx, by, bw, bh: i16,
 ) -> bool {
     return !(ax + aw <= bx ||
         bx + bw <= ax ||
@@ -77,6 +82,28 @@ ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
         return true
     }
     return false
+}
+
+ContainerMovieItem :: proc(
+    container: ^Container,
+    item: ^ItemInstance,
+    delta_x: i16 = 0,
+    delta_y: i16 = 0
+) -> bool {
+    new_x := item.pos_x + delta_x
+    new_y := item.pos_y + delta_y
+
+    if !ContainerCanPlaceAt(container,
+        item.definition,
+        new_x,
+        new_y,
+        item.id) {
+        return false
+    }
+
+    item.pos_x = new_x
+    item.pos_y = new_y
+    return true
 }
 
 TestItem :: proc() -> struct{
