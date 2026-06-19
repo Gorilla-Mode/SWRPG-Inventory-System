@@ -168,7 +168,6 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 
 ContainerToString :: proc(container: ^Container) -> string {
     builder := strings.Builder{}
-    defer strings.builder_destroy(&builder)
 
     grid := make([][]rune, container.height)
     defer {
@@ -193,8 +192,14 @@ ContainerToString :: proc(container: ^Container) -> string {
 
         for y in 0..<item.definition.height {
             for x in 0..<item.definition.width {
+
                 gx := item.pos_x + x
                 gy := item.pos_y + y
+
+                if gx < 0 || gx >= container.width ||
+                gy < 0 || gy >= container.height {
+                    continue
+                }
 
                 grid[gy][gx] = symbol
             }
