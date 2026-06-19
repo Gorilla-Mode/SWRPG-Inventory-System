@@ -31,6 +31,10 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     }
 
     for existing in container.items{
+        if existing.id == item.id {
+            continue
+        }
+
         if RectOverlap(item.pos_x,
         item.pos_y,
         item.definition.width,
@@ -43,16 +47,16 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
         }
     }
     return true
-
 }
 
-ContainerCanPlaceAt :: proc(container: ^Container, Item: ^Item, x: i16, y: i16) -> bool{
+ContainerCanPlaceAt :: proc(container: ^Container, Item: ^Item, x: i16, y: i16, id: u64) -> bool{
     temp_instance := new(ItemInstance)
     defer free(temp_instance)
 
     temp_instance.definition = Item
-    temp_instance.pos_x = x
-    temp_instance.pos_y = y
+    temp_instance.pos_x      = x
+    temp_instance.pos_y      = y
+    temp_instance.id         = id
 
     return ContainerCanPlace(container, temp_instance)
 }
@@ -101,11 +105,13 @@ TestItem :: proc() -> struct{
     rifle_instance.definition = rifle
     rifle_instance.pos_x = 0
     rifle_instance.pos_y = 0
+    rifle_instance.id = 1
 
     sword_instance := new(ItemInstance)
     sword_instance.definition = sword
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
+    sword_instance.id = 2
 
     append_elem(&backpack.items, sword_instance)
 
