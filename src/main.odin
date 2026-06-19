@@ -4,14 +4,11 @@ import rl "vendor:raylib"
 import util "utils"
 import ui "ui"
 import inv "core/inventory"
+import app "core/app"
 import str "core:strings"
 
 window_width: i32 = 1280
 window_height: i32 = 720
-
-State :: struct{
-    InventoryGrid: string
-}
 
 main :: proc()
 {
@@ -37,40 +34,17 @@ main :: proc()
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
 
-    state := State{}
+    state := app.State{}
     items := inv.TestItem()
     inv.TestInvGrid(items.backpack, items.sword, items.rifle, items.sword_instance, items.rifle_instance)
     state.InventoryGrid = inv.ContainerToString(items.backpack)
 
     for !rl.WindowShouldClose()
     {
-        if rl.IsKeyPressed(rl.KeyboardKey.RIGHT)
-        {
-            inv.ContainerMovieItem(items.backpack, items.rifle_instance, 1)
-            state.InventoryGrid = inv.ContainerToString(items.backpack)
-        }
-
-        if rl.IsKeyPressed(rl.KeyboardKey.LEFT)
-        {
-            inv.ContainerMovieItem(items.backpack, items.rifle_instance, -1)
-            state.InventoryGrid = inv.ContainerToString(items.backpack)
-        }
-
-        if rl.IsKeyPressed(rl.KeyboardKey.UP)
-        {
-            inv.ContainerMovieItem(items.backpack, items.rifle_instance, delta_y = -1)
-            state.InventoryGrid = inv.ContainerToString(items.backpack)
-        }
-
-
-        if rl.IsKeyPressed(rl.KeyboardKey.DOWN)
-        {
-            inv.ContainerMovieItem(items.backpack, items.rifle_instance, delta_y = 1)
-            state.InventoryGrid = inv.ContainerToString(items.backpack)
-        }
-
         grid := str.clone_to_cstring(state.InventoryGrid, context.allocator)
         defer delete_cstring(grid)
+
+        app.InputMoveItem(&state, items.rifle_instance, items.backpack)
 
         rl.BeginDrawing()
         rl.ClearBackground(palette.surface)
