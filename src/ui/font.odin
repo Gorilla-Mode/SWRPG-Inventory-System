@@ -28,11 +28,6 @@ LoadFont :: proc () -> fonts{
         bold =     make(map[font_size]rl.Font)
     }
 
-    defer delete(fnts.regular)
-    defer delete(fnts.medium)
-    defer delete(fnts.semibold)
-    defer delete(fnts.bold)
-
     for size in font_size {
         fnts.regular[size] =  rl.LoadFontEx("src/assets/font/Inconsolata-Regular.ttf", i32(size), nil, 0)
         fnts.medium[size] =   rl.LoadFontEx("src/assets/font/Inconsolata-Medium.ttf", i32(size), nil, 0)

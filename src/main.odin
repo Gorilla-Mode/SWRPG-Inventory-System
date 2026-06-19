@@ -28,9 +28,14 @@ main :: proc()
     util.SetDarkTitlebar()
 
     images := ui.LoadImages()
+    defer delete(images)
     rl.SetWindowIcon(images[ui.icons.app_icon])
 
     fnt := ui.LoadFont()
+    defer delete(fnt.regular)
+    defer delete(fnt.bold)
+    defer delete(fnt.medium)
+    defer delete(fnt.semibold)
 
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
