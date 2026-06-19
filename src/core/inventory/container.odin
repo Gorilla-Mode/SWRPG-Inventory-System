@@ -89,6 +89,15 @@ ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     return false
 }
 
+ContainerRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+    item.rotated = !item.rotated
+    if ContainerCanPlace(container, item) {
+        return true
+    }
+    item.rotated = !item.rotated
+    return false
+}
+
 ContainerMovieItem :: proc(
     container: ^Container,
     item: ^ItemInstance,

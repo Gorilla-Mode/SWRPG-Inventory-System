@@ -25,11 +25,7 @@ InputMoveItem :: proc(state: ^State, item: ^inv.ItemInstance, container: ^inv.Co
     }
 
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE){
-        if item.rotated {
-            item.rotated = false
-        } else {
-            item.rotated = true
-        }
+        inv.ContainerRotateItem(container, item)
         state.InventoryGrid = inv.ContainerToString(container)
     }
 }
