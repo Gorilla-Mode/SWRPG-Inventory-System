@@ -20,7 +20,7 @@ Item :: struct{
     id:            string,
     name:          string,
     description:   string,
-    width, height: i8,
+    width, height: i16,
     base_rarity:   i8,
     hardpoints:    i8,
     restricted:    bool,
