@@ -1,7 +1,5 @@
 ﻿package inventory
 
-import fmt "core:fmt"
-
 ContainerType :: enum{
     Backpack,
     Belt,
@@ -30,7 +28,11 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     }
 
     for existing in container.items{
-        if RectOverlap(item.pos_x,
+        if existing.id == item.id {
+            continue
+        }
+
+        if ContainerRectOverlap(item.pos_x,
         item.pos_y,
         item.definition.width,
         item.definition.height,
@@ -42,12 +44,28 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
         }
     }
     return true
-
 }
 
-RectOverlap :: proc(
-ax, ay, aw, ah: i16,
-bx, by, bw, bh: i16,
+ContainerCanPlaceAt :: proc(container: ^Container,
+    Item: ^Item,
+    x: i16,
+    y: i16,
+    id: u64
+) -> bool{
+    temp_instance := new(ItemInstance)
+    defer free(temp_instance)
+
+    temp_instance.definition = Item
+    temp_instance.pos_x      = x
+    temp_instance.pos_y      = y
+    temp_instance.id         = id
+
+    return ContainerCanPlace(container, temp_instance)
+}
+
+ContainerRectOverlap :: proc(
+    ax, ay, aw, ah: i16,
+    bx, by, bw, bh: i16,
 ) -> bool {
     return !(ax + aw <= bx ||
         bx + bw <= ax ||
@@ -55,71 +73,32 @@ bx, by, bw, bh: i16,
         by + bh <= ay)
 }
 
-TestInv :: proc(){
+ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    if ContainerCanPlace(container, item) {
+        append_elem(&container.items, item)
+        return true
+    }
+    return false
+}
 
-    backpack := Container{
-        width = 8,
-        height = 6,
+ContainerMovieItem :: proc(
+    container: ^Container,
+    item: ^ItemInstance,
+    delta_x: i16 = 0,
+    delta_y: i16 = 0
+) -> bool {
+    new_x := item.pos_x + delta_x
+    new_y := item.pos_y + delta_y
+
+    if !ContainerCanPlaceAt(container,
+        item.definition,
+        new_x,
+        new_y,
+        item.id) {
+        return false
     }
 
-    sword := Item{
-        name = "Sword",
-        width = 1,
-        height = 4,
-    }
-
-    rifle := Item{
-        name = "Rifle",
-        width = 2,
-        height = 3,
-    }
-
-    rifle_instance := ItemInstance{
-        definition = &rifle,
-        pos_y = 0,
-        pos_x = 0,
-    }
-
-    sword_instance := ItemInstance{
-        definition = &sword,
-        pos_y = 0,
-        pos_x = 0,
-    }
-
-    append_elem(&backpack.items, &sword_instance)
-
-    fmt.println()
-
-    fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlace(&backpack, &rifle_instance))
-
-    fmt.println()
-
-    rifle_instance.pos_x = 1
-    rifle_instance.pos_y = 2
-    fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlace(&backpack, &rifle_instance))
-
-    fmt.println()
-
-    rifle_instance.pos_x = 2
-    rifle_instance.pos_y = 0
-    fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlace(&backpack, &rifle_instance))
-
-    fmt.println()
-
-    rifle_instance.pos_x = 7
-    rifle_instance.pos_y = 0
-    fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlace(&backpack, &rifle_instance))
-
-    fmt.println()
-
-    rifle_instance.pos_x = -1
-    rifle_instance.pos_y = 0
-    fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlace(&backpack, &rifle_instance))
-
-    fmt.println()
+    item.pos_x = new_x
+    item.pos_y = new_y
+    return true
 }
