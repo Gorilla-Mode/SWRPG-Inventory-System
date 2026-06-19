@@ -1,5 +1,7 @@
 ﻿package inventory
 
+import fmt "core:fmt"
+
 ContainerType :: enum{
     Backpack,
     Belt,
@@ -14,16 +16,23 @@ Container :: struct{
     items: [dynamic]^ItemInstance
 }
 
+Rect :: struct {
+    pos_x, pos_y: i16,
+    width, height: i16,
+}
+
 ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    if item.pos_x < 0 || item.pos_y < 0 {
+    item_bounds := GetBounds(item)
+
+    if item_bounds.pos_x < 0 || item_bounds.pos_y < 0 {
         return false
     }
 
-    if item.pos_x + item.definition.width > container.width {
+    if item_bounds.pos_x + item_bounds.width > container.width {
         return false
     }
 
-    if item.pos_y + item.definition.height > container.height {
+    if item_bounds.pos_y + item_bounds.height > container.height {
         return false
     }
 
@@ -31,15 +40,15 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
         if existing.id == item.id {
             continue
         }
-
-        if ContainerRectOverlap(item.pos_x,
-        item.pos_y,
-        item.definition.width,
-        item.definition.height,
-        existing.pos_x,
-        existing.pos_y,
-        existing.definition.width,
-        existing.definition.height){
+        existing_item_bounds := GetBounds(existing)
+        if ContainerRectOverlap( existing_item_bounds.pos_x,
+        existing_item_bounds.pos_y,
+        existing_item_bounds.width,
+        existing_item_bounds.height,
+        item_bounds.pos_x,
+        item_bounds.pos_y,
+        item_bounds.width,
+        item_bounds.height,){
             return false
         }
     }
@@ -50,17 +59,18 @@ ContainerCanPlaceAt :: proc(container: ^Container,
     Item: ^Item,
     x: i16,
     y: i16,
-    id: u64
+    id: u64,
+    rot: bool
 ) -> bool{
-    temp_instance := new(ItemInstance)
-    defer free(temp_instance)
+    temp := ItemInstance{
+        definition = Item,
+        pos_x = x,
+        pos_y = y,
+        id = id,
+        rotated = rot,
+    }
 
-    temp_instance.definition = Item
-    temp_instance.pos_x      = x
-    temp_instance.pos_y      = y
-    temp_instance.id         = id
-
-    return ContainerCanPlace(container, temp_instance)
+    return ContainerCanPlace(container, &temp)
 }
 
 ContainerRectOverlap :: proc(
@@ -94,11 +104,30 @@ ContainerMovieItem :: proc(
         item.definition,
         new_x,
         new_y,
-        item.id) {
+        item.id,
+    item.rotated,){
         return false
     }
 
     item.pos_x = new_x
     item.pos_y = new_y
     return true
+}
+
+GetBounds :: proc(item: ^ItemInstance) -> Rect {
+    if item.rotated {
+        return Rect{
+            pos_x = item.pos_x,
+            pos_y = item.pos_y,
+            width = item.definition.height,
+            height = item.definition.width,
+        }
+    }
+
+    return Rect{
+        pos_x = item.pos_x,
+        pos_y = item.pos_y,
+        width = item.definition.width,
+        height = item.definition.height,
+    }
 }
