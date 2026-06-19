@@ -51,7 +51,7 @@ main :: proc()
 
         rl.DrawTextEx(fnt.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, palette.text)
         ui.DrawPalette(palette, offset_y = 34)
-        rl.DrawTextEx(fnt.semibold[ui.font_size.header], grid, {20, 34 + 100 + 60}, f32(ui.font_size.header), 0, palette.text)
+        rl.DrawTextEx(fnt.semibold[ui.font_size.header], grid, {20, 34 + 100 + 60}, f32(ui.font_size.header), 10, palette.text)
 
         rl.EndDrawing()
     }
