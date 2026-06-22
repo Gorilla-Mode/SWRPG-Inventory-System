@@ -28,11 +28,6 @@ LoadFont :: proc () -> fonts{
         bold =     make(map[font_size]rl.Font)
     }
 
-    defer delete(fnts.regular)
-    defer delete(fnts.medium)
-    defer delete(fnts.semibold)
-    defer delete(fnts.bold)
-
     for size in font_size {
         fnts.regular[size] =  rl.LoadFontEx("src/assets/font/Inconsolata-Regular.ttf", i32(size), nil, 0)
         fnts.medium[size] =   rl.LoadFontEx("src/assets/font/Inconsolata-Medium.ttf", i32(size), nil, 0)
@@ -41,4 +36,19 @@ LoadFont :: proc () -> fonts{
     }
 
     return fnts
+}
+
+// Unloads all fonts in the provided fonts struct, and frees the memory allocated for the maps of font sizes to their corresponding rl.Font objects for each weight.
+FreeFont :: proc (fnts: fonts) {
+    for size in font_size {
+        rl.UnloadFont(fnts.regular[size])
+        rl.UnloadFont(fnts.medium[size])
+        rl.UnloadFont(fnts.semibold[size])
+        rl.UnloadFont(fnts.bold[size])
+    }
+
+    delete(fnts.regular)
+    delete(fnts.medium)
+    delete(fnts.semibold)
+    delete(fnts.bold)
 }
