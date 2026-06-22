@@ -31,7 +31,7 @@ ContainerSlot :: struct {
 }
 
 ContainerVolume :: struct {
-    volume: i64
+    volume: i32
 }
 
 Rect :: struct {
@@ -52,10 +52,22 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
 }
 
 ContainerCanPlaceSlot :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    if container.storage.(ContainerSlot).slots <= i32(len(container.items)) {
+        return false
+    }
+
     return true
 }
 
 ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    for item in container.items{
+        vol_used : i32 = 0
+        vol_used =+ ItemArea(item.definition)
+
+        if vol_used > container.storage.(ContainerVolume).volume {
+            return false
+        }
+    }
     return true
 }
 
