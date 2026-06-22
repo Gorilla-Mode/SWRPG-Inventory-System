@@ -12,12 +12,8 @@ TestItem :: proc() -> struct{
     rifle_instance: ^ItemInstance }
 {
     backpack := new(Container)
-    backpack.storage = ContainerGrid{
-        width  = 8,
-        height = 9,
-    }
-    backpack.type = ContainerType.Backpack
-
+    backpack.height = 7
+    backpack.width = 8
 
     sword := new(Item)
     sword.name = "Sword"
@@ -61,35 +57,35 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
     fmt.println()
 
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 1
     rifle_instance.pos_y = 2
     fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 2
     rifle_instance.pos_y = 0
     fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 7
     rifle_instance.pos_y = 0
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = -1
     rifle_instance.pos_y = 0
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
@@ -102,7 +98,7 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 ContainerToString :: proc(container: ^Container) -> string {
     builder := str.Builder{}
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height)
+    grid := make([][]rune, container.height)
     defer {
         for row in grid {
             delete(row)
@@ -110,10 +106,10 @@ ContainerToString :: proc(container: ^Container) -> string {
         delete(grid)
     }
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width)
+    for y in 0..<container.height {
+        grid[y] = make([]rune, container.width)
 
-        for x in 0..<container.storage.(ContainerGrid).width {
+        for x in 0..<container.width {
             grid[y][x] = '.'
         }
     }
@@ -130,8 +126,8 @@ ContainerToString :: proc(container: ^Container) -> string {
                 gx := b.pos_x + x
                 gy := b.pos_y + y
 
-                if gx < 0 || gx >= container.storage.(ContainerGrid).width ||
-                gy < 0 || gy >= container.storage.(ContainerGrid).height {
+                if gx < 0 || gx >= container.width ||
+                gy < 0 || gy >= container.height {
                     continue
                 }
 
@@ -140,8 +136,8 @@ ContainerToString :: proc(container: ^Container) -> string {
         }
     }
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        for x in 0..<container.storage.(ContainerGrid).width {
+    for y in 0..<container.height {
+        for x in 0..<container.width {
             str.write_rune(&builder, grid[y][x])
         }
 
