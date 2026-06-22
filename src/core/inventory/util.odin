@@ -12,12 +12,11 @@ TestItem :: proc() -> struct{
     rifle_instance: ^ItemInstance }
 {
     backpack := new(Container)
+    backpack.type = ContainerType.Backpack
     backpack.storage = ContainerGrid{
         width  = 8,
-        height = 9,
-    }
-    backpack.type = ContainerType.Backpack
-
+        height = 9
+ }
 
     sword := new(Item)
     sword.name = "Sword"
@@ -61,35 +60,35 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
     fmt.println()
 
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 1
     rifle_instance.pos_y = 2
     fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 2
     rifle_instance.pos_y = 0
     fmt.println("Expected: true")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = 7
     rifle_instance.pos_y = 0
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
     rifle_instance.pos_x = -1
     rifle_instance.pos_y = 0
     fmt.println("Expected: false")
-    fmt.println("Actual:", ContainerCanPlaceGrid(backpack, rifle_instance))
+    fmt.println("Actual:", ContainerCanPlace(backpack, rifle_instance))
 
     fmt.println()
 
