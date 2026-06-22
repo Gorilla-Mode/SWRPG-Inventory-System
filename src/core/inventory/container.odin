@@ -60,9 +60,9 @@ ContainerCanPlaceSlot :: proc(container: ^Container, item: ^ItemInstance) -> boo
 }
 
 ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    for item in container.items{
+    for curr_item in container.items{
         vol_used : i32 = 0
-        vol_used =+ ItemArea(item.definition)
+        vol_used =+ ItemArea(curr_item.definition)
 
         if vol_used > container.storage.(ContainerVolume).volume {
             return false
