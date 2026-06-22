@@ -8,10 +8,30 @@ ContainerType :: enum{
 
 Container :: struct{
     id: string,
-    width, height: i16,
     type: ContainerType,
+    storage: ContainerStorage,
 
     items: [dynamic]^ItemInstance
+}
+
+ContainerStorage :: union{
+    ContainerGrid,
+    ContainerSlot,
+    ContainerVolume
+}
+
+ContainerGrid :: struct {
+    width, height: i16,
+}
+
+ContainerSlot :: struct {
+    slots:          i32,
+    item_whitelist: []string,
+    tag_whitelist:  []ItemTag,
+}
+
+ContainerVolume :: struct {
+    volume: i32
 }
 
 Rect :: struct {
@@ -20,17 +40,51 @@ Rect :: struct {
 }
 
 ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    switch _ in container.storage{
+        case ContainerGrid:
+            return ContainerCanPlaceGrid(container, item)
+        case ContainerSlot:
+            return ContainerCanPlaceSlot(container, item)
+        case ContainerVolume:
+            return ContainerCanPlaceVolume(container, item)
+    }
+    return false
+}
+
+ContainerCanPlaceSlot :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    if container.storage.(ContainerSlot).slots <= i32(len(container.items)) {
+        return false
+    }
+
+    return true
+}
+
+ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    for item in container.items{
+        vol_used : i32 = 0
+        vol_used =+ ItemArea(item.definition)
+
+        if vol_used > container.storage.(ContainerVolume).volume {
+            return false
+        }
+    }
+    return true
+}
+
+
+
+ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     item_bounds := GetBounds(item)
 
     if item_bounds.pos_x < 0 || item_bounds.pos_y < 0 {
         return false
     }
 
-    if item_bounds.pos_x + item_bounds.width > container.width {
+    if item_bounds.pos_x + item_bounds.width > container.storage.(ContainerGrid).width {
         return false
     }
 
-    if item_bounds.pos_y + item_bounds.height > container.height {
+    if item_bounds.pos_y + item_bounds.height > container.storage.(ContainerGrid).height {
         return false
     }
 
@@ -68,7 +122,7 @@ ContainerCanPlaceAt :: proc(container: ^Container,
         rotated = rot,
     }
 
-    return ContainerCanPlace(container, &temp)
+    return ContainerCanPlaceGrid(container, &temp)
 }
 
 ContainerRectOverlap :: proc(
@@ -82,7 +136,7 @@ ContainerRectOverlap :: proc(
 }
 
 ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    if ContainerCanPlace(container, item) {
+    if ContainerCanPlaceGrid(container, item) {
         append_elem(&container.items, item)
         return true
     }
@@ -91,7 +145,7 @@ ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
 
 ContainerRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
     item.rotated = !item.rotated
-    if ContainerCanPlace(container, item) {
+    if ContainerCanPlaceGrid(container, item) {
         return true
     }
     item.rotated = !item.rotated
