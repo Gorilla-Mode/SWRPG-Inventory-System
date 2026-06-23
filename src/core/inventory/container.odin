@@ -79,8 +79,6 @@ ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> b
     return true
 }
 
-
-
 ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     grid, ok := container.storage.(ContainerGrid)
     if !ok {
@@ -106,7 +104,7 @@ ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> boo
             continue
         }
         existing_item_bounds := GetBounds(existing)
-        if ContainerRectOverlap( existing_item_bounds.pos_x,
+        if ContainerGridRectOverlap( existing_item_bounds.pos_x,
         existing_item_bounds.pos_y,
         existing_item_bounds.width,
         existing_item_bounds.height,
@@ -120,7 +118,7 @@ ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> boo
     return true
 }
 
-ContainerCanPlaceAt :: proc(container: ^Container,
+ContainerGridCanPlaceAt :: proc(container: ^Container,
     Item: ^Item,
     x: i16,
     y: i16,
@@ -138,7 +136,7 @@ ContainerCanPlaceAt :: proc(container: ^Container,
     return ContainerCanPlaceGrid(container, &temp)
 }
 
-ContainerRectOverlap :: proc(
+ContainerGridRectOverlap :: proc(
     ax, ay, aw, ah: i16,
     bx, by, bw, bh: i16,
 ) -> bool {
@@ -150,14 +148,19 @@ ContainerRectOverlap :: proc(
 
 //TODO: Implement the other container types
 ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    if ContainerCanPlaceGrid(container, item) {
+    if ContainerCanPlace(container, item) {
         append_elem(&container.items, item)
         return true
     }
     return false
 }
 
-ContainerRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+    grid, ok := container.storage.(ContainerGrid)
+    if !ok {
+        return false
+    }
+
     item.rotated = !item.rotated
     if ContainerCanPlaceGrid(container, item) {
         return true
@@ -166,16 +169,20 @@ ContainerRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool 
     return false
 }
 
-ContainerMovieItem :: proc(
+ContainerGridMoveItem :: proc(
     container: ^Container,
-    item: ^ItemInstance,
-    delta_x: i16 = 0,
-    delta_y: i16 = 0
-) -> bool {
+    item:      ^ItemInstance,
+    delta_x:   i16 = 0,
+    delta_y:   i16 = 0) -> bool {
+    grid, ok := container.storage.(ContainerGrid)
+    if !ok {
+        return false
+    }
+
     new_x := item.pos_x + delta_x
     new_y := item.pos_y + delta_y
 
-    if !ContainerCanPlaceAt(container,
+    if !ContainerGridCanPlaceAt(container,
         item.definition,
         new_x,
         new_y,
@@ -187,22 +194,4 @@ ContainerMovieItem :: proc(
     item.pos_x = new_x
     item.pos_y = new_y
     return true
-}
-
-GetBounds :: proc(item: ^ItemInstance) -> Rect {
-    if item.rotated {
-        return Rect{
-            pos_x = item.pos_x,
-            pos_y = item.pos_y,
-            width = item.definition.height,
-            height = item.definition.width,
-        }
-    }
-
-    return Rect{
-        pos_x = item.pos_x,
-        pos_y = item.pos_y,
-        width = item.definition.width,
-        height = item.definition.height,
-    }
 }
