@@ -156,7 +156,7 @@ ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
 }
 
 ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
-    grid, ok := container.storage.(ContainerGrid)
+    _, ok := container.storage.(ContainerGrid)
     if !ok {
         return false
     }
@@ -174,7 +174,7 @@ ContainerGridMoveItem :: proc(
     item:      ^ItemInstance,
     delta_x:   i16 = 0,
     delta_y:   i16 = 0) -> bool {
-    grid, ok := container.storage.(ContainerGrid)
+    _, ok := container.storage.(ContainerGrid)
     if !ok {
         return false
     }
