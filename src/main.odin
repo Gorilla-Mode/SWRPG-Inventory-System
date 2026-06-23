@@ -26,7 +26,7 @@ main :: proc()
 
     images := ui.LoadImages()
     defer delete(images)
-    rl.SetWindowIcon(images[ui.icons.app_icon])
+    rl.SetWindowIcon(images[ui.Icons.app_icon])
 
     fnt := ui.LoadFont()
     defer ui.FreeFont(fnt)
