@@ -16,7 +16,7 @@ TestItem :: proc() -> struct{
     backpack.storage = ContainerGrid{
         width  = 8,
         height = 9
- }
+    }
 
     sword := new(Item)
     sword.name = "Sword"
