@@ -21,25 +21,24 @@ ContainerStorage :: union{
 }
 
 ContainerGrid :: struct {
-    width, height: i16,
+    width, height: i16
 }
 
 ContainerSlot :: struct {
     slots:          i32,
     occupied_slots: i32,
     item_whitelist: []string,
-    tag_whitelist:  []ItemTag,
+    tag_whitelist:  []ItemTag
 }
 
 ContainerVolume :: struct {
     volume:      i32,
-    volume_used: i32,
-
+    volume_used: i32
 }
 
 Rect :: struct {
     pos_x, pos_y: i16,
-    width, height: i16,
+    width, height: i16
 }
 
 // Dispatch function to determine if an item can be placed in a container, based on the container's storage type
