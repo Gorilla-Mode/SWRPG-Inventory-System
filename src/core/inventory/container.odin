@@ -146,7 +146,6 @@ ContainerGridRectOverlap :: proc(
         by + bh <= ay)
 }
 
-//TODO: Implement the other container types
 ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     if ContainerCanPlace(container, item) {
         append_elem(&container.items, item)
