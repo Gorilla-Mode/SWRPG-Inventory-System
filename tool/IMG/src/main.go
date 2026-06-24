@@ -13,20 +13,47 @@ type Icon struct {
 	Name    string
 }
 
-// Assumes working dir of /IMG
+type Dir struct {
+	name  string
+	count int
+	icons []Icon
+}
+
+// Assumes working Dir of /IMG
 const iconDir = "../../src/assets/icon"
 const outputFile = "../../src/ui/icon_manifest.odin"
 
 func main() {
+	var outputDirAbs, err = filepath.Abs(outputFile)
+	if err != nil {
+		panic(err)
+	}
 
 	var icons []Icon
+	var dirs []Dir
 
-	err := filepath.WalkDir(iconDir, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(iconDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if d.IsDir() {
+			if d.Name() == "icon" {
+				return nil
+			}
+
+			files, _ := os.ReadDir(path)
+			var IconsInPath []Icon
+			for _, file := range files {
+				IconsInPath = append(IconsInPath, Icon{EnumDef: pathToEnum(file.Name()), Name: file.Name()})
+
+				if !strings.HasSuffix(file.Name(), ".png") {
+					IconsInPath = IconsInPath[:len(IconsInPath)-1]
+				}
+			}
+
+			dirs = append(dirs, Dir{name: d.Name(), count: len(files), icons: IconsInPath})
+
 			return nil
 		}
 
@@ -55,6 +82,16 @@ func main() {
 
 		return nil
 	})
+
+	fmt.Println(printResults(dirs))
+	fmt.Println("Continue? (y/n)")
+	var input string
+	_, err = fmt.Scanln(&input)
+
+	if input != "y" {
+		return
+	}
+	fmt.Print("Generating output file to: ", outputDirAbs)
 
 	if err != nil {
 		panic(err)
@@ -97,14 +134,14 @@ func main() {
 		}
 	}
 
-	b.WriteString("}\n")
+	b.WriteString("}")
 
 	if err := os.WriteFile(outputFile, []byte(b.String()), 0644); err != nil {
 		panic(err)
 	}
 }
 
-// pathToEnum converts a file path to a lowercase, underscore-separated enum-like string format.
+// pathToEnum converts a file path to a camelcase string format.
 func pathToEnum(path string) string {
 	path = strings.TrimSuffix(path, filepath.Ext(path))
 	var b strings.Builder
@@ -115,6 +152,45 @@ func pathToEnum(path string) string {
 		if part != filepath.Base(path) {
 			b.WriteString("_")
 		}
+	}
+
+	return b.String()
+}
+
+func printResults(dirs []Dir) string {
+	var b strings.Builder
+	var iconCount int
+
+	for _, dirs := range dirs {
+		_, err := fmt.Fprintf(&b, "- %s\n", dirs.name)
+
+		if len(dirs.icons) == 0 {
+			_, err = fmt.Fprintf(&b, "\tFound %d sub-directories\n", dirs.count)
+		} else {
+			_, err = fmt.Fprintf(&b, "\tFound %d icons:\n", dirs.count)
+		}
+
+		if err != nil {
+			return "Something wong"
+		}
+
+		for _, icon := range dirs.icons {
+			_, err = fmt.Fprintf(&b, "\t\t- %s\n", icon.Name)
+			if err != nil {
+				return "Something wong"
+			}
+
+			if strings.HasSuffix(icon.Name, ".png") {
+				iconCount++
+			}
+		}
+	}
+
+	b.WriteString("\nTotal:\n")
+	_, err := fmt.Fprintf(&b, "\tDirectories:     %d\n", len(dirs))
+	_, err = fmt.Fprintf(&b, "\tIcons:           %d\n", iconCount)
+	if err != nil {
+		return "Something wong"
 	}
 
 	return b.String()
