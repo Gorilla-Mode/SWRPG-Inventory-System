@@ -14,7 +14,9 @@ main :: proc()
 {
     defer rl.CloseWindow()
 
-    palette:= ui.LoadColorPalette()
+    style := ui.style{}
+
+    style.colors = ui.LoadColorPalette()
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -24,12 +26,12 @@ main :: proc()
     rl.InitWindow(window_width, window_height, "SWIS")
     util.SetDarkTitlebar()
 
-    images := ui.LoadImages()
-    defer delete(images)
-    rl.SetWindowIcon(images[ui.Icons.app_icon])
+    style.icons = ui.LoadImages()
+    defer delete(style.icons)
+    rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
 
-    fnt := ui.LoadFont()
-    defer ui.FreeFont(fnt)
+    style.fonts = ui.LoadFont()
+    defer ui.FreeFont(style.fonts)
 
     rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
@@ -47,11 +49,13 @@ main :: proc()
         app.InputMoveItem(&state, items.rifle_instance, items.backpack)
 
         rl.BeginDrawing()
-        rl.ClearBackground(palette.surface)
+        rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(fnt.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, palette.text)
-        ui.DrawPalette(palette, offset_y = 34)
-        rl.DrawTextEx(fnt.semibold[ui.font_size.header], grid, {20, 34 + 100 + 60}, f32(ui.font_size.header), 10, palette.text)
+        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, style.colors.text)
+        ui.DrawPalette(style.colors, offset_y = 34)
+        //rl.DrawTextEx(fnt.semibold[ui.font_size.header], grid, {20, 34 + 100 + 60}, f32(ui.font_size.header), 10, palette.text)
+
+        inv.DrawContainerGrid(items.backpack, 20, 34 + 100 + 60, 40, &style)
 
         rl.EndDrawing()
     }
