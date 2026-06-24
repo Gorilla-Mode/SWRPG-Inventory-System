@@ -32,6 +32,32 @@ func main() {
 	var icons []Icon
 	var dirs []Dir
 
+	err, dirs, icons = scanIcons(err, dirs, icons)
+	fmt.Println(scanResult(dirs))
+
+	err, ok := ConfirmWrite(err)
+	if !ok {
+		return
+	}
+
+	fmt.Print("Generating output file to: ", outputDirAbs)
+	writeManifest(err, icons)
+}
+
+// ConfirmWrite asks the user if they want to continue.
+func ConfirmWrite(err error) (error, bool) {
+	var input string
+	fmt.Println("Continue? (y/n)")
+	_, err = fmt.Scanln(&input)
+
+	if input != "y" {
+		return nil, false
+	}
+	return err, true
+}
+
+// Recursively scans the icon directory for icons.
+func scanIcons(err error, dirs []Dir, icons []Icon) (error, []Dir, []Icon) {
 	err = filepath.WalkDir(iconDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -82,21 +108,11 @@ func main() {
 
 		return nil
 	})
+	return err, dirs, icons
+}
 
-	fmt.Println(printResults(dirs))
-	fmt.Println("Continue? (y/n)")
-	var input string
-	_, err = fmt.Scanln(&input)
-
-	if input != "y" {
-		return
-	}
-	fmt.Print("Generating output file to: ", outputDirAbs)
-
-	if err != nil {
-		panic(err)
-	}
-
+// writeManifest writes the manifest file to the output directory.
+func writeManifest(err error, icons []Icon) {
 	var b strings.Builder
 
 	b.WriteString("package ui\n\n")
@@ -157,7 +173,7 @@ func pathToEnum(path string) string {
 	return b.String()
 }
 
-func printResults(dirs []Dir) string {
+func scanResult(dirs []Dir) string {
 	var b strings.Builder
 	var iconCount int
 
