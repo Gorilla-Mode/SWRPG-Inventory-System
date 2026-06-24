@@ -126,7 +126,9 @@ func writeManifest(err error, icons []Icon) {
 	b.WriteString("// DO NOT EDIT.\n\n")
 	b.WriteString("Icons :: enum {\n")
 
+	fmt.Println("Writing icon definitions...")
 	for _, icon := range icons {
+		fmt.Println("\t" + icon.EnumDef)
 		_, err = fmt.Fprintf(&b, "\t%s,\n", icon.EnumDef)
 
 		if err != nil {
@@ -142,7 +144,9 @@ func writeManifest(err error, icons []Icon) {
 		panic(err)
 	}
 
+	fmt.Println("Writing icon names...")
 	for _, icon := range icons {
+		fmt.Println("\t" + icon.EnumDef + " = " + icon.Name)
 		_, err = fmt.Fprintf(&b, "\tIcons.%s = %q,\n", icon.EnumDef, icon.Name)
 
 		if err != nil {
