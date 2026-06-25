@@ -22,6 +22,8 @@ HandleHover :: proc(state: ^State, container: ^inv.Container, origin_x, origin_y
 	}
 
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+		if !inv.ContainerGridCanRotateItem(container, item) do return
+
 		mouse_pos := rl.GetMousePosition()
 		gx := i16((mouse_pos.x - origin_x) / cell_size)
 		gy := i16((mouse_pos.y - origin_y) / cell_size)
@@ -59,6 +61,8 @@ HandleDragging :: proc(state: ^State, container: ^inv.Container, origin_x, origi
 	}
 
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+		if !inv.ContainerGridCanRotateItem(container, item) do return
+
 		h := f32(item.definition.height)
 		new_offset_x, new_offset_y: f32
 		if !state.ghost.rotated {
