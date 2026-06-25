@@ -151,12 +151,26 @@ ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
         append_elem(&container.items, item)
         return true
     }
+
     return false
 }
 
-ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+ContainerGridCanRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
     _, ok := container.storage.(ContainerGrid)
     if !ok {
+        return false
+    }
+
+    if item.definition.width == item.definition.height {
+        return false
+    }
+
+    return true
+}
+
+ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+    if !ContainerGridCanRotateItem(container, item)
+    {
         return false
     }
 
@@ -164,6 +178,7 @@ ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> b
     if ContainerCanPlaceGrid(container, item) {
         return true
     }
+
     item.rotated = !item.rotated
     return false
 }

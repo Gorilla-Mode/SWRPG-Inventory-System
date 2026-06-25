@@ -18,7 +18,39 @@ HandleHover :: proc(state: ^State, container: ^inv.Container, origin_x, origin_y
 
 	if rl.IsMouseButtonPressed(rl.MouseButton.LEFT) {
 		StartDragging(state, item, origin_x, origin_y, cell_size)
-	} 
+		return
+	}
+
+	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+		if !inv.ContainerGridCanRotateItem(container, item) do return
+
+		mouse_pos := rl.GetMousePosition()
+		gx := i16((mouse_pos.x - origin_x) / cell_size)
+		gy := i16((mouse_pos.y - origin_y) / cell_size)
+
+		lx := gx - item.pos_x
+		ly := gy - item.pos_y
+
+		h := item.definition.height
+
+		new_lx, new_ly: i16
+		if !item.rotated {
+			new_lx = h - 1 - ly
+			new_ly = lx
+		} else {
+			new_lx = ly
+			new_ly = h - 1 - lx
+		}
+
+		new_pos_x := gx - new_lx
+		new_pos_y := gy - new_ly
+
+		if inv.ContainerGridCanPlaceAt(container, item.definition, new_pos_x, new_pos_y, item.id, !item.rotated) {
+			item.pos_x = new_pos_x
+			item.pos_y = new_pos_y
+			item.rotated = !item.rotated
+		}
+	}
 }
 
 HandleDragging :: proc(state: ^State, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
@@ -28,13 +60,27 @@ HandleDragging :: proc(state: ^State, container: ^inv.Container, origin_x, origi
 		return
 	}
 
+	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+		if !inv.ContainerGridCanRotateItem(container, item) do return
+
+		h := f32(item.definition.height)
+		new_offset_x, new_offset_y: f32
+		if !state.ghost.rotated {
+			new_offset_x = h * cell_size - state.grab.offset_y
+			new_offset_y = state.grab.offset_x
+		} else {
+			new_offset_x = state.grab.offset_y
+			new_offset_y = h * cell_size - state.grab.offset_x
+		}
+
+		state.grab.offset_x = new_offset_x
+		state.grab.offset_y = new_offset_y
+		state.ghost.rotated = !state.ghost.rotated
+	}
+
 	mouse_pos := rl.GetMousePosition()
 	state.ghost.pos_x = i16((mouse_pos.x - origin_x - state.grab.offset_x + cell_size / 2) / cell_size)
 	state.ghost.pos_y = i16((mouse_pos.y - origin_y - state.grab.offset_y + cell_size / 2) / cell_size)
-
-	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-		state.ghost.rotated = !state.ghost.rotated
-	}
 
 	state.ghost.valid = inv.ContainerGridCanPlaceAt(container, item.definition, state.ghost.pos_x, state.ghost.pos_y, item.id, state.ghost.rotated)
 }
