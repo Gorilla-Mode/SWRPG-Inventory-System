@@ -65,8 +65,20 @@ main :: proc()
 
         if state.grab.is_dragging && state.grab.dragged_item != nil {
             inv.DrawItemGhost(state.grab.dragged_item,
-            state.ghost.pos_x,
-            state.ghost.pos_y,
+            f32(state.ghost.pos_x),
+            f32(state.ghost.pos_y),
+            true,
+            state.ghost.rotated,
+            state.ghost.valid,
+            grid_x,
+            grid_y,
+            grid_size,
+            &style)
+
+            inv.DrawItemGhost(state.grab.dragged_item,
+            state.ghost.unsnapped_x,
+            state.ghost.unsnapped_y,
+            false,
             state.ghost.rotated,
             state.ghost.valid,
             grid_x,
