@@ -3,7 +3,6 @@
 import inv "../inventory"
 
 State :: struct{
-    InventoryGrid: string,
     grab:          Grab,
     ghost:         Ghost,
 }
