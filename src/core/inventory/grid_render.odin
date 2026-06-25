@@ -24,7 +24,7 @@ DrawContainerGrid :: proc(
                 i32(py),
                 i32(cell_size),
                 i32(cell_size),
-                rl.BLACK,
+                style.colors.primary,
                 )
             }
         }
@@ -47,26 +47,48 @@ DrawItem :: proc(
     x := origin_x + f32(item.pos_x) * cell_size
     y := origin_y + f32(item.pos_y) * cell_size
 
+    rot: f32
+    textVec: rl.Vector2
+
+    switch item.rotated {
+    case true:
+        rot = 90
+        textVec = rl.Vector2{
+            x + width * cell_size - 5,
+            y + 5,
+        }
+    case false:
+        rot = 0
+        textVec = rl.Vector2{
+            x + 5,
+            y + 5,
+        }
+    }
+
     rl.DrawRectangle(
     i32(x),
     i32(y),
     i32(width * cell_size),
     i32(height * cell_size),
-    rl.DARKGRAY,
+    style.colors.primary,
     )
 
-    rl.DrawTextEx(style.fonts.regular[ui.font_size.header],
-    str.clone_to_cstring(item.definition.name),
-    { x + 5, y + 5 },
-    f32(ui.font_size.header),
-    0,
-    style.colors.primary)
+    rl.DrawTextPro(
+        style.fonts.regular[ui.font_size.default],
+        str.clone_to_cstring(item.definition.name),
+        textVec,
+        rl.Vector2{0, 0},
+        rot,
+        f32(ui.font_size.default),
+        1,
+        style.colors.text,
+    )
 
     rl.DrawRectangleLines(
     i32(x),
     i32(y),
     i32(width * cell_size),
     i32(height * cell_size),
-    rl.WHITE,
+    style.colors.surface,
     )
 }
