@@ -39,7 +39,7 @@ DrawItem :: proc(
     item: ^ItemInstance,
     origin_x, origin_y: f32,
     cell_size: f32,
-    style: ^ui.style
+    style: ^ui.style,
 ) {
     width := f32(ItemGetWidth(item))
     height := f32(ItemGetHeight(item))
@@ -49,6 +49,9 @@ DrawItem :: proc(
 
     rot: f32
     textVec: rl.Vector2
+    bgColor := style.colors.primary
+    textColor := style.colors.text
+    outlineColor := style.colors.surface
 
     switch item.rotated {
     case true:
@@ -65,12 +68,18 @@ DrawItem :: proc(
         }
     }
 
+    if item.grabbed {
+        bgColor.a = 128
+        textColor.a = 128
+        outlineColor.a = 128
+    }
+
     rl.DrawRectangle(
     i32(x),
     i32(y),
     i32(width * cell_size),
     i32(height * cell_size),
-    style.colors.primary,
+    bgColor,
     )
 
     rl.DrawTextPro(
@@ -81,7 +90,7 @@ DrawItem :: proc(
         rot,
         f32(ui.font_size.default),
         1,
-        style.colors.text,
+        textColor,
     )
 
     rl.DrawRectangleLines(
@@ -89,7 +98,7 @@ DrawItem :: proc(
     i32(y),
     i32(width * cell_size),
     i32(height * cell_size),
-    style.colors.surface,
+    outlineColor,
     )
 }
 
@@ -108,7 +117,7 @@ DrawItemGhost :: proc(
     px, py: f32
     color := valid ? style.colors.success : style.colors.error
     bg_color := color
-    bg_color.a = 128
+    bg_color.a = 32
     rot: f32
     textVec: rl.Vector2
 
@@ -116,6 +125,7 @@ DrawItemGhost :: proc(
         case true:
             px = origin_x + x * cell_size
             py = origin_y + y * cell_size
+            color.a = 128
         case false:
             px = x
             py = y

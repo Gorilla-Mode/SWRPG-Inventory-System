@@ -4,6 +4,7 @@ ItemInstance :: struct{
     id: u64,
     definition: ^Item,
     rotated: bool,
+    grabbed: bool,
 
     pos_x, pos_y: i16,
 }

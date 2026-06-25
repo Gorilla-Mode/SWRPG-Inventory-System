@@ -91,6 +91,7 @@ StartDragging :: proc(state: ^State, item: ^inv.ItemInstance, origin_x, origin_y
 	mouse_pos := rl.GetMousePosition()
 	state.grab.is_dragging = true
 	state.grab.dragged_item = item
+	item.grabbed = true
 	
 	item_screen_x := origin_x + f32(item.pos_x) * cell_size
 	item_screen_y := origin_y + f32(item.pos_y) * cell_size
@@ -107,6 +108,7 @@ StartDragging :: proc(state: ^State, item: ^inv.ItemInstance, origin_x, origin_y
 
 DropItem :: proc(state: ^State, container: ^inv.Container) {
 	item := state.grab.dragged_item
+	item.grabbed = false
 	if state.ghost.valid {
 		item.pos_x = state.ghost.pos_x
 		item.pos_y = state.ghost.pos_y
