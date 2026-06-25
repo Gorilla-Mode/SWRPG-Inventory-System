@@ -92,3 +92,69 @@ DrawItem :: proc(
     style.colors.surface,
     )
 }
+
+DrawItemGhost :: proc(
+    item: ^ItemInstance,
+    x, y: i16,
+    rotated: bool,
+    valid: bool,
+    origin_x, origin_y: f32,
+    cell_size: f32,
+    style: ^ui.style
+) {
+    width := f32(rotated ? item.definition.height : item.definition.width)
+    height := f32(rotated ? item.definition.width : item.definition.height)
+
+    px := origin_x + f32(x) * cell_size
+    py := origin_y + f32(y) * cell_size
+
+    color := valid ? style.colors.success : style.colors.error
+
+    bg_color := color
+    bg_color.a = 128
+
+    rl.DrawRectangle(
+        i32(px),
+        i32(py),
+        i32(width * cell_size),
+        i32(height * cell_size),
+        bg_color,
+    )
+
+    rot: f32
+    textVec: rl.Vector2
+
+    switch rotated {
+    case true:
+        rot = 90
+        textVec = rl.Vector2{
+            px + width * cell_size - 5,
+            py + 5,
+        }
+    case false:
+        rot = 0
+        textVec = rl.Vector2{
+            px + 5,
+            py + 5,
+        }
+    }
+
+    rl.DrawTextPro(
+        style.fonts.regular[ui.font_size.default],
+        str.clone_to_cstring(item.definition.name),
+        textVec,
+        rl.Vector2{0, 0},
+        rot,
+        f32(ui.font_size.default),
+        1,
+        style.colors.text,
+    )
+
+    rl.DrawRectangleLines(
+        i32(px),
+        i32(py),
+        i32(width * cell_size),
+        i32(height * cell_size),
+        color,
+    )
+}
