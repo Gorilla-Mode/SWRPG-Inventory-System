@@ -5,50 +5,6 @@ import os "core:os"
 import "core:path/filepath"
 import strings "core:strings"
 
-// region Image Definitions
-// Definiton of icons loaded, and to be used across the UI
-// Names should correspond to file path of the icon
-icons :: enum {
-    app_icon,
-    character_user,
-    character_party,
-    item_weapon_stat_crit,
-    item_weapon_stat_dmg,
-    item_weapon_type_pistol,
-    item_weapon_type_rifle,
-    item_weapon_type_gunnery,
-    item_weapon_type_shotgun,
-    item_weapon_type_melee,
-    item_generic_hardpoint,
-    item_weapon_stat_range,
-    economy_wallet,
-    economy_credit,
-    economy_rarity,
-    effect_restricted,
-}
-
-// Array of icon names corresponding to the icons enum variants, used for matching file names when loading icons.
-// The order of names in this array should match the order of variants in the icons enum. And name correspond to the file name
-// excluding the file extension.
-ICON_NAMES := [?]string{
-    "app_icon",
-    "user",
-    "party",
-    "crit",
-    "damage",
-    "pistol",
-    "rifle",
-    "gunnery",
-    "shotgun",
-    "melee",
-    "hardpoint",
-    "range",
-    "wallet",
-    "credit",
-    "rarity",
-    "restricted",
-}
-//endregion
 
 // Struct to hold the file path for each icon to be loaded.
 IconMetadata :: struct {
@@ -56,11 +12,11 @@ IconMetadata :: struct {
 }
 
 // Loads all icons defined in the icons enum, and returns a map of icons to their corresponding rl.Image objects.
-LoadImages :: proc() -> map[icons]rl.Image {
-    icon_paths := make(map[icons]IconMetadata)
+LoadImages :: proc() -> map[Icons]rl.Image {
+    icon_paths := make(map[Icons]IconMetadata)
     Get_Icons(&icon_paths, "src/assets/icon")
 
-    images := make(map[icons]rl.Image)
+    images := make(map[Icons]rl.Image)
 
     for icon, metadata in icon_paths {
         loaded_image := rl.LoadImage(metadata.path)
@@ -72,7 +28,7 @@ LoadImages :: proc() -> map[icons]rl.Image {
 }
 
 // Recursively searches the specified directory for image files matching the defined icons, and populates a map of icons to their corresponding file paths.
-Get_Icons :: proc(icon_paths: ^map[icons]IconMetadata, icon_dir: string) {
+Get_Icons :: proc(icon_paths: ^map[Icons]IconMetadata, icon_dir: string) {
     handle, err := os.open(icon_dir)
     if err != os.ERROR_NONE {
         return
@@ -97,8 +53,8 @@ Get_Icons :: proc(icon_paths: ^map[icons]IconMetadata, icon_dir: string) {
 
         filename := strings.trim_suffix(file.name, filepath.ext(file.name))
 
-        for icon in icons {
-            if !strings.equal_fold(filename, ICON_NAMES[icon]){
+        for icon in Icons {
+            if !strings.equal_fold(filename, Icon_names[icon]){
                 continue
             }
 
