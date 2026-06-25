@@ -40,15 +40,40 @@ main :: proc()
 
     for !rl.WindowShouldClose()
     {
-        app.InputMoveItem(&state, items.rifle_instance, items.backpack)
+        grid_x: f32 = 20
+        grid_y: f32 = 34 + 100 + 60
+        grid_size: f32 = 50
+
+        app.InputMoveItem(&state,
+        items.backpack,
+        grid_x,
+        grid_y,
+        grid_size)
 
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, style.colors.text)
+        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
+        "SWIS",
+        {20, 5},
+        f32(ui.font_size.title),
+        0,
+        style.colors.text)
         ui.DrawPalette(style.colors, offset_y = 34)
 
-        inv.DrawContainerGrid(items.backpack, 20, 34 + 100 + 60, 50, &style)
+        inv.DrawContainerGrid(items.backpack, grid_x, grid_y, grid_size, &style)
+
+        if state.grab.is_dragging && state.grab.dragged_item != nil {
+            inv.DrawItemGhost(state.grab.dragged_item,
+            state.ghost.pos_x,
+            state.ghost.pos_y,
+            state.ghost.rotated,
+            state.ghost.valid,
+            grid_x,
+            grid_y,
+            grid_size,
+            &style)
+        }
 
         rl.EndDrawing()
     }
