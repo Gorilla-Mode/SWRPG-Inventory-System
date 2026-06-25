@@ -174,3 +174,49 @@ DrawItemGhost :: proc(
         color,
     )
 }
+
+DrawItemCard :: proc(
+    item: ^ItemInstance,
+    x, y: f32,
+    origin_x, origin_y: f32,
+    cell_size: f32,
+    style: ^ui.style
+) {
+    offset: i32 = 5
+    posX:= i32(x * cell_size + origin_x) + offset
+    posY:= i32(y * cell_size + origin_y) + offset
+    height: i32 = 450
+    width: i32 = 300
+    header := style.fonts.bold[ui.font_size.header]
+    headerSize := f32(ui.font_size.header)
+    regular := style.fonts.regular[ui.font_size.default]
+    regularSize := f32(ui.font_size.default)
+
+    builder: str.Builder
+    str.builder_init(&builder)
+
+    str.write_string(&builder, "Name: ")
+    str.write_string(&builder, item.definition.name)
+    str.write_string(&builder, "\n")
+
+    str.write_string(&builder, "Description:\n")
+    str.write_string(&builder, item.definition.description)
+    str.write_string(&builder, "\n\n")
+
+    str.write_string(&builder, "Width: ")
+    str.write_int(&builder, int(item.definition.width))
+    str.write_string(&builder, "\n")
+
+    str.write_string(&builder, "Height: ")
+    str.write_int(&builder, int(item.definition.height))
+    str.write_string(&builder, "\n")
+
+    s := str.to_string(builder)
+
+    rl.DrawRectangle(posX, posY, width, height, style.colors.secondary)
+    rl.DrawRectangleLines(posX, posY, width, height, style.colors.accent)
+    rl.DrawLine(posX, posY + i32(headerSize) + 10, posX + width, posY + i32(headerSize) + 10, style.colors.accent)
+
+    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {f32(posX + 5), f32(posY + 5)}, headerSize, 0, style.colors.text)
+    rl.DrawTextEx(regular, str.clone_to_cstring(s), {f32(posX + 5), f32(posY + i32(headerSize) + 15)}, regularSize, 0, style.colors.text)
+}

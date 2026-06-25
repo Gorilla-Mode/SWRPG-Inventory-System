@@ -18,23 +18,28 @@ TestItem :: proc() -> struct{
         height = 10
     }
 
+    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     sword := new(Item)
-    sword.name = "Sword"
+    sword.name = "Vibro Rapier"
     sword.width = 5
     sword.height = 1
+    sword.description = "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes."
 
     rifle := new(Item)
-    rifle.name = "Rifle"
+    rifle.name = "A280C Blaster Rifle"
     rifle.width = 6
     rifle.height = 2
+    rifle.description = "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops"
 
     knife := new(Item)
-    knife.name = "Knife"
+    knife.name = "Vibroknife"
+    knife.description = "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks."
     knife.width = 3
     knife.height = 1
 
     canteen := new(Item)
     canteen.name = "Canteen"
+    canteen.description = "A small container for carrying water or\nother liquids."
     canteen.width = 2
     canteen.height = 2
 
