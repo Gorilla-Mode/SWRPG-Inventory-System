@@ -79,8 +79,10 @@ HandleDragging :: proc(state: ^State, container: ^inv.Container, origin_x, origi
 	}
 
 	mouse_pos := rl.GetMousePosition()
-	state.ghost.pos_x = i16((mouse_pos.x - origin_x - state.grab.offset_x + cell_size / 2) / cell_size)
-	state.ghost.pos_y = i16((mouse_pos.y - origin_y - state.grab.offset_y + cell_size / 2) / cell_size)
+	state.ghost.unsnapped_x = mouse_pos.x - state.grab.offset_x
+	state.ghost.unsnapped_y = mouse_pos.y - state.grab.offset_y
+	state.ghost.pos_x = i16((state.ghost.unsnapped_x - origin_x + cell_size / 2) / cell_size)
+	state.ghost.pos_y = i16((state.ghost.unsnapped_y - origin_y + cell_size / 2) / cell_size)
 
 	state.ghost.valid = inv.ContainerGridCanPlaceAt(container, item.definition, state.ghost.pos_x, state.ghost.pos_y, item.id, state.ghost.rotated)
 }
@@ -89,6 +91,7 @@ StartDragging :: proc(state: ^State, item: ^inv.ItemInstance, origin_x, origin_y
 	mouse_pos := rl.GetMousePosition()
 	state.grab.is_dragging = true
 	state.grab.dragged_item = item
+	item.grabbed = true
 	
 	item_screen_x := origin_x + f32(item.pos_x) * cell_size
 	item_screen_y := origin_y + f32(item.pos_y) * cell_size
@@ -97,12 +100,15 @@ StartDragging :: proc(state: ^State, item: ^inv.ItemInstance, origin_x, origin_y
 	state.grab.offset_y = mouse_pos.y - item_screen_y
 	state.ghost.pos_x = item.pos_x
 	state.ghost.pos_y = item.pos_y
+	state.ghost.unsnapped_x = item_screen_x
+	state.ghost.unsnapped_y = item_screen_y
 	state.ghost.rotated = item.rotated
 	state.ghost.valid = true
 }
 
 DropItem :: proc(state: ^State, container: ^inv.Container) {
 	item := state.grab.dragged_item
+	item.grabbed = false
 	if state.ghost.valid {
 		item.pos_x = state.ghost.pos_x
 		item.pos_y = state.ghost.pos_y

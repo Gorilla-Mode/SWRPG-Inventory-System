@@ -17,6 +17,8 @@ Grab :: struct{
 Ghost :: struct{
     pos_x: i16,
     pos_y: i16,
+    unsnapped_x: f32,
+    unsnapped_y: f32,
     rotated: bool,
     valid: bool,
 }
