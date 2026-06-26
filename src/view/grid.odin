@@ -66,12 +66,7 @@ DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.st
         style.grid.cell_size,
         style)
 
-        if rl.IsMouseButtonPressed(rl.MouseButton.LEFT) &&
-        state.grab.selected_item != nil &&
-        (
-            state.grab.selected_item.grabbed ||
-            (!CheckCollisonItemCard(state, style) && state.grab.dragged_item == nil)
-        ) {
+        if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style)) {
             state.grab.selected_item = nil
         }
     }
