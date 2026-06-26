@@ -2,6 +2,7 @@
 
 import inv "../inventory"
 import rl  "vendor:raylib"
+import ui "../../ui"
 
 InputMoveItem :: proc(state: ^State, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	if state.grab.is_dragging {
@@ -134,4 +135,24 @@ GetItemAtMousePos :: proc(container: ^inv.Container, origin_x, origin_y, cell_si
 		}
 	}
 	return nil
+}
+
+CheckCollisonItemCard :: proc(state: ^State, style: ^ui.style) -> bool{
+	return (rl.CheckCollisionPointRec(rl.GetMousePosition(),
+	inv.GetItemCardRect(f32(state.grab.selected_item.pos_x),
+	f32(state.grab.selected_item.pos_y),
+	style)))
+}
+
+ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^State) {
+	hoveredItem := GetItemAtMousePos(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size)
+	if hoveredItem != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT){
+		state.grab.selected_item = hoveredItem
+	}
+}
+
+HideItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^State){
+	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style)) {
+		state.grab.selected_item = nil
+	}
 }

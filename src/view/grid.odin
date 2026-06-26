@@ -51,11 +51,7 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
 }
 
 DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
-    hoveredItem := app.GetItemAtMousePos(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size)
-
-    if hoveredItem != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT){
-        state.grab.selected_item = hoveredItem
-    }
+    app.ShowItemCard(container, style, state)
 
     if state.grab.selected_item != nil {
         inv.DrawItemCard(state.grab.selected_item,
@@ -65,18 +61,9 @@ DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.st
         style.grid.origin_y,
         style.grid.cell_size,
         style)
-
-        if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style)) {
-            state.grab.selected_item = nil
-        }
     }
-}
 
-CheckCollisonItemCard :: proc(state: ^app.State, style: ^ui.style) -> bool{
-    return (rl.CheckCollisionPointRec(rl.GetMousePosition(),
-    inv.GetItemCardRect(f32(state.grab.selected_item.pos_x),
-    f32(state.grab.selected_item.pos_y),
-    style)))
+    app.HideItemCard(container, style, state)
 }
 
 GridGetCenter :: proc(grid_size: rl.Vector2, state: ^app.State) -> rl.Vector2 {
