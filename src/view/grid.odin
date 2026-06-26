@@ -9,11 +9,14 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
     inv.DrawContainerGrid(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
+        gw := state.ghost.rotated ? state.grab.dragged_item.definition.height : state.grab.dragged_item.definition.width
+        gh := state.ghost.rotated ? state.grab.dragged_item.definition.width : state.grab.dragged_item.definition.height
+
         if inv.ContainerGridCheckBounds(container, inv.Rect{
             pos_x = state.ghost.pos_x,
             pos_y = state.ghost.pos_y,
-            width = (state.ghost.rotated ? inv.ItemGetHeight(state.grab.dragged_item) : inv.ItemGetWidth(state.grab.dragged_item)),
-            height = (state.ghost.rotated ? inv.ItemGetWidth(state.grab.dragged_item) : inv.ItemGetHeight(state.grab.dragged_item)),
+            width = gw,
+            height = gh,
         })
         {
             inv.DrawItemGhost(state.grab.dragged_item,
