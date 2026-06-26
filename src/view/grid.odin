@@ -47,12 +47,12 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
         style)
     }
 
-    DrawItemCard(container, state, style)
+    if(app.ShowItemCard(container, style, state) || state.grab.selected_item != nil){
+        DrawItemCard(container, state, style)
+    }
 }
 
 DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
-    app.ShowItemCard(container, style, state)
-
     if state.grab.selected_item != nil {
         inv.DrawItemCard(state.grab.selected_item,
         f32(state.grab.selected_item.pos_x),
