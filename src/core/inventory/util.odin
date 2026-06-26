@@ -4,7 +4,7 @@ import str "core:strings"
 import fmt "core:fmt"
 
 // Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc() -> struct{
+TestItem :: proc(cell_size: f32) -> struct{
     backpack: ^Container,
     sword: ^Item,
     rifle: ^Item,

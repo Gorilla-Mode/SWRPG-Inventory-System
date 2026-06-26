@@ -1,5 +1,7 @@
 ﻿package inventory
 
+import rl "vendor:raylib"
+
 ContainerType :: enum{
     Backpack,
     Belt,
@@ -215,4 +217,18 @@ ContainerGridMoveItem :: proc(
     item.pos_x = new_x
     item.pos_y = new_y
     return true
+}
+
+ContainerGridPixelsXY :: proc(container: ^Container, cell_size: f32) -> rl.Vector2
+{
+    grid, ok := container.storage.(ContainerGrid)
+    if !ok {
+        return {}
+    }
+
+    size := rl.Vector2 {}
+    size.x = cell_size * f32(grid.width)
+    size.y = cell_size * f32(grid.height)
+
+    return size
 }

@@ -11,7 +11,9 @@ style :: struct{
 }
 
 grid :: struct{
-    origin_x: f32,
-    origin_y: f32,
-    cell_size: f32
+    origin_x:  f32,
+    origin_y:  f32,
+    cell_size: f32,
+    offset_x:  f32,
+    offset_y:  f32
 }

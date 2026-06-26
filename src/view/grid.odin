@@ -53,3 +53,11 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
         }
     }
 }
+
+GridGetCenter :: proc(grid_size: rl.Vector2, state: ^app.State) -> rl.Vector2 {
+    center := rl.Vector2{}
+    center.x = (state.window.width - grid_size.x) /2
+    center.y = (state.window.height - grid_size.y) / 2
+
+    return center
+}

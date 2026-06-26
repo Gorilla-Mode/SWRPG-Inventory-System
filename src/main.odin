@@ -11,14 +11,14 @@ main :: proc()
 {
     defer rl.CloseWindow()
 
-    state := app.State{}
-    items := inv.TestItem()
-
     style := ui.style{
         grid = {
             cell_size = 50
         }
     }
+
+    state := app.State{}
+    items := inv.TestItem(style.grid.cell_size)
 
     style.icons = ui.LoadImages()
     style.colors = ui.LoadColorPalette()
@@ -41,12 +41,9 @@ main :: proc()
     for !rl.WindowShouldClose()
     {
         app.UpdateWindowState(&state)
-        grid := items.backpack.storage.(inv.ContainerGrid)
-        grid_h := style.grid.cell_size * f32(grid.height)
-        grid_w := style.grid.cell_size * f32(grid.width)
-
-        style.grid.origin_y = (state.window.height - grid_h) / 2
-        style.grid.origin_x = (state.window.width - grid_w) / 2
+        gridCenter := v.GridGetCenter(inv.ContainerGridPixelsXY(items.backpack, style.grid.cell_size), &state)
+        style.grid.origin_x = gridCenter.x
+        style.grid.origin_y = gridCenter.y
 
         app.InputMoveItem(&state,
         items.backpack,
