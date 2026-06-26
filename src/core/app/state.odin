@@ -1,15 +1,18 @@
 ﻿package app
 
 import inv "../inventory"
+import rl "vendor:raylib"
 
 State :: struct{
     grab:          Grab,
     ghost:         Ghost,
+    window:        WindowState,
 }
 
 Grab :: struct{
     is_dragging: bool,
     dragged_item: ^inv.ItemInstance,
+    selected_item: ^inv.ItemInstance,
     offset_x: f32,
     offset_y: f32,
 }
@@ -21,4 +24,14 @@ Ghost :: struct{
     unsnapped_y: f32,
     rotated: bool,
     valid: bool,
+}
+
+WindowState :: struct{
+    width:  f32,
+    height: f32,
+}
+
+UpdateWindowState :: proc(state: ^State) {
+    state.window.width = f32(rl.GetScreenWidth())
+    state.window.height = f32(rl.GetScreenHeight())
 }
