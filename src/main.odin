@@ -7,6 +7,10 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 
+UpdateWindowState :: proc() {
+
+}
+
 main :: proc()
 {
     defer rl.CloseWindow()
@@ -41,10 +45,7 @@ main :: proc()
     for !rl.WindowShouldClose()
     {
         app.UpdateWindowState(&state)
-        gridCenter := v.GridGetCenter(inv.ContainerGridPixelsXY(items.backpack, style.grid.cell_size), &state)
-        style.grid.origin_x = gridCenter.x
-        style.grid.origin_y = gridCenter.y
-
+        
         app.InputMoveItem(&state,
         items.backpack,
         style.grid.origin_x,

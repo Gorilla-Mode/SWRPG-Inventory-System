@@ -6,6 +6,10 @@ import ui "../ui"
 import rl "vendor:raylib"
 
 DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
+    gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(container, style.grid.cell_size), state)
+    style.grid.origin_x = gridCenter.x
+    style.grid.origin_y = gridCenter.y
+
     inv.DrawContainerGrid(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
