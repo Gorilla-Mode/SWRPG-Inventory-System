@@ -246,3 +246,14 @@ DrawItemCard :: proc(
     rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
 }
 
+GetItemCardRect :: proc(x: f32, y: f32, style: ^ui.style) -> rl.Rectangle {
+    pos_x := x * style.grid.cell_size + style.grid.origin_x + 5
+    pos_y := y * style.grid.cell_size + style.grid.origin_y + 5
+
+    return rl.Rectangle{
+        x = pos_x,
+        y = pos_y,
+        width = 300,
+        height = 450,
+    }
+}

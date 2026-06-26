@@ -7,8 +7,8 @@ import rl "vendor:raylib"
 
 DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
     gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(container, style.grid.cell_size), state)
-    style.grid.origin_x = gridCenter.x
-    style.grid.origin_y = gridCenter.y
+    style.grid.origin_x = gridCenter.x + style.grid.offset_x
+    style.grid.origin_y = gridCenter.y + style.grid.offset_y
 
     inv.DrawContainerGrid(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
 
@@ -54,7 +54,7 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
     if state.grab.hovered_item != nil {
 
         inv.DrawItemCard(state.grab.hovered_item, f32(state.grab.hovered_item.pos_x), f32(state.grab.hovered_item.pos_y), style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
-        if rl.IsMouseButtonPressed(rl.MouseButton.MIDDLE) || state.grab.hovered_item.grabbed
+        if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !rl.CheckCollisionPointRec(rl.GetMousePosition(), inv.GetItemCardRect(f32(state.grab.hovered_item.pos_x), f32(state.grab.hovered_item.pos_y), style)))
         {
             state.grab.hovered_item = nil
         }
