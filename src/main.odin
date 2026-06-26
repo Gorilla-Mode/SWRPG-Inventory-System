@@ -68,8 +68,8 @@ main :: proc()
             if inv.ContainerGridCheckBounds(items.backpack, inv.Rect{
                 pos_x = state.ghost.pos_x,
                 pos_y = state.ghost.pos_y,
-                width = inv.ItemGetWidth(state.grab.dragged_item),
-                height = inv.ItemGetHeight(state.grab.dragged_item),
+                width = (state.ghost.rotated ? inv.ItemGetHeight(state.grab.dragged_item) : inv.ItemGetWidth(state.grab.dragged_item)),
+                height = (state.ghost.rotated ? inv.ItemGetWidth(state.grab.dragged_item) : inv.ItemGetHeight(state.grab.dragged_item)),
             })
             {
                 inv.DrawItemGhost(state.grab.dragged_item,

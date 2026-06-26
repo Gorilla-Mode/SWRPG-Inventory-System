@@ -192,26 +192,21 @@ DrawItemCard :: proc(
     regular := style.fonts.regular[ui.font_size.default]
     regularSize := f32(ui.font_size.default)
 
-    builder: str.Builder
-    str.builder_init(&builder)
+    b: str.Builder
+    str.builder_init(&b)
 
-    str.write_string(&builder, "Name: ")
-    str.write_string(&builder, item.definition.name)
-    str.write_string(&builder, "\n")
+    str.write_string(&b, item.definition.description)
+    str.write_string(&b, "\n\n")
 
-    str.write_string(&builder, "Description:\n")
-    str.write_string(&builder, item.definition.description)
-    str.write_string(&builder, "\n\n")
+    str.write_string(&b, "Width: ")
+    str.write_int(&b, int(item.definition.width))
+    str.write_string(&b, "\n")
 
-    str.write_string(&builder, "Width: ")
-    str.write_int(&builder, int(item.definition.width))
-    str.write_string(&builder, "\n")
+    str.write_string(&b, "Height: ")
+    str.write_int(&b, int(item.definition.height))
+    str.write_string(&b, "\n")
 
-    str.write_string(&builder, "Height: ")
-    str.write_int(&builder, int(item.definition.height))
-    str.write_string(&builder, "\n")
-
-    s := str.to_string(builder)
+    s := str.to_string(b)
 
     rect := rl.Rectangle{x = posX, y =  posY, width = width, height = height}
     rl.DrawRectangleRounded(rect, 0.1, 32, style.colors.surface)
