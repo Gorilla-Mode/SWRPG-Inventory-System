@@ -218,6 +218,6 @@ DrawItemCard :: proc(
     rl.DrawRectangleRoundedLines(rect, 0.1, 32, style.colors.primary)
     rl.DrawLine(i32(posX), i32(posY + headerSize) + 10, i32(posX + width), i32(posY + headerSize) + 10, style.colors.secondary)
 
-    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {f32(posX + 5), f32(posY + 5)}, headerSize, 0, style.colors.text)
+    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {posX + 5, posY + 5}, headerSize, 0, style.colors.text)
     rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
 }
