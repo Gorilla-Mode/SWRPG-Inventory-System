@@ -144,11 +144,14 @@ CheckCollisonItemCard :: proc(state: ^State, style: ^ui.style) -> bool{
 	style)))
 }
 
-ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^State) {
+ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^State) -> bool {
 	hoveredItem := GetItemAtMousePos(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size)
 	if hoveredItem != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT){
 		state.grab.selected_item = hoveredItem
+
+		return true
 	}
+	return false
 }
 
 HideItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^State){
