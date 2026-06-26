@@ -12,7 +12,7 @@ State :: struct{
 Grab :: struct{
     is_dragging: bool,
     dragged_item: ^inv.ItemInstance,
-    hovered_item: ^inv.ItemInstance,
+    selected_item: ^inv.ItemInstance,
     offset_x: f32,
     offset_y: f32,
 }
