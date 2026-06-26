@@ -37,6 +37,7 @@ main :: proc()
 
     state := app.State{}
     items := inv.TestItem()
+    hoveredItem: ^inv.ItemInstance
 
     for !rl.WindowShouldClose()
     {
@@ -85,6 +86,19 @@ main :: proc()
             grid_y,
             grid_size,
             &style)
+        }
+
+        if app.GetItemAtMousePos(items.backpack, grid_x, grid_y, grid_size) != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT) {
+            hoveredItem = app.GetItemAtMousePos(items.backpack, grid_x, grid_y, grid_size)
+        }
+
+        if hoveredItem != nil {
+
+            inv.DrawItemCard(hoveredItem, f32(hoveredItem.pos_x), f32(hoveredItem.pos_y), grid_x, grid_y, grid_size, &style)
+            if rl.IsMouseButtonPressed(rl.MouseButton.MIDDLE) || hoveredItem.grabbed
+            {
+                hoveredItem = nil
+            }
         }
 
         rl.EndDrawing()

@@ -174,3 +174,50 @@ DrawItemGhost :: proc(
         color,
     )
 }
+
+DrawItemCard :: proc(
+    item: ^ItemInstance,
+    x, y: f32,
+    origin_x, origin_y: f32,
+    cell_size: f32,
+    style: ^ui.style
+) {
+    offset: f32 = 5
+    posX:= x * cell_size + origin_x + offset
+    posY:= y * cell_size + origin_y + offset
+    height: f32 = 450
+    width: f32 = 300
+    header := style.fonts.bold[ui.font_size.header]
+    headerSize := f32(ui.font_size.header)
+    regular := style.fonts.regular[ui.font_size.default]
+    regularSize := f32(ui.font_size.default)
+
+    builder: str.Builder
+    str.builder_init(&builder)
+
+    str.write_string(&builder, "Name: ")
+    str.write_string(&builder, item.definition.name)
+    str.write_string(&builder, "\n")
+
+    str.write_string(&builder, "Description:\n")
+    str.write_string(&builder, item.definition.description)
+    str.write_string(&builder, "\n\n")
+
+    str.write_string(&builder, "Width: ")
+    str.write_int(&builder, int(item.definition.width))
+    str.write_string(&builder, "\n")
+
+    str.write_string(&builder, "Height: ")
+    str.write_int(&builder, int(item.definition.height))
+    str.write_string(&builder, "\n")
+
+    s := str.to_string(builder)
+
+    rect := rl.Rectangle{x = posX, y =  posY, width = width, height = height}
+    rl.DrawRectangleRounded(rect, 0.1, 32, style.colors.surface)
+    rl.DrawRectangleRoundedLines(rect, 0.1, 32, style.colors.primary)
+    rl.DrawLine(i32(posX), i32(posY + headerSize) + 10, i32(posX + width), i32(posY + headerSize) + 10, style.colors.secondary)
+
+    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {posX + 5, posY + 5}, headerSize, 0, style.colors.text)
+    rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
+}
