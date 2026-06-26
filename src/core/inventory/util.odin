@@ -111,8 +111,6 @@ TestItem :: proc() -> struct{
     append_elem(&backpack.items, knife_instance)
     append_elem(&backpack.items, canteen_instance)
 
-    fmt.println(context.allocator)
-
     return{
         backpack,
         sword,
