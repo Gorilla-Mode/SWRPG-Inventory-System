@@ -7,10 +7,6 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 
-UpdateWindowState :: proc() {
-
-}
-
 main :: proc()
 {
     defer rl.CloseWindow()
@@ -36,7 +32,8 @@ main :: proc()
     rl.InitWindow(1280, 720, "SWIS")
     util.SetDarkTitlebar()
     rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
-    rl.SetTargetFPS(180)
+    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
+
     rl.SetExitKey(nil)
 
     style.fonts = ui.LoadFont()
@@ -44,8 +41,9 @@ main :: proc()
 
     for !rl.WindowShouldClose()
     {
+        //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         app.UpdateWindowState(&state)
-        
+
         app.InputMoveItem(&state,
         items.backpack,
         style.grid.origin_x,
