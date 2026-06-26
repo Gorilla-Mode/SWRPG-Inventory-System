@@ -192,26 +192,50 @@ DrawItemCard :: proc(
     regular := style.fonts.regular[ui.font_size.default]
     regularSize := f32(ui.font_size.default)
 
-    builder: str.Builder
-    str.builder_init(&builder)
+    b: str.Builder
+    str.builder_init(&b)
 
-    str.write_string(&builder, "Name: ")
-    str.write_string(&builder, item.definition.name)
-    str.write_string(&builder, "\n")
+    str.write_string(&b, item.definition.description)
+    str.write_string(&b, "\n\n")
 
-    str.write_string(&builder, "Description:\n")
-    str.write_string(&builder, item.definition.description)
-    str.write_string(&builder, "\n\n")
 
-    str.write_string(&builder, "Width: ")
-    str.write_int(&builder, int(item.definition.width))
-    str.write_string(&builder, "\n")
+    str.write_string(&b, GetItemDataString(item.definition))
 
-    str.write_string(&builder, "Height: ")
-    str.write_int(&builder, int(item.definition.height))
-    str.write_string(&builder, "\n")
+    if len(item.definition.qualities) > 0 {
+        str.write_string(&b, "Qualities: ")
+        for quality in item.definition.qualities {
 
-    s := str.to_string(builder)
+            str.write_string(&b, quality)
+            if quality != item.definition.qualities[len(item.definition.qualities) - 1] {
+                str.write_string(&b, ", ")
+            }
+        }
+        str.write_string(&b, "\n")
+    }
+
+    if len(item.definition.features) > 0 {
+        str.write_string(&b, "Features: ")
+        for feature in item.definition.features {
+
+            str.write_string(&b, feature)
+            if feature != item.definition.features[len(item.definition.features) - 1] {
+                str.write_string(&b, ", ")
+            }
+        }
+        str.write_string(&b, "\n")
+    }
+    str.write_string(&b, "\n")
+
+    str.write_string(&b, "Base rarity: ")
+    str.write_int(&b, int(item.definition.base_rarity))
+    str.write_string(&b, "\n")
+
+    str.write_string(&b, "Base price: ")
+    str.write_int(&b, int(item.definition.base_price))
+    str.write_string(&b, "\n")
+
+
+    s := str.to_string(b)
 
     rect := rl.Rectangle{x = posX, y =  posY, width = width, height = height}
     rl.DrawRectangleRounded(rect, 0.1, 32, style.colors.surface)
@@ -220,4 +244,55 @@ DrawItemCard :: proc(
 
     rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {posX + 5, posY + 5}, headerSize, 0, style.colors.text)
     rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
+}
+
+GetItemDataString :: proc(item: ^Item) -> string {
+    switch _ in item.data{
+        case WeaponData:
+            return GetItemWeaponString(item)
+    }
+
+    return ""
+}
+
+GetItemWeaponString :: proc(item: ^Item) -> string {
+    data, ok := item.data.(WeaponData)
+    if !ok {
+        return ""
+    }
+
+    b: str.Builder
+    str.builder_init(&b)
+
+    str.write_string(&b, "Damage: ")
+    if data.skill == WeaponSkill.Melee{
+        str.write_string(&b, "+")
+    }
+    str.write_int(&b, int(data.damage))
+    str.write_string(&b, "\n")
+
+    if data.range > 0 {
+        str.write_string(&b, "Range: ")
+        str.write_int(&b, int(data.range))
+        str.write_string(&b, "ft")
+        str.write_string(&b, "\n")
+    }
+
+    str.write_string(&b, "Rangeband: ")
+    str.write_string(&b, WeaponRangebandString(data.rangeband))
+    str.write_string(&b, "\n")
+
+    str.write_string(&b, "Crit: ")
+    str.write_int(&b, int(data.crit))
+    str.write_string(&b, "\n")
+
+    str.write_string(&b, "Skill: ")
+    str.write_string(&b, WeaponSkillString(data.skill))
+    str.write_string(&b, "\n")
+
+    str.write_string(&b, "category: ")
+    str.write_string(&b, WeaponSubCategoryString(data.sub_category))
+    str.write_string(&b, "\n\n")
+
+    return str.to_string(b)
 }

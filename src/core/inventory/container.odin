@@ -79,13 +79,11 @@ ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> b
     return true
 }
 
-ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+ContainerGridCheckBounds :: proc(container: ^Container, item_bounds: Rect) -> bool{
     grid, ok := container.storage.(ContainerGrid)
     if !ok {
         return false
     }
-
-    item_bounds := GetBounds(item)
 
     if item_bounds.pos_x < 0 || item_bounds.pos_y < 0 {
         return false
@@ -96,6 +94,15 @@ ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> boo
     }
 
     if item_bounds.pos_y + item_bounds.height > grid.height {
+        return false
+    }
+
+    return true
+}
+
+ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    item_bounds := GetBounds(item)
+    if !ContainerGridCheckBounds(container, item_bounds) {
         return false
     }
 
