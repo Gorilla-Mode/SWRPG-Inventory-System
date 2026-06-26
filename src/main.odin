@@ -7,9 +7,6 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 
-window_width: i32 = 1280
-window_height: i32 = 720
-
 main :: proc()
 {
     defer rl.CloseWindow()
@@ -19,9 +16,7 @@ main :: proc()
 
     style := ui.style{
         grid = {
-            cell_size = 50,
-            origin_x = 20,
-            origin_y = 34 + 100 + 60,
+            cell_size = 50
         }
     }
 
@@ -34,7 +29,7 @@ main :: proc()
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(window_width, window_height, "SWIS")
+    rl.InitWindow(1280, 720, "SWIS")
     util.SetDarkTitlebar()
     rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
     rl.SetTargetFPS(180)
@@ -45,6 +40,14 @@ main :: proc()
 
     for !rl.WindowShouldClose()
     {
+        app.UpdateWindowState(&state)
+        grid := items.backpack.storage.(inv.ContainerGrid)
+        grid_h := style.grid.cell_size * f32(grid.height)
+        grid_w := style.grid.cell_size * f32(grid.width)
+
+        style.grid.origin_y = (state.window.height - grid_h) / 2
+        style.grid.origin_x = (state.window.width - grid_w) / 2
+
         app.InputMoveItem(&state,
         items.backpack,
         style.grid.origin_x,
@@ -60,9 +63,9 @@ main :: proc()
         f32(ui.font_size.title),
         0,
         style.colors.text)
-        ui.DrawPalette(style.colors, offset_y = 34)
 
         v.DrawGrid(items.backpack, &state, &style)
+        v.DrawDebug(&state, &style)
 
         rl.EndDrawing()
     }

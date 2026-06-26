@@ -4,6 +4,9 @@ import rl "vendor:raylib"
 
 // Renders the current color palette as 100x100 rectangles.
 DrawPalette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0) {
+
+    rl.DrawRectangle(0,0, rl.GetScreenWidth(), rl.GetScreenHeight(), palette.surface)
+
     rl.DrawText("Color palette", 20, 5 + offset_y, 24, palette.text)
 
     rl.DrawRectangle(20 + offset_x, 34 + offset_y, 100, 100, palette.primary)
