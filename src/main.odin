@@ -65,16 +65,24 @@ main :: proc()
         inv.DrawContainerGrid(items.backpack, grid_x, grid_y, grid_size, &style)
 
         if state.grab.is_dragging && state.grab.dragged_item != nil {
-            inv.DrawItemGhost(state.grab.dragged_item,
-            f32(state.ghost.pos_x),
-            f32(state.ghost.pos_y),
-            true,
-            state.ghost.rotated,
-            state.ghost.valid,
-            grid_x,
-            grid_y,
-            grid_size,
-            &style)
+            if inv.ContainerGridCheckBounds(items.backpack, inv.Rect{
+                pos_x = state.ghost.pos_x,
+                pos_y = state.ghost.pos_y,
+                width = inv.ItemGetWidth(state.grab.dragged_item),
+                height = inv.ItemGetHeight(state.grab.dragged_item),
+            })
+            {
+                inv.DrawItemGhost(state.grab.dragged_item,
+                f32(state.ghost.pos_x),
+                f32(state.ghost.pos_y),
+                true,
+                state.ghost.rotated,
+                state.ghost.valid,
+                grid_x,
+                grid_y,
+                grid_size,
+                &style)
+            }
 
             inv.DrawItemGhost(state.grab.dragged_item,
             state.ghost.unsnapped_x,
