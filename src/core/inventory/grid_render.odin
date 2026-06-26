@@ -182,11 +182,11 @@ DrawItemCard :: proc(
     cell_size: f32,
     style: ^ui.style
 ) {
-    offset: i32 = 5
-    posX:= i32(x * cell_size + origin_x) + offset
-    posY:= i32(y * cell_size + origin_y) + offset
-    height: i32 = 450
-    width: i32 = 300
+    offset: f32 = 5
+    posX:= x * cell_size + origin_x + offset
+    posY:= y * cell_size + origin_y + offset
+    height: f32 = 450
+    width: f32 = 300
     header := style.fonts.bold[ui.font_size.header]
     headerSize := f32(ui.font_size.header)
     regular := style.fonts.regular[ui.font_size.default]
@@ -213,10 +213,11 @@ DrawItemCard :: proc(
 
     s := str.to_string(builder)
 
-    rl.DrawRectangle(posX, posY, width, height, style.colors.secondary)
-    rl.DrawRectangleLines(posX, posY, width, height, style.colors.accent)
-    rl.DrawLine(posX, posY + i32(headerSize) + 10, posX + width, posY + i32(headerSize) + 10, style.colors.accent)
+    rect := rl.Rectangle{x = posX, y =  posY, width = width, height = height}
+    rl.DrawRectangleRounded(rect, 0.1, 32, style.colors.surface)
+    rl.DrawRectangleRoundedLines(rect, 0.1, 32, style.colors.primary)
+    rl.DrawLine(i32(posX), i32(posY + headerSize) + 10, i32(posX + width), i32(posY + headerSize) + 10, style.colors.secondary)
 
     rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {f32(posX + 5), f32(posY + 5)}, headerSize, 0, style.colors.text)
-    rl.DrawTextEx(regular, str.clone_to_cstring(s), {f32(posX + 5), f32(posY + i32(headerSize) + 15)}, regularSize, 0, style.colors.text)
+    rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
 }
