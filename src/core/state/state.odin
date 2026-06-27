@@ -1,4 +1,4 @@
-﻿package app
+﻿package state
 
 import inv "../inventory"
 import rl "vendor:raylib"

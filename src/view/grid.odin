@@ -4,8 +4,9 @@ import app "../core/app"
 import inv "../core/inventory"
 import ui "../ui"
 import rl "vendor:raylib"
+import st "../core/state"
 
-DrawGrid :: proc(item: ^inv.Item, state: ^app.State, style: ^ui.style){
+DrawGrid :: proc(item: ^inv.Item, state: ^st.State, style: ^ui.style){
     container, ok := item.data.(inv.ContainerData)
     if !ok {
         return
@@ -57,7 +58,7 @@ DrawGrid :: proc(item: ^inv.Item, state: ^app.State, style: ^ui.style){
     }
 }
 
-DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
+DrawItemCard :: proc(container: ^inv.Container, state: ^st.State, style: ^ui.style){
     if state.grab.selected_item != nil {
         inv.DrawItemCard(state.grab.selected_item,
         f32(state.grab.selected_item.pos_x),
@@ -71,7 +72,7 @@ DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.st
     app.HideItemCard(container, style, state)
 }
 
-GridGetCenter :: proc(grid_size: rl.Vector2, state: ^app.State) -> rl.Vector2 {
+GridGetCenter :: proc(grid_size: rl.Vector2, state: ^st.State) -> rl.Vector2 {
     center := rl.Vector2{}
     //Cursed wobbly ahh text fix
     center.x = f32(i32((state.window.width - grid_size.x) / 2))

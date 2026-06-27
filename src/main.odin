@@ -6,6 +6,7 @@ import ui "ui"
 import inv "core/inventory"
 import app "core/app"
 import v "view"
+import st "core/state"
 
 main :: proc()
 {
@@ -17,7 +18,7 @@ main :: proc()
         }
     }
 
-    state := app.State{}
+    state := st.State{}
     items := inv.TestItem(style.grid.cell_size)
 
     style.icons = ui.LoadImages()
@@ -42,7 +43,7 @@ main :: proc()
     for !rl.WindowShouldClose()
     {
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
-        app.UpdateWindowState(&state)
+        st.UpdateWindowState(&state)
 
         app.InputMoveItem(&state,
         items.backpack,
