@@ -5,13 +5,19 @@ import ui "../../ui"
 import str "core:strings"
 
 DrawContainerGrid :: proc(
-    container: ^Container,
+    item: ^Item,
     origin_x, origin_y: f32,
     cell_size: f32,
     style: ^ui.style
 ) {
+    container, ok := item.data.(ContainerData)
+    if !ok {
+        return
+    }
 
-    #partial switch storage in container.storage {
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], str.clone_to_cstring(item.name), rl.Vector2{origin_x, origin_y - 25}, f32(ui.font_size.header), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container.sub_category)), rl.Vector2{origin_x, origin_y - 34}, f32(ui.font_size.caption), 2, style.colors.text)
+    #partial switch storage in container.storage.storage {
     case ContainerGrid:
         for y in 0..<storage.height {
             for x in 0..<storage.width {
@@ -29,7 +35,7 @@ DrawContainerGrid :: proc(
             }
         }
 
-        for item in container.items {
+        for item in container.storage.items {
             DrawItem(item, origin_x, origin_y, cell_size, style)
         }
     }
