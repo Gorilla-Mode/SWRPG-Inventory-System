@@ -14,20 +14,28 @@ Button :: struct {
 }
 
 DrawButton :: proc(
-    button: ^Button,
-    style: ^ui.style,
-    current_page: st.page,
+button: ^Button,
+style: ^ui.style,
+current_page: st.page,
 ) -> bool {
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
-    color := style.colors.secondary
 
-    target_size: f32 = button.rect.height - 4
+    color := style.colors.secondary
+    if button.page == current_page {
+        color = style.colors.secondary_active
+    } else if hovered {
+        color = style.colors.secondary_hover
+    }
+
+    padding: f32 = 2
+    target_size: f32 = button.rect.height - padding * 2
     scale := target_size / f32(button.image.width)
     icon_height := f32(button.image.height) * scale
+
     icon_pos := rl.Vector2{
-        button.rect.x + 2,
-        button.rect.y + (button.rect.height - icon_height) / 2
+        button.rect.x + padding,
+        button.rect.y + (button.rect.height - icon_height) / 2,
     }
 
     text := str.clone_to_cstring(button.text, context.temp_allocator)
@@ -37,18 +45,35 @@ DrawButton :: proc(
     f32(ui.font_size.default),
     0,
     )
-    text_pos := rl.Vector2{
-        button.rect.x + (button.rect.width - text_size.x + target_size) / 2,
-        button.rect.y + (button.rect.height - text_size.y) / 2,
+
+    icon_rect := rl.Rectangle{
+        x = button.rect.x + padding,
+        y = button.rect.y + padding,
+        width = target_size,
+        height = target_size,
     }
 
-    if button.page == current_page {
-        color = style.colors.secondary_active
-    } else if hovered {
-        color = style.colors.secondary_hover
+    text_area := rl.Rectangle{
+        x = icon_rect.x + icon_rect.width + padding,
+        y = button.rect.y,
+        width = button.rect.width - (icon_rect.width + padding * 2),
+        height = button.rect.height,
+    }
+
+    text_pos := rl.Vector2{
+        text_area.x + (text_area.width - text_size.x) / 2,
+        text_area.y + (text_area.height - text_size.y) / 2,
     }
 
     rl.DrawRectangleRec(button.rect, color)
+    rl.DrawRectangleRec(icon_rect, style.colors.surface)
+    rl.DrawTextureEx(
+    button.image,
+    icon_pos,
+    0,
+    scale,
+    style.colors.text,
+    )
 
     rl.DrawTextEx(
     style.fonts.semibold[ui.font_size.default],
@@ -59,16 +84,9 @@ DrawButton :: proc(
     style.colors.text,
     )
 
-    rl.DrawTextureEx(
-    button.image,
-    icon_pos,
-    0,
-    scale,
-    style.colors.secondary,
-    )
-
     return hovered && rl.IsMouseButtonPressed(rl.MouseButton.LEFT)
 }
+
 ButtonCreate :: proc(
     text: string,
     center: rl.Vector2,
