@@ -22,9 +22,9 @@ DrawButton :: proc(
     color := style.colors.secondary
 
     if button.page == current_page {
-        color = style.colors.accent
+        color = style.colors.secondary_active
     } else if hovered {
-        color = style.colors.accent
+        color = style.colors.secondary_hover
     }
 
     text := str.clone_to_cstring(button.text, context.temp_allocator)
