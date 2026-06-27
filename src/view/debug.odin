@@ -1,11 +1,8 @@
 ﻿package view
 
-import rl "vendor:raylib"
-import app "../core/app"
+import st "../core/state"
 import ui "../ui"
 
-DrawDebug :: proc(state: ^app.State, style: ^ui.style) {
-    if rl.IsKeyDown(rl.KeyboardKey.C){
+DrawDebug :: proc(state: ^st.state, style: ^ui.style) {
         ui.DrawPalette(style.colors, offset_y = 34)
-    }
 }

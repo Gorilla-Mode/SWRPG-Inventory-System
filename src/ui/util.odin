@@ -5,8 +5,6 @@ import rl "vendor:raylib"
 // Renders the current color palette as 100x100 rectangles.
 DrawPalette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0) {
 
-    rl.DrawRectangle(0,0, rl.GetScreenWidth(), rl.GetScreenHeight(), palette.surface)
-
     rl.DrawText("Color palette", 20, 5 + offset_y, 24, palette.text)
 
     rl.DrawRectangle(20 + offset_x, 34 + offset_y, 100, 100, palette.primary)
@@ -15,8 +13,8 @@ DrawPalette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0
     rl.DrawRectangle(130 + offset_x, 34 + offset_y, 100, 100, palette.secondary)
     rl.DrawText("Secondary", 135 + offset_x, 39 + offset_y, 12, palette.text)
 
-    rl.DrawRectangle(240 + offset_x, 34 + offset_y, 100, 100, palette.accent)
-    rl.DrawText("Accent", 245 + offset_x, 39 + offset_y, 12, palette.text)
+    rl.DrawRectangle(240 + offset_x, 34 + offset_y, 100, 100, palette.secondary_hover)
+    rl.DrawText("Secondary\nhover", 245 + offset_x, 39 + offset_y, 12, palette.text)
 
     rl.DrawRectangle(350 + offset_x, 34 + offset_y, 100, 100, palette.success)
     rl.DrawText("Success", 355 + offset_x, 39 + offset_y, 12, palette.text)
@@ -33,6 +31,9 @@ DrawPalette :: proc(palette: color_palette, offset_x: i32 = 0, offset_y: i32 = 0
 
     rl.DrawRectangle(790 + offset_x, 34 + offset_y, 100, 100, palette.text)
     rl.DrawText("Text", 795 + offset_x, 39 + offset_y, 12, palette.surface)
+
+    rl.DrawRectangle(900 + offset_x, 34 + offset_y, 100, 100, palette.secondary_active)
+    rl.DrawText("Secondary\nactive", 905 + offset_x, 39 + offset_y, 12, palette.text)
 }
 
 // Converts a hexadecimal color value to an rl.Color struct, with an optional alpha component.

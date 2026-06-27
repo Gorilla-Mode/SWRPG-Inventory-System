@@ -181,17 +181,12 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 // Function to convert the container and its items into a string representation for debugging/ease of use purposes
 ContainerToString :: proc(container: ^Container) -> string {
     builder := str.Builder{}
+    str.builder_init(&builder, context.temp_allocator)
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height)
-    defer {
-        for row in grid {
-            delete(row)
-        }
-        delete(grid)
-    }
+    grid := make([][]rune, container.storage.(ContainerGrid).height, context.temp_allocator)
 
     for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width)
+        grid[y] = make([]rune, container.storage.(ContainerGrid).width, context.temp_allocator)
 
         for x in 0..<container.storage.(ContainerGrid).width {
             grid[y][x] = '.'
