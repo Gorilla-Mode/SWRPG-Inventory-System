@@ -8,6 +8,7 @@ import st "../../core/state"
 Button :: struct {
     text: string,
     rect: rl.Rectangle,
+    image: rl.Texture2D,
 
     page: st.page
 }
@@ -21,10 +22,12 @@ DrawButton :: proc(
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
     color := style.colors.secondary
 
-    if button.page == current_page {
-        color = style.colors.secondary_active
-    } else if hovered {
-        color = style.colors.secondary_hover
+    target_size: f32 = button.rect.height - 4
+    scale := target_size / f32(button.image.width)
+    icon_height := f32(button.image.height) * scale
+    icon_pos := rl.Vector2{
+        button.rect.x + 2,
+        button.rect.y + (button.rect.height - icon_height) / 2
     }
 
     text := str.clone_to_cstring(button.text, context.temp_allocator)
@@ -34,10 +37,15 @@ DrawButton :: proc(
     f32(ui.font_size.default),
     0,
     )
-
     text_pos := rl.Vector2{
-        button.rect.x + (button.rect.width - text_size.x) / 2,
+        button.rect.x + (button.rect.width - text_size.x + target_size) / 2,
         button.rect.y + (button.rect.height - text_size.y) / 2,
+    }
+
+    if button.page == current_page {
+        color = style.colors.secondary_active
+    } else if hovered {
+        color = style.colors.secondary_hover
     }
 
     rl.DrawRectangleRec(button.rect, color)
@@ -51,13 +59,22 @@ DrawButton :: proc(
     style.colors.text,
     )
 
+    rl.DrawTextureEx(
+    button.image,
+    icon_pos,
+    0,
+    scale,
+    style.colors.secondary,
+    )
+
     return hovered && rl.IsMouseButtonPressed(rl.MouseButton.LEFT)
 }
 ButtonCreate :: proc(
     text: string,
     center: rl.Vector2,
     width, height: f32,
-    page: st.page
+    page: st.page,
+    image: rl.Texture2D = rl.Texture2D{}
 ) -> Button {
     return Button{
         text = text,
@@ -68,6 +85,7 @@ ButtonCreate :: proc(
             height = height,
         },
         page = page,
+        image = image,
     }
 }
 

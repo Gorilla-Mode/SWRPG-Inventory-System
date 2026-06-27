@@ -12,16 +12,16 @@ IconMetadata :: struct {
 }
 
 // Loads all icons defined in the icons enum, and returns a map of icons to their corresponding rl.Image objects.
-LoadImages :: proc() -> map[Icons]rl.Image {
+LoadImages :: proc() -> map[Icons]rl.Texture2D {
     icon_paths := make(map[Icons]IconMetadata)
     defer delete(icon_paths)
     Get_Icons(&icon_paths, "src/assets/icon")
 
-    images := make(map[Icons]rl.Image)
+    images := make(map[Icons]rl.Texture2D)
 
     for icon, metadata in icon_paths {
-        loaded_image := rl.LoadImage(metadata.path)
-        rl.ImageFormat(&loaded_image, .UNCOMPRESSED_R8G8B8A8)
+        loaded_image : rl.Texture2D = rl.LoadTexture(metadata.path)
+        rl.SetTextureFilter(loaded_image, rl.TextureFilter.TRILINEAR)
         images[icon] = loaded_image
     }
 
@@ -30,9 +30,9 @@ LoadImages :: proc() -> map[Icons]rl.Image {
 }
 
 // Unloads all images in the provided map of icons to their corresponding rl.Image objects, and frees the memory allocated for the map itself.
-FreeImages :: proc(images: map[Icons]rl.Image) {
+FreeImages :: proc(images: map[Icons]rl.Texture2D) {
     for _, img in images {
-        rl.UnloadImage(img)
+        rl.UnloadTexture(img)
     }
     delete(images)
 }

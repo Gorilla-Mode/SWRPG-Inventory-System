@@ -21,21 +21,23 @@ main :: proc()
     state := st.state{}
     items := inv.TestItem(style.grid.cell_size)
 
-    style.icons = ui.LoadImages()
-    style.colors = ui.LoadColorPalette()
-
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
     }
 
     rl.SetConfigFlags(window_flags)
     rl.InitWindow(1280, 720, "SWIS")
-    util.SetDarkTitlebar()
-    rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
-    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
 
+    style.icons = ui.LoadImages()
+    appIcon := rl.LoadImageFromTexture(style.icons[ui.Icons.app_icon])
+    rl.ImageFormat(&appIcon, rl.PixelFormat.UNCOMPRESSED_R8G8B8A8)
+    rl.SetWindowIcon(appIcon)
+
+    util.SetDarkTitlebar()
+    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
     rl.SetExitKey(nil)
 
+    style.colors = ui.LoadColorPalette()
     style.fonts = ui.LoadFont()
     defer ui.FreeFont(style.fonts)
     defer ui.FreeImages(style.icons)
