@@ -25,11 +25,11 @@ Item :: struct{
     hardpoints:    i8,
     restricted:    bool,
     base_price:    i32,
-    qualities:     []string,
-    features:      []string,
+    qualities:     [dynamic]string,
+    features:      [dynamic]string,
 
     category:      ItemCategory,
-    tags:          []ItemTag,
+    tags:          [dynamic]ItemTag,
 
     data:          ItemData
 }
@@ -37,13 +37,15 @@ Item :: struct{
 //Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
+    ContainerData,
 }
 
 WeaponData :: struct{
     damage:       i16,
     range:        i16,
+    rangeband:    WeaponRangebands,
     crit:         i8,
-    type:         WeaponSkill,
+    skill:        WeaponSkill,
     scale:        WeaponScale,
 
     sub_category: WeaponSubCategory,
@@ -59,10 +61,38 @@ WeaponSkill :: enum{
     Mechanics
 }
 
+WeaponSkillString :: proc(skill: WeaponSkill) -> string {
+    switch skill {
+        case WeaponSkill.Light:
+            return "Light"
+        case WeaponSkill.Heavy:
+            return "Heavy"
+        case WeaponSkill.Gunnery:
+            return "Gunnery"
+        case WeaponSkill.Brawl:
+            return "Brawl"
+        case WeaponSkill.Melee:
+            return "Melee"
+        case WeaponSkill.Mechanics:
+            return "Mechanics"
+    }
+    return ""
+}
+
 //Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale
 WeaponScale :: enum{
     Personal,
     Planetary
+}
+
+WeaponScaleString :: proc(scale: WeaponScale) -> string {
+    switch scale {
+        case WeaponScale.Personal:
+            return "Personal"
+        case WeaponScale.Planetary:
+            return "Planetary"
+    }
+    return ""
 }
 
 WeaponRangebands :: enum{
@@ -75,10 +105,73 @@ WeaponRangebands :: enum{
     Strategic
 }
 
+WeaponRangebandString :: proc(rangeband: WeaponRangebands) -> string {
+    switch rangeband {
+        case WeaponRangebands.Engaged:
+            return "Engaged"
+        case WeaponRangebands.Close:
+            return "Close"
+        case WeaponRangebands.Short:
+            return "Short"
+        case WeaponRangebands.Medium:
+            return "Medium"
+        case WeaponRangebands.Long:
+            return "Long"
+        case WeaponRangebands.Extreme:
+            return "Extreme"
+        case WeaponRangebands.Strategic:
+            return "Strategic"
+    }
+    return ""
+}
+
 WeaponSubCategory :: enum{
     Pistol,
     Rifle,
     Carbine,
     Blade,
     Blunt,
+}
+
+WeaponSubCategoryString :: proc(sub_category: WeaponSubCategory) -> string {
+    switch sub_category {
+        case WeaponSubCategory.Pistol:
+            return "Pistol"
+        case WeaponSubCategory.Rifle:
+            return "Rifle"
+        case WeaponSubCategory.Carbine:
+            return "Carbine"
+        case WeaponSubCategory.Blade:
+            return "Blade"
+        case WeaponSubCategory.Blunt:
+            return "Blunt"
+    }
+    return ""
+}
+
+ContainerData :: struct{
+    storage: ^Container,
+
+    sub_category: ContainerSubCategory
+}
+
+ContainerSubCategory :: enum{
+    Backpack,
+    Belt,
+    Clothing,
+    Pouch,
+}
+
+ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string {
+    switch sub_category {
+        case ContainerSubCategory.Backpack:
+            return "Backpack"
+        case ContainerSubCategory.Belt:
+            return "Belt"
+        case ContainerSubCategory.Clothing:
+            return "Clothing"
+        case ContainerSubCategory.Pouch:
+            return "Pouch"
+    }
+    return ""
 }

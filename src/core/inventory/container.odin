@@ -1,5 +1,7 @@
 ﻿package inventory
 
+import rl "vendor:raylib"
+
 ContainerType :: enum{
     Backpack,
     Belt,
@@ -79,13 +81,11 @@ ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> b
     return true
 }
 
-ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+ContainerGridCheckBounds :: proc(container: ^Container, item_bounds: Rect) -> bool{
     grid, ok := container.storage.(ContainerGrid)
     if !ok {
         return false
     }
-
-    item_bounds := GetBounds(item)
 
     if item_bounds.pos_x < 0 || item_bounds.pos_y < 0 {
         return false
@@ -96,6 +96,15 @@ ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> boo
     }
 
     if item_bounds.pos_y + item_bounds.height > grid.height {
+        return false
+    }
+
+    return true
+}
+
+ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+    item_bounds := GetBounds(item)
+    if !ContainerGridCheckBounds(container, item_bounds) {
         return false
     }
 
@@ -146,18 +155,31 @@ ContainerGridRectOverlap :: proc(
         by + bh <= ay)
 }
 
-//TODO: Implement the other container types
 ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     if ContainerCanPlace(container, item) {
         append_elem(&container.items, item)
         return true
     }
+
     return false
 }
 
-ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+ContainerGridCanRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
     _, ok := container.storage.(ContainerGrid)
     if !ok {
+        return false
+    }
+
+    if item.definition.width == item.definition.height {
+        return false
+    }
+
+    return true
+}
+
+ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+    if !ContainerGridCanRotateItem(container, item)
+    {
         return false
     }
 
@@ -165,6 +187,7 @@ ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> b
     if ContainerCanPlaceGrid(container, item) {
         return true
     }
+
     item.rotated = !item.rotated
     return false
 }
@@ -194,4 +217,18 @@ ContainerGridMoveItem :: proc(
     item.pos_x = new_x
     item.pos_y = new_y
     return true
+}
+
+ContainerGridPixelsXY :: proc(container: ^Container, cell_size: f32) -> rl.Vector2
+{
+    grid, ok := container.storage.(ContainerGrid)
+    if !ok {
+        return {}
+    }
+
+    size := rl.Vector2 {}
+    size.x = cell_size * f32(grid.width)
+    size.y = cell_size * f32(grid.height)
+
+    return size
 }

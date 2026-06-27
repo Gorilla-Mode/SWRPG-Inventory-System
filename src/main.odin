@@ -5,53 +5,63 @@ import util "utils"
 import ui "ui"
 import inv "core/inventory"
 import app "core/app"
-import str "core:strings"
-
-window_width: i32 = 1280
-window_height: i32 = 720
+import v "view"
 
 main :: proc()
 {
     defer rl.CloseWindow()
 
-    palette:= ui.LoadColorPalette()
+    style := ui.style{
+        grid = {
+            cell_size = 50
+        }
+    }
+
+    state := app.State{}
+    items := inv.TestItem(style.grid.cell_size)
+
+    style.icons = ui.LoadImages()
+    style.colors = ui.LoadColorPalette()
+    defer delete(style.icons)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(window_width, window_height, "SWIS")
+    rl.InitWindow(1280, 720, "SWIS")
     util.SetDarkTitlebar()
+    rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
+    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
 
-    images := ui.LoadImages()
-    defer delete(images)
-    rl.SetWindowIcon(images[ui.Icons.app_icon])
-
-    fnt := ui.LoadFont()
-    defer ui.FreeFont(fnt)
-
-    rl.SetTargetFPS(60)
     rl.SetExitKey(nil)
 
-    state := app.State{}
-    items := inv.TestItem()
-    inv.TestInvGrid(items.backpack, items.sword, items.rifle, items.sword_instance, items.rifle_instance)
-    state.InventoryGrid = inv.ContainerToString(items.backpack)
+    style.fonts = ui.LoadFont()
+    defer ui.FreeFont(style.fonts)
 
     for !rl.WindowShouldClose()
     {
-        grid := str.clone_to_cstring(state.InventoryGrid, context.allocator)
-        defer delete_cstring(grid)
+        //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
+        app.UpdateWindowState(&state)
 
-        app.InputMoveItem(&state, items.rifle_instance, items.backpack)
+        app.InputMoveItem(&state,
+        items.backpack,
+        style.grid.origin_x,
+        style.grid.origin_y,
+        style.grid.cell_size)
 
         rl.BeginDrawing()
-        rl.ClearBackground(palette.surface)
+        rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(fnt.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, palette.text)
-        ui.DrawPalette(palette, offset_y = 34)
-        rl.DrawTextEx(fnt.semibold[ui.font_size.header], grid, {20, 34 + 100 + 60}, f32(ui.font_size.header), 10, palette.text)
+        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
+        "SWIS",
+        {20, 5},
+        f32(ui.font_size.title),
+        0,
+        style.colors.text)
+
+        v.DrawGrid(items.backpackItem, &state, &style)
+        v.DrawDebug(&state, &style)
 
         rl.EndDrawing()
     }

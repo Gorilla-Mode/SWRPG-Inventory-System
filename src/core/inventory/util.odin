@@ -4,35 +4,98 @@ import str "core:strings"
 import fmt "core:fmt"
 
 // Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc() -> struct{
+TestItem :: proc(cell_size: f32) -> struct{
     backpack: ^Container,
     sword: ^Item,
     rifle: ^Item,
     sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance }
+    rifle_instance: ^ItemInstance,
+    backpackItem: ^Item}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
     backpack.storage = ContainerGrid{
         width  = 8,
-        height = 9
+        height = 10
     }
 
+    backpackItem := new(Item)
+    backpackItem.name = "Spacers duffel"
+    backpackItem.width = 8
+    backpackItem.height = 10
+    backpackItem.description = "A standard backpack for carrying items."
+    backpackItem.base_rarity = 1
+    backpackItem.base_price = 100
+    backpackItem.qualities = nil
+    backpackItem.data = ContainerData{
+        storage = backpack,
+        sub_category = ContainerSubCategory.Backpack
+    }
+
+    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     sword := new(Item)
-    sword.name = "Sword"
-    sword.width = 1
-    sword.height = 4
+    sword.name = "Vibro Rapier"
+    sword.width = 5
+    sword.height = 1
+    sword.description = "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes."
+    sword.base_rarity = 6
+    sword.base_price = 5000
+    sword.qualities = nil
+    append_elem(&sword.qualities, "Pierce 5")
 
     rifle := new(Item)
-    rifle.name = "Rifle"
-    rifle.width = 2
-    rifle.height = 3
+    rifle.name = "A280C Blaster Rifle"
+    rifle.width = 6
+    rifle.height = 2
+    rifle.description = "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops"
+    rifle.base_rarity = 4
+    rifle.base_price = 1200
+    rifle.qualities = nil
+    append_elems(&rifle.qualities, "Pirece 1", "Full-Auto")
+    rifle.hardpoints = 4
+    rifle.data = WeaponData {
+        skill = WeaponSkill.Heavy,
+        crit = 4,
+        damage = 7,
+        scale = WeaponScale.Personal,
+        range = 300,
+        rangeband = WeaponRangebands.Long,
+        sub_category = WeaponSubCategory.Carbine
+    }
 
+    knife := new(Item)
+    knife.name = "Vibroknife"
+    knife.description = "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks."
+    knife.width = 3
+    knife.height = 1
+    knife.base_price = 200
+    knife.base_rarity = 2
+    knife.qualities = nil
+    append_elem(&knife.qualities, "Pierce 2")
+    knife.hardpoints = 1
+    knife.data = WeaponData {
+        skill = WeaponSkill.Melee,
+        crit = 2,
+        damage = 2,
+        scale = WeaponScale.Personal,
+        rangeband = WeaponRangebands.Engaged,
+        sub_category = WeaponSubCategory.Blade
+    }
+
+    canteen := new(Item)
+    canteen.name = "Canteen"
+    canteen.description = "A small container for carrying water or\nother liquids."
+    canteen.width = 2
+    canteen.height = 2
+    canteen.base_price = 50
+    canteen.base_rarity = 1
+    canteen.features = nil
+    append_elem(&canteen.features, "Can contain 1L of liquid")
 
     rifle_instance := new(ItemInstance)
     rifle_instance.definition = rifle
     rifle_instance.pos_x = 0
-    rifle_instance.pos_y = 0
+    rifle_instance.pos_y = 1
     rifle_instance.id = 1
     rifle_instance.rotated = false
 
@@ -43,14 +106,32 @@ TestItem :: proc() -> struct{
     sword_instance.id = 2
     sword_instance.rotated = false
 
+    knife_instance := new(ItemInstance)
+    knife_instance.definition = knife
+    knife_instance.pos_x = 5
+    knife_instance.pos_y = 0
+    knife_instance.id = 3
+    knife_instance.rotated = false
+
+    canteen_instance := new(ItemInstance)
+    canteen_instance.definition = canteen
+    canteen_instance.pos_x = 6
+    canteen_instance.pos_y = 1
+    canteen_instance.id = 4
+    canteen_instance.rotated = false
+
     append_elem(&backpack.items, sword_instance)
+    append_elem(&backpack.items, rifle_instance)
+    append_elem(&backpack.items, knife_instance)
+    append_elem(&backpack.items, canteen_instance)
 
     return{
         backpack,
         sword,
         rifle,
         sword_instance,
-        rifle_instance
+        rifle_instance,
+        backpackItem
     }
 }
 
