@@ -35,6 +35,8 @@ windowState :: struct{
 page :: enum{
     Inventory,
     Debug,
+    Character,
+    Catalog,
 }
 
 UpdateWindowState :: proc(state: ^state) {

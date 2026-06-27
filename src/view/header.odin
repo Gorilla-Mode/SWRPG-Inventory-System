@@ -32,15 +32,34 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     30,
     st.page.Debug
     )
+
+    ButtonCharacter := co.ButtonCreate(
+    "Character",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    120,
+    30,
+    st.page.Character
+    )
+
+    ButtonCatalog := co.ButtonCreate(
+    "Catalog",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    120,
+    30,
+    st.page.Catalog
+    )
+
     buttons := []co.Button{
         ButtonInv,
-        ButtonDebug
+        ButtonDebug,
+        ButtonCharacter,
+        ButtonCatalog,
     }
 
     co.LayoutButtonsHorizontal(
     buttons,
     rl.Vector2{state.window.width / 2, header_y / 2},
-    5,
+    2,
     )
 
     for i in 0..<len(buttons) {

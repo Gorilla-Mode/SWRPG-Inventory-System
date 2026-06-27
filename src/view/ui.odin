@@ -12,5 +12,9 @@ DrawUI :: proc(state: ^st.state, style: ^ui.style, items: ^inv.Item) {
         DrawGrid(items, state, style)
     case st.page.Debug:
         DrawDebug(state, style)
+    case st.page.Character:
+        DrawWIPPage("Character", style)
+    case st.page.Catalog:
+        DrawWIPPage("Catalog", style)
     }
 }
