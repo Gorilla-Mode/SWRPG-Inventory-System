@@ -33,8 +33,8 @@ windowState :: struct{
 }
 
 page :: enum{
-    MainMenu,
     Inventory,
+    Debug,
 }
 
 UpdateWindowState :: proc(state: ^state) {

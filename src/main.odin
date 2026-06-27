@@ -54,9 +54,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        v.DrawHeader(&style, &state)
-        v.DrawGrid(items.backpackItem, &state, &style)
-        v.DrawDebug(&state, &style)
+        v.DrawUI(&state, &style, items.backpackItem)
 
         rl.EndDrawing()
     }

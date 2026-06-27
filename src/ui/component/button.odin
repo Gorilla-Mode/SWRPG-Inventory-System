@@ -40,7 +40,7 @@ DrawButton :: proc(
         button.rect.y + (button.rect.height - text_size.y) / 2,
     }
 
-    rl.DrawRectangleRounded(button.rect, 0.1, 16, color)
+    rl.DrawRectangleRec(button.rect, color)
 
     rl.DrawTextEx(
     style.fonts.semibold[ui.font_size.default],
@@ -68,5 +68,28 @@ ButtonCreate :: proc(
             height = height,
         },
         page = page,
+    }
+}
+
+LayoutButtonsHorizontal :: proc(
+    buttons: []Button,
+    center: rl.Vector2,
+    spacing: f32,
+) {
+    total_width: f32 = 0
+
+    for button in buttons {
+        total_width += button.rect.width
+    }
+
+    total_width += spacing * f32(len(buttons) - 1)
+
+    x := center.x - total_width / 2
+
+    for i in 0..<len(buttons) {
+        buttons[i].rect.x = x
+        buttons[i].rect.y = center.y - buttons[i].rect.height / 2
+
+        x += buttons[i].rect.width + spacing
     }
 }
