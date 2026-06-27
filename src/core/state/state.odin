@@ -7,6 +7,7 @@ state :: struct{
     grab:          grab,
     ghost:         ghost,
     window:        windowState,
+    page:          page,
 }
 
 grab :: struct{
@@ -29,6 +30,11 @@ ghost :: struct{
 windowState :: struct{
     width:  f32,
     height: f32,
+}
+
+page :: enum{
+    MainMenu,
+    Inventory,
 }
 
 UpdateWindowState :: proc(state: ^state) {

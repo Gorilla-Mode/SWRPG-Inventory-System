@@ -3,6 +3,7 @@
 import ui "../ui"
 import rl "vendor:raylib"
 import st "../core/state"
+import co "../ui/component"
 
 DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     pos := rl.Vector2{5, 0}
@@ -16,13 +17,17 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     0,
     style.colors.text)
 
-    ButtonInv := ui.ButtonCreate(
+    ButtonInv := co.ButtonCreate(
     "Inventory",
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     120,
     30,
+    st.page.Inventory
     )
 
-    ui.DrawButton(&ButtonInv, style)
+    if co.DrawButton(&ButtonInv, style, state.page) {
+        state.page = st.page.Inventory
+    }
+
     rl.DrawLine(0, i32(header_y), i32(state.window.width), i32(header_y), style.colors.secondary)
 }
