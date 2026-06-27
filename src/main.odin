@@ -53,13 +53,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
-        "SWIS",
-        {20, 5},
-        f32(ui.font_size.title),
-        0,
-        style.colors.text)
-
+        v.DrawHeader(&style, &state)
         v.DrawGrid(items.backpackItem, &state, &style)
         v.DrawDebug(&state, &style)
 
