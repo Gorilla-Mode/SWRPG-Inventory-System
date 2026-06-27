@@ -27,7 +27,7 @@ DrawButton :: proc(
         color = style.colors.accent
     }
 
-    text := str.clone_to_cstring(button.text)
+    text := str.clone_to_cstring(button.text, context.temp_allocator)
     text_size := rl.MeasureTextEx(
     style.fonts.semibold[ui.font_size.default],
     text,

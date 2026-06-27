@@ -7,13 +7,13 @@ import rl "vendor:raylib"
 DrawWIPPage :: proc(pageName: string, style: ^ui.style) {
 
     b := str.Builder{}
-    str.builder_init(&b)
+    str.builder_init(&b, context.temp_allocator)
     str.write_string(&b, "The ")
     str.write_string(&b, pageName)
     str.write_string(&b, " page is not yet implemented.")
 
     s := str.to_string(b)
-    text := str.clone_to_cstring(s)
+    text := str.clone_to_cstring(s, context.temp_allocator)
 
     font := style.fonts.bold[ui.font_size.title]
     font_size := f32(ui.font_size.title)

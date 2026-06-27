@@ -39,9 +39,11 @@ main :: proc()
 
     style.fonts = ui.LoadFont()
     defer ui.FreeFont(style.fonts)
+    defer ui.FreeImages(style.icons)
 
     for !rl.WindowShouldClose()
     {
+        free_all(context.temp_allocator)
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
 
