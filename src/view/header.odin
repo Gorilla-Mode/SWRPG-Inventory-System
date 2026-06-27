@@ -4,7 +4,7 @@ import ui "../ui"
 import rl "vendor:raylib"
 import st "../core/state"
 
-DrawHeader :: proc(style: ^ui.style, state: ^st.State) {
+DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     pos := rl.Vector2{5, 0}
     fontSize := f32(ui.font_size.title)
     header_y := pos.y + fontSize + 2

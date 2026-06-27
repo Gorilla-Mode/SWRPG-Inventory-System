@@ -3,13 +3,13 @@
 import inv "../inventory"
 import rl "vendor:raylib"
 
-State :: struct{
-    grab:          Grab,
-    ghost:         Ghost,
-    window:        WindowState,
+state :: struct{
+    grab:          grab,
+    ghost:         ghost,
+    window:        windowState,
 }
 
-Grab :: struct{
+grab :: struct{
     is_dragging: bool,
     dragged_item: ^inv.ItemInstance,
     selected_item: ^inv.ItemInstance,
@@ -17,7 +17,7 @@ Grab :: struct{
     offset_y: f32,
 }
 
-Ghost :: struct{
+ghost :: struct{
     pos_x: i16,
     pos_y: i16,
     unsnapped_x: f32,
@@ -26,12 +26,12 @@ Ghost :: struct{
     valid: bool,
 }
 
-WindowState :: struct{
+windowState :: struct{
     width:  f32,
     height: f32,
 }
 
-UpdateWindowState :: proc(state: ^State) {
+UpdateWindowState :: proc(state: ^state) {
     state.window.width = f32(rl.GetScreenWidth())
     state.window.height = f32(rl.GetScreenHeight())
 }

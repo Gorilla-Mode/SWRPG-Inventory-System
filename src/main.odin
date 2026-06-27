@@ -18,7 +18,7 @@ main :: proc()
         }
     }
 
-    state := st.State{}
+    state := st.state{}
     items := inv.TestItem(style.grid.cell_size)
 
     style.icons = ui.LoadImages()

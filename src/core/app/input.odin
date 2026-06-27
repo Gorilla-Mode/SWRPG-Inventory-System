@@ -5,7 +5,7 @@ import rl  "vendor:raylib"
 import ui "../../ui"
 import st "../state"
 
-InputMoveItem :: proc(state: ^st.State, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
+InputMoveItem :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	if state.grab.is_dragging {
 		HandleDragging(state, container, origin_x, origin_y, cell_size)
 		return
@@ -14,7 +14,7 @@ InputMoveItem :: proc(state: ^st.State, container: ^inv.Container, origin_x, ori
 	HandleHover(state, container, origin_x, origin_y, cell_size)
 }
 
-HandleHover :: proc(state: ^st.State, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
+HandleHover :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	item := GetItemAtMousePos(container, origin_x, origin_y, cell_size)
 	if item == nil do return
 
@@ -55,7 +55,7 @@ HandleHover :: proc(state: ^st.State, container: ^inv.Container, origin_x, origi
 	}
 }
 
-HandleDragging :: proc(state: ^st.State, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
+HandleDragging :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	item := state.grab.dragged_item
 	if !rl.IsMouseButtonDown(rl.MouseButton.LEFT) {
 		DropItem(state, container)
@@ -89,7 +89,7 @@ HandleDragging :: proc(state: ^st.State, container: ^inv.Container, origin_x, or
 	state.ghost.valid = inv.ContainerGridCanPlaceAt(container, item.definition, state.ghost.pos_x, state.ghost.pos_y, item.id, state.ghost.rotated)
 }
 
-StartDragging :: proc(state: ^st.State, item: ^inv.ItemInstance, origin_x, origin_y, cell_size: f32) {
+StartDragging :: proc(state: ^st.state, item: ^inv.ItemInstance, origin_x, origin_y, cell_size: f32) {
 	mouse_pos := rl.GetMousePosition()
 	state.grab.is_dragging = true
 	state.grab.dragged_item = item
@@ -108,7 +108,7 @@ StartDragging :: proc(state: ^st.State, item: ^inv.ItemInstance, origin_x, origi
 	state.ghost.valid = true
 }
 
-DropItem :: proc(state: ^st.State, container: ^inv.Container) {
+DropItem :: proc(state: ^st.state, container: ^inv.Container) {
 	item := state.grab.dragged_item
 	item.grabbed = false
 	if state.ghost.valid {
@@ -138,14 +138,14 @@ GetItemAtMousePos :: proc(container: ^inv.Container, origin_x, origin_y, cell_si
 	return nil
 }
 
-CheckCollisonItemCard :: proc(state: ^st.State, style: ^ui.style) -> bool{
+CheckCollisonItemCard :: proc(state: ^st.state, style: ^ui.style) -> bool{
 	return (rl.CheckCollisionPointRec(rl.GetMousePosition(),
 	inv.GetItemCardRect(f32(state.grab.selected_item.pos_x),
 	f32(state.grab.selected_item.pos_y),
 	style)))
 }
 
-ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.State) -> bool {
+ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.state) -> bool {
 	hoveredItem := GetItemAtMousePos(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size)
 	if hoveredItem != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT){
 		state.grab.selected_item = hoveredItem
@@ -155,7 +155,7 @@ ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.Sta
 	return false
 }
 
-HideItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.State){
+HideItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.state){
 	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style)) {
 		state.grab.selected_item = nil
 	}
