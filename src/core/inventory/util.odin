@@ -9,13 +9,27 @@ TestItem :: proc(cell_size: f32) -> struct{
     sword: ^Item,
     rifle: ^Item,
     sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance }
+    rifle_instance: ^ItemInstance,
+    backpackItem: ^Item}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
     backpack.storage = ContainerGrid{
         width  = 8,
         height = 10
+    }
+
+    backpackItem := new(Item)
+    backpackItem.name = "Spacers duffel"
+    backpackItem.width = 8
+    backpackItem.height = 10
+    backpackItem.description = "A standard backpack for carrying items."
+    backpackItem.base_rarity = 1
+    backpackItem.base_price = 100
+    backpackItem.qualities = nil
+    backpackItem.data = ContainerData{
+        storage = backpack,
+        sub_category = ContainerSubCategory.Backpack
     }
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
@@ -116,7 +130,8 @@ TestItem :: proc(cell_size: f32) -> struct{
         sword,
         rifle,
         sword_instance,
-        rifle_instance
+        rifle_instance,
+        backpackItem
     }
 }
 

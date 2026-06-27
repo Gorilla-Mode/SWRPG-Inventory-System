@@ -37,6 +37,7 @@ Item :: struct{
 //Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
+    ContainerData,
 }
 
 WeaponData :: struct{
@@ -44,7 +45,7 @@ WeaponData :: struct{
     range:        i16,
     rangeband:    WeaponRangebands,
     crit:         i8,
-    skill:         WeaponSkill,
+    skill:        WeaponSkill,
     scale:        WeaponScale,
 
     sub_category: WeaponSubCategory,
@@ -144,6 +145,33 @@ WeaponSubCategoryString :: proc(sub_category: WeaponSubCategory) -> string {
             return "Blade"
         case WeaponSubCategory.Blunt:
             return "Blunt"
+    }
+    return ""
+}
+
+ContainerData :: struct{
+    storage: ^Container,
+
+    sub_category: ContainerSubCategory
+}
+
+ContainerSubCategory :: enum{
+    Backpack,
+    Belt,
+    Clothing,
+    Pouch,
+}
+
+ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string {
+    switch sub_category {
+        case ContainerSubCategory.Backpack:
+            return "Backpack"
+        case ContainerSubCategory.Belt:
+            return "Belt"
+        case ContainerSubCategory.Clothing:
+            return "Clothing"
+        case ContainerSubCategory.Pouch:
+            return "Pouch"
     }
     return ""
 }

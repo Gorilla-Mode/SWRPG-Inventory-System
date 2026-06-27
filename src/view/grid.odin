@@ -5,18 +5,23 @@ import inv "../core/inventory"
 import ui "../ui"
 import rl "vendor:raylib"
 
-DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
-    gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(container, style.grid.cell_size), state)
+DrawGrid :: proc(item: ^inv.Item, state: ^app.State, style: ^ui.style){
+    container, ok := item.data.(inv.ContainerData)
+    if !ok {
+        return
+    }
+
+    gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(container.storage, style.grid.cell_size), state)
     style.grid.origin_x = gridCenter.x + style.grid.offset_x
     style.grid.origin_y = gridCenter.y + style.grid.offset_y
 
-    inv.DrawContainerGrid(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
+    inv.DrawContainerGrid(item, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
         gw := state.ghost.rotated ? state.grab.dragged_item.definition.height : state.grab.dragged_item.definition.width
         gh := state.ghost.rotated ? state.grab.dragged_item.definition.width : state.grab.dragged_item.definition.height
 
-        if inv.ContainerGridCheckBounds(container, inv.Rect{
+        if inv.ContainerGridCheckBounds(container.storage, inv.Rect{
             pos_x = state.ghost.pos_x,
             pos_y = state.ghost.pos_y,
             width = gw,
@@ -47,8 +52,8 @@ DrawGrid :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style)
         style)
     }
 
-    if(app.ShowItemCard(container, style, state) || state.grab.selected_item != nil){
-        DrawItemCard(container, state, style)
+    if(app.ShowItemCard(container.storage, style, state) || state.grab.selected_item != nil){
+        DrawItemCard(container.storage, state, style)
     }
 }
 

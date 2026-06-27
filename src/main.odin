@@ -60,7 +60,7 @@ main :: proc()
         0,
         style.colors.text)
 
-        v.DrawGrid(items.backpack, &state, &style)
+        v.DrawGrid(items.backpackItem, &state, &style)
         v.DrawDebug(&state, &style)
 
         rl.EndDrawing()
