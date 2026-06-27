@@ -7,6 +7,7 @@ import app "../core/app"
 DrawHeader :: proc(style: ^ui.style, state: ^app.State) {
     pos := rl.Vector2{5, 0}
     fontSize := f32(ui.font_size.title)
+    header_y := pos.y + fontSize + 2
 
     rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
     "SWIS",
@@ -15,5 +16,13 @@ DrawHeader :: proc(style: ^ui.style, state: ^app.State) {
     0,
     style.colors.text)
 
-    rl.DrawLine(0, i32(pos.y + fontSize + 2), i32(state.window.width), i32(pos.y + fontSize + 2), style.colors.secondary)
+    ButtonInv := ui.ButtonCreate(
+    "Inventory",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    120,
+    30,
+    )
+
+    ui.DrawButton(&ButtonInv, style)
+    rl.DrawLine(0, i32(header_y), i32(state.window.width), i32(header_y), style.colors.secondary)
 }
