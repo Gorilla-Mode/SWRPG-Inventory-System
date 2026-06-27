@@ -10,7 +10,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     fontSize := f32(ui.font_size.title)
     header_y := pos.y + fontSize + 2
     buttonHeight : f32 = 30
-    buttonWidth : f32= 100
+    buttonWidth : f32 = 110
 
     rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
     "SWIS",
