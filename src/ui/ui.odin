@@ -3,7 +3,7 @@
 import rl "vendor:raylib"
 
 style :: struct{
-    icons: map[Icons]rl.Image,
+    icons: map[Icons]rl.Texture2D,
     fonts: fonts,
     colors: color_palette,
 

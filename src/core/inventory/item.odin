@@ -32,7 +32,7 @@ GetItemWeaponString :: proc(item: ^Item) -> string {
     }
 
     b: str.Builder
-    str.builder_init(&b)
+    str.builder_init(&b, context.temp_allocator)
 
     str.write_string(&b, "Damage: ")
     if data.skill == WeaponSkill.Melee{
@@ -75,7 +75,7 @@ GetItemContainerString :: proc(item: ^Item) -> string {
     }
 
     b: str.Builder
-    str.builder_init(&b)
+    str.builder_init(&b, context.temp_allocator)
 
     str.write_string(&b, "Storage Type: ")
     str.write_string(&b, ContainerSubCategoryString(data.sub_category))

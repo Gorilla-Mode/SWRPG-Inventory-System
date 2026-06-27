@@ -15,8 +15,8 @@ DrawContainerGrid :: proc(
         return
     }
 
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], str.clone_to_cstring(item.name), rl.Vector2{origin_x, origin_y - 25}, f32(ui.font_size.header), 2, style.colors.text)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container.sub_category)), rl.Vector2{origin_x, origin_y - 34}, f32(ui.font_size.caption), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], str.clone_to_cstring(item.name, context.temp_allocator), rl.Vector2{origin_x, origin_y - 25}, f32(ui.font_size.header), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container.sub_category), context.temp_allocator), rl.Vector2{origin_x, origin_y - 34}, f32(ui.font_size.caption), 2, style.colors.text)
     #partial switch storage in container.storage.storage {
     case ContainerGrid:
         for y in 0..<storage.height {
@@ -90,7 +90,7 @@ DrawItem :: proc(
 
     rl.DrawTextPro(
         style.fonts.regular[ui.font_size.default],
-        str.clone_to_cstring(item.definition.name),
+        str.clone_to_cstring(item.definition.name, context.temp_allocator),
         textVec,
         rl.Vector2{0, 0},
         rot,
@@ -163,7 +163,7 @@ DrawItemGhost :: proc(
 
     if !snap {rl.DrawTextPro(
         style.fonts.regular[ui.font_size.default],
-        str.clone_to_cstring(item.definition.name),
+        str.clone_to_cstring(item.definition.name, context.temp_allocator),
         textVec,
         rl.Vector2{0, 0},
         rot,
@@ -199,7 +199,7 @@ DrawItemCard :: proc(
     regularSize := f32(ui.font_size.default)
 
     b: str.Builder
-    str.builder_init(&b)
+    str.builder_init(&b, context.temp_allocator)
 
     str.write_string(&b, item.definition.description)
     str.write_string(&b, "\n\n")
@@ -248,8 +248,8 @@ DrawItemCard :: proc(
     rl.DrawRectangleRoundedLines(rect, 0.1, 32, style.colors.primary)
     rl.DrawLine(i32(posX), i32(posY + headerSize) + 10, i32(posX + width), i32(posY + headerSize) + 10, style.colors.secondary)
 
-    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name), {posX + 5, posY + 5}, headerSize, 0, style.colors.text)
-    rl.DrawTextEx(regular, str.clone_to_cstring(s), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
+    rl.DrawTextEx(header, str.clone_to_cstring(item.definition.name, context.temp_allocator), {posX + 5, posY + 5}, headerSize, 0, style.colors.text)
+    rl.DrawTextEx(regular, str.clone_to_cstring(s, context.temp_allocator), {posX + 5, posY + headerSize + 15}, regularSize, 0, style.colors.text)
 }
 
 GetItemCardRect :: proc(x: f32, y: f32, style: ^ui.style) -> rl.Rectangle {
