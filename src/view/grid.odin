@@ -73,8 +73,9 @@ DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.st
 
 GridGetCenter :: proc(grid_size: rl.Vector2, state: ^app.State) -> rl.Vector2 {
     center := rl.Vector2{}
-    center.x = (state.window.width - grid_size.x) /2
-    center.y = (state.window.height - grid_size.y) / 2
+    //Cursed wobbly ahh text fix
+    center.x = f32(i32((state.window.width - grid_size.x) / 2))
+    center.y = f32(i32((state.window.height - grid_size.y) / 2))
 
     return center
 }
