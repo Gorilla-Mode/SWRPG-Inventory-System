@@ -20,6 +20,7 @@ main :: proc()
 
     state := st.state{}
     items := inv.TestItem(style.grid.cell_size)
+    state.character = inv.TestCharacter(items.backpackInstance)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -47,12 +48,18 @@ main :: proc()
         free_all(context.temp_allocator)
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
-
-        app.InputMoveItem(&state,
-        items.backpack,
-        style.grid.origin_x,
-        style.grid.origin_y,
-        style.grid.cell_size)
+        
+        switch state.page {
+        case .Inventory:
+            app.InputMoveItem(&state,
+            items.backpack,
+            style.grid.origin_x,
+            style.grid.origin_y,
+            style.grid.cell_size)
+        case .Character:
+            app.InputCharacter(&state, &style)
+        case .Debug, .Catalog:
+        }
 
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)

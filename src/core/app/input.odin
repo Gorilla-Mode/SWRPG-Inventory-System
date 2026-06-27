@@ -14,6 +14,77 @@ InputMoveItem :: proc(state: ^st.state, container: ^inv.Container, origin_x, ori
 	HandleHover(state, container, origin_x, origin_y, cell_size)
 }
 
+InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
+    char := state.character
+    if char == nil do return
+
+    header_height: f32 = 34
+    top_margin := header_height + 10
+    
+    centerX := state.window.width / 2 + 100
+    centerY := (state.window.height + top_margin) / 2
+    avatar_width: f32 = 200
+    avatar_height: f32 = 400
+    avatar_rect := rl.Rectangle{centerX - avatar_width / 2, centerY - avatar_height / 2, avatar_width, avatar_height}
+
+    slot_size: f32 = 100
+    spacing: f32 = 20
+
+    slots := make(map[inv.EquipmentSlot]rl.Rectangle, context.temp_allocator)
+    slots[.Back] = {avatar_rect.x - slot_size - spacing, avatar_rect.y, slot_size, slot_size}
+    slots[.Armor] = {avatar_rect.x - slot_size - spacing, avatar_rect.y + slot_size + spacing, slot_size, slot_size}
+    slots[.Backpack] = {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y, slot_size, slot_size}
+    slots[.Belt] = {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y + slot_size + spacing, slot_size, slot_size}
+    slots[.Holster] = {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y + (slot_size + spacing) * 2, slot_size, slot_size}
+
+    mouse_pos := rl.GetMousePosition()
+
+    if state.grab.is_dragging {
+        state.ghost.unsnapped_x = mouse_pos.x - state.grab.offset_x
+        state.ghost.unsnapped_y = mouse_pos.y - state.grab.offset_y
+
+        if rl.IsMouseButtonReleased(.LEFT) {
+            for slot, rect in slots {
+                if rl.CheckCollisionPointRec(mouse_pos, rect) {
+                    item := state.grab.dragged_item
+                    
+                    if old_container := inv.FindContainerForItem(char, item); old_container != nil {
+                        inv.RemoveItemFromContainer(old_container, item)
+                    }
+                    
+                    char.equipment.slots[slot] = item
+                    break
+                }
+            }
+            state.grab.is_dragging = false
+            state.grab.dragged_item.grabbed = false
+            state.grab.dragged_item = nil
+        }
+        return
+    }
+
+    // Handle clicking on items in the list
+    all_items := inv.GetAllCharacterItems(char)
+    list_x: f32 = 50
+    list_y: f32 = top_margin + 80
+    item_height: f32 = 35
+    list_width: f32 = 250
+    
+    for item, i in all_items {
+        item_rect := rl.Rectangle{list_x, list_y + f32(i) * (item_height + 5), list_width, item_height}
+        if rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(mouse_pos, item_rect) {
+            state.grab.is_dragging = true
+            state.grab.dragged_item = item
+            item.grabbed = true
+            state.grab.offset_x = mouse_pos.x - item_rect.x
+            state.grab.offset_y = mouse_pos.y - item_rect.y
+            state.ghost.unsnapped_x = item_rect.x
+            state.ghost.unsnapped_y = item_rect.y
+            return
+        }
+    }
+}
+
 HandleHover :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	item := GetItemAtMousePos(container, origin_x, origin_y, cell_size)
 	if item == nil do return

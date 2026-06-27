@@ -8,6 +8,7 @@ state :: struct{
     ghost:         ghost,
     window:        windowState,
     page:          page,
+    character:     ^inv.Character,
 }
 
 grab :: struct{
