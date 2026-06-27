@@ -23,7 +23,6 @@ main :: proc()
 
     style.icons = ui.LoadImages()
     style.colors = ui.LoadColorPalette()
-    defer delete(style.icons)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
