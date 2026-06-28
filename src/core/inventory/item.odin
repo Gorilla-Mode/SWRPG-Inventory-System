@@ -81,6 +81,5 @@ GetItemContainerString :: proc(item: ^Item) -> string {
     str.write_string(&b, ContainerSubCategoryString(data.sub_category))
     str.write_string(&b, "\n")
 
-
     return str.to_string(b)
 }

@@ -20,13 +20,14 @@ main :: proc()
 
     state := st.state{}
     items := inv.TestItem(style.grid.cell_size)
+    state.character = inv.TestCharacter(items.backpackInstance)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(1280, 720, "SWIS")
+    rl.InitWindow(1440, 720, "Inventory System")
 
     style.icons = ui.LoadImages()
     appIcon := rl.LoadImageFromTexture(style.icons[ui.Icons.app_icon])
@@ -47,12 +48,18 @@ main :: proc()
         free_all(context.temp_allocator)
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
-
-        app.InputMoveItem(&state,
-        items.backpack,
-        style.grid.origin_x,
-        style.grid.origin_y,
-        style.grid.cell_size)
+        
+        switch state.page {
+        case .Inventory:
+            app.InputMoveItem(&state,
+            items.backpack,
+            style.grid.origin_x,
+            style.grid.origin_y,
+            style.grid.cell_size)
+        case .Character:
+            app.InputCharacter(&state, &style)
+        case .Debug, .Catalog:
+        }
 
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)

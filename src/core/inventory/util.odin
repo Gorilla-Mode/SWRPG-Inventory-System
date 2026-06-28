@@ -10,7 +10,8 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle: ^Item,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
-    backpackItem: ^Item}
+    backpackItem: ^Item,
+    backpackInstance: ^ItemInstance}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
@@ -31,6 +32,10 @@ TestItem :: proc(cell_size: f32) -> struct{
         storage = backpack,
         sub_category = ContainerSubCategory.Backpack
     }
+
+    backpackInstance := new(ItemInstance)
+    backpackInstance.definition = backpackItem
+    backpackInstance.id = 100
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     sword := new(Item)
@@ -131,8 +136,43 @@ TestItem :: proc(cell_size: f32) -> struct{
         rifle,
         sword_instance,
         rifle_instance,
-        backpackItem
+        backpackItem,
+        backpackInstance
     }
+}
+
+TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+    char := new(Character)
+    char.name = "Lord Holcrub"
+    char.id = "1"
+
+    char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
+    char.equipment.slots[.Backpack] = backpack
+
+    belt_container := new(Container)
+    belt_container.type = .Belt
+    belt_container.storage = ContainerGrid{
+        width = 4,
+        height = 1,
+    }
+
+    beltItem := new(Item)
+    beltItem.name = "Utility Belt"
+    beltItem.height = 1
+    beltItem.width = 4
+    beltItem.description = "A utility belt with various pouches and compartments."
+    beltItem.data = ContainerData{
+        storage = belt_container,
+        sub_category = .Belt
+    }
+
+    beltInstance := new(ItemInstance)
+    beltInstance.definition = beltItem
+    beltInstance.id = 101
+
+    char.equipment.slots[.Belt] = beltInstance
+
+    return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container

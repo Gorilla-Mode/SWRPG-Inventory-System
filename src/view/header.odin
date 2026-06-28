@@ -14,7 +14,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
 
     rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
     "SWIS",
-    pos,
+    ui.SnapVector2(pos),
     fontSize,
     0,
     style.colors.text)
