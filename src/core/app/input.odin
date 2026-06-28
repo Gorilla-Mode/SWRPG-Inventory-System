@@ -69,14 +69,12 @@ InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
 }
 
 HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_size: f32, slots: map[inv.EquipmentSlot]rl.Rectangle, grid_locs: [dynamic]GridLocation) {
-    UpdateGhostUnsnapped(state)
-    state.ghost.valid = false
-
     HandleRotationInput(state, cell_size)
+    UpdateGhostUnsnapped(state)
 
+    state.ghost.valid = false
     mouse_pos := rl.GetMousePosition()
 
-    // 1. Check Slots
     for slot, rect in slots {
         if rl.CheckCollisionPointRec(mouse_pos, rect) {
             state.ghost.valid = true
@@ -88,7 +86,6 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
         }
     }
 
-    // 2. Check Grids
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         grid := container.storage.(inv.ContainerGrid)
@@ -118,7 +115,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         item := GetItemAtMousePos(container, loc.origin.x, loc.origin.y, cell_size)
-        if item != nil && rl.IsMouseButtonPressed(.LEFT) {
+        if item != nil && rl.IsMouseButtonDown(.LEFT) {
             StartDragging(state, item, loc.origin.x, loc.origin.y, cell_size)
             return
         }
@@ -126,7 +123,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
 
     for slot, rect in slots {
         if item, ok := char.equipment.slots[slot]; ok && item != nil {
-            if rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(mouse_pos, rect) {
+            if rl.IsMouseButtonDown(.LEFT) && rl.CheckCollisionPointRec(mouse_pos, rect) {
                 StartDraggingAtSlot(state, item, rect, cell_size)
                 return
             }
