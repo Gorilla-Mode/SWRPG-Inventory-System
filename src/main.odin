@@ -27,7 +27,7 @@ main :: proc()
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(1280, 720, "SWIS")
+    rl.InitWindow(1440, 720, "Inventory System")
 
     style.icons = ui.LoadImages()
     appIcon := rl.LoadImageFromTexture(style.icons[ui.Icons.app_icon])

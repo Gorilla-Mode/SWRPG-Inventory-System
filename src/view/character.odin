@@ -15,16 +15,15 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     layout_info := app.GetCharacterPageLayoutInfo(state, style.grid.cell_size)
     
     DrawCharacterHeader(char, layout_info.char_start_x, layout_info.grid_start_y, style)
-    
-    grid_locs := app.GetCharacterGridLocations(char, layout_info.grid_start_y, style.grid.cell_size, layout_info.grid_start_x)
-    DrawCharacterGrids(grid_locs, style)
-
     DrawCharacterAvatar(layout_info.avatarCenterX, layout_info.grid_start_y + app.AVATAR_HEIGHT / 2, style)
 
     slots := app.GetCharacterSlotRects(state, layout_info.avatarCenterX, layout_info.grid_start_y)
     for slot, rect in slots {
         draw_slot(slot, {rect.x, rect.y}, state, style)
     }
+
+    grid_locs := app.GetCharacterGridLocations(char, layout_info.grid_start_y, style.grid.cell_size, layout_info.grid_start_x)
+    DrawCharacterGrids(state, grid_locs, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
         DrawCharacterGhost(state, grid_locs, style)
@@ -36,9 +35,15 @@ DrawCharacterHeader :: proc(char: ^inv.Character, startX: f32, topY: f32, style:
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({startX, topY - f32(ui.font_size.header) - 5}), f32(ui.font_size.header), 2, style.colors.text)
 }
 
-DrawCharacterGrids :: proc(grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
+DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
     for loc in grid_locs {
         inv.DrawContainerGrid(loc.item.definition, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
+
+        if container_data, ok := loc.item.definition.data.(inv.ContainerData); ok {
+            if(app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) || state.grab.selected_item != nil){
+                DrawItemCard(container_data.storage, loc.origin.x, loc.origin.y, state, style)
+            }
+        }
     }
 }
 

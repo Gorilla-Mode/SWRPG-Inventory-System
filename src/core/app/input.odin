@@ -254,15 +254,16 @@ GetItemAtMousePos :: proc(container: ^inv.Container, origin_x, origin_y, cell_si
 	return nil
 }
 
-CheckCollisonItemCard :: proc(state: ^st.state, style: ^ui.style) -> bool{
+CheckCollisonItemCard :: proc(state: ^st.state, style: ^ui.style, origin_x, origin_y: f32) -> bool{
 	return (rl.CheckCollisionPointRec(rl.GetMousePosition(),
 	inv.GetItemCardRect(f32(state.grab.selected_item.pos_x),
 	f32(state.grab.selected_item.pos_y),
+	origin_x, origin_y,
 	style)))
 }
 
-ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.state) -> bool {
-	hoveredItem := GetItemAtMousePos(container, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size)
+ShowItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, style: ^ui.style, state: ^st.state) -> bool {
+	hoveredItem := GetItemAtMousePos(container, origin_x, origin_y, style.grid.cell_size)
 	if hoveredItem != nil && rl.IsMouseButtonPressed(rl.MouseButton.RIGHT){
 		state.grab.selected_item = hoveredItem
 
@@ -271,8 +272,19 @@ ShowItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.sta
 	return false
 }
 
-HideItemCard :: proc(container: ^inv.Container, style: ^ui.style, state: ^st.state){
-	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style)) {
+HideItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, style: ^ui.style, state: ^st.state){
+	if state.grab.selected_item == nil do return
+
+	is_in_container := false
+	for item in container.items {
+		if item == state.grab.selected_item {
+			is_in_container = true
+			break
+		}
+	}
+	if !is_in_container do return
+
+	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style, origin_x, origin_y)) {
 		state.grab.selected_item = nil
 	}
 }

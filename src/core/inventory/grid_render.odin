@@ -252,9 +252,9 @@ DrawItemCard :: proc(
     rl.DrawTextEx(regular, str.clone_to_cstring(s, context.temp_allocator), ui.SnapVector2({posX + 5, posY + headerSize + 15}), regularSize, 0, style.colors.text)
 }
 
-GetItemCardRect :: proc(x: f32, y: f32, style: ^ui.style) -> rl.Rectangle {
-    pos_x := x * style.grid.cell_size + style.grid.origin_x + 5
-    pos_y := y * style.grid.cell_size + style.grid.origin_y + 5
+GetItemCardRect :: proc(x: f32, y: f32, origin_x, origin_y: f32, style: ^ui.style) -> rl.Rectangle {
+    pos_x := x * style.grid.cell_size + origin_x + 5
+    pos_y := y * style.grid.cell_size + origin_y + 5
 
     return rl.Rectangle{
         x = pos_x,
