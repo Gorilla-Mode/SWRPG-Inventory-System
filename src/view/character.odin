@@ -32,7 +32,7 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
 DrawCharacterHeader :: proc(char: ^inv.Character, startX: f32, topY: f32, style: ^ui.style) {
     name_str := str.clone_to_cstring(char.name, context.temp_allocator)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({startX, topY - f32(ui.font_size.header) - 5}), f32(ui.font_size.header), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({startX, topY - f32(ui.font_size.header) - 2}), f32(ui.font_size.header), 2, style.colors.text)
 }
 
 DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
