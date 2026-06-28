@@ -82,3 +82,41 @@ FindSlotForItem :: proc(char: ^Character, item: ^ItemInstance) -> (EquipmentSlot
     }
     return {}, false
 }
+
+RemoveItemFromCurrentLocation :: proc(char: ^Character, item: ^ItemInstance) {
+    if old_container := FindContainerForItem(char, item); old_container != nil {
+        RemoveItemFromContainer(old_container, item)
+    }
+    if old_slot, found := FindSlotForItem(char, item); found {
+        delete_key(&char.equipment.slots, old_slot)
+    }
+}
+
+IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
+    data, ok := item.definition.data.(ContainerData)
+    if !ok do return false
+    
+    if data.storage == target do return true
+    
+    for sub_item in data.storage.items {
+        if IsContainerInItem(sub_item, target) do return true
+    }
+    return false
+}
+
+EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) {
+    RemoveItemFromCurrentLocation(char, item)
+    char.equipment.slots[slot] = item
+}
+
+MoveItemToContainer :: proc(char: ^Character, container: ^Container, item: ^ItemInstance, x, y: i16, rotated: bool) {
+    if IsContainerInItem(item, container) do return
+
+    RemoveItemFromCurrentLocation(char, item)
+    
+    item.pos_x = x
+    item.pos_y = y
+    item.rotated = rotated
+    
+    append(&container.items, item)
+}

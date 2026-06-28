@@ -78,7 +78,7 @@ current_page: st.page,
     rl.DrawTextEx(
     style.fonts.semibold[ui.font_size.default],
     text,
-    text_pos,
+    ui.SnapVector2(text_pos),
     f32(ui.font_size.default),
     0,
     style.colors.text,

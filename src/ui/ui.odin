@@ -17,3 +17,6 @@ grid :: struct{
     offset_x:  f32,
     offset_y:  f32
 }
+
+HEADER_HEIGHT :: 34
+TOP_MARGIN :: HEADER_HEIGHT + 10

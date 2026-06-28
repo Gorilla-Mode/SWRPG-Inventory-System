@@ -4,93 +4,110 @@ import rl "vendor:raylib"
 import ui "../ui"
 import st "../core/state"
 import inv "../core/inventory"
+import app "../core/app"
 import str "core:strings"
 import fmt "core:fmt"
 
 DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     char := state.character
-    if char == nil {
-        return
+    if char == nil do return
+
+    layout_info := app.GetCharacterPageLayoutInfo(state, style.grid.cell_size)
+    
+    headerCenterX := f32(state.window.width) / 2
+    centerY := (state.window.height + ui.TOP_MARGIN) / 2
+
+    DrawCharacterHeader(char, headerCenterX, style)
+    
+    grid_locs := app.GetCharacterGridLocations(char, ui.TOP_MARGIN, style.grid.cell_size, layout_info.grid_start_x)
+    DrawCharacterGrids(grid_locs, style)
+
+    DrawCharacterAvatar(layout_info.avatarCenterX, centerY, style)
+
+    slots := app.GetCharacterSlotRects(state, layout_info.avatarCenterX)
+    for slot, rect in slots {
+        draw_slot(slot, {rect.x, rect.y}, state, style)
     }
 
-    header_height: f32 = 34
-    top_margin := header_height + 10
+    if state.grab.is_dragging && state.grab.dragged_item != nil {
+        DrawCharacterGhost(state, grid_locs, style)
+    }
+}
 
-    centerX := state.window.width / 2 + 100 // Shifted right to make room for list
-    centerY := (state.window.height + top_margin) / 2
-
-    // Draw Character Name centered above avatar
+DrawCharacterHeader :: proc(char: ^inv.Character, centerX: f32, style: ^ui.style) {
     name_str := str.clone_to_cstring(char.name, context.temp_allocator)
     name_width := f32(rl.MeasureTextEx(style.fonts.bold[ui.font_size.title], name_str, f32(ui.font_size.title), 2).x)
-    rl.DrawTextEx(style.fonts.bold[ui.font_size.title], name_str, {centerX - name_width / 2, top_margin}, f32(ui.font_size.title), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.bold[ui.font_size.title], name_str, ui.SnapVector2({centerX - name_width / 2, ui.TOP_MARGIN}), f32(ui.font_size.title), 2, style.colors.text)
+}
 
-    // Collect all items from all containers
-    all_items := inv.GetAllCharacterItems(char)
-
-    // Draw Item List on the left
-    list_x: f32 = 50
-    list_y: f32 = top_margin + 80
-    item_height: f32 = 35
-    list_width: f32 = 250
-
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], "Container Items", {list_x, list_y - 30}, f32(ui.font_size.header), 1, style.colors.text)
-
-    for item, i in all_items {
-        item_rect := rl.Rectangle{list_x, list_y + f32(i) * (item_height + 5), list_width, item_height}
-        
-        bgColor := style.colors.surface
-        if item.grabbed {
-            bgColor.a = 128
-        }
-        
-        rl.DrawRectangleRec(item_rect, bgColor)
-        rl.DrawRectangleLinesEx(item_rect, 1, style.colors.secondary)
-        
-        item_name := str.clone_to_cstring(item.definition.name, context.temp_allocator)
-        rl.DrawTextEx(style.fonts.regular[ui.font_size.default], item_name, {item_rect.x + 10, item_rect.y + 10}, f32(ui.font_size.default), 1, style.colors.text)
+DrawCharacterGrids :: proc(grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
+    for loc in grid_locs {
+        inv.DrawContainerGrid(loc.item.definition, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
     }
+}
 
-    // Center of the screen for the character avatar
-    // centerX and centerY are already defined above
+DrawCharacterAvatar :: proc(centerX, centerY: f32, style: ^ui.style) {
+    avatar_rect := rl.Rectangle{f32(i32(centerX - app.AVATAR_WIDTH / 2)), f32(i32(centerY - app.AVATAR_HEIGHT / 2)), app.AVATAR_WIDTH, app.AVATAR_HEIGHT}
     
-    // Draw Character Avatar placeholder
-    avatar_width: f32 = 200
-    avatar_height: f32 = 400
-    avatar_rect := rl.Rectangle{centerX - avatar_width / 2, centerY - avatar_height / 2, avatar_width, avatar_height}
-    
-    // Draw avatar icon
     icon := style.icons[ui.Icons.character_user]
     icon_pos := rl.Vector2{
-        avatar_rect.x + (avatar_rect.width - f32(icon.width)) / 2,
+        avatar_rect.x + f32(i32((avatar_rect.width - f32(icon.width)) / 2)),
         avatar_rect.y + 50,
     }
     rl.DrawTextureV(icon, icon_pos, rl.WHITE)
     rl.DrawRectangleLinesEx(avatar_rect, 2, style.colors.primary)
+}
 
-    // Define slot positions relative to avatar
-    slot_size: f32 = 100
-    spacing: f32 = 20
+DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
+    item := state.grab.dragged_item
+    mouse_pos := rl.GetMousePosition()
+    cell_size := style.grid.cell_size
 
-    // Left column
-    draw_slot(.Back, {avatar_rect.x - slot_size - spacing, avatar_rect.y}, state, style)
-    draw_slot(.Armor, {avatar_rect.x - slot_size - spacing, avatar_rect.y + slot_size + spacing}, state, style)
-    
-    // Right column
-    draw_slot(.Backpack, {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y}, state, style)
-    draw_slot(.Belt, {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y + slot_size + spacing}, state, style)
-    draw_slot(.Holster, {avatar_rect.x + avatar_rect.width + spacing, avatar_rect.y + (slot_size + spacing) * 2}, state, style)
+    for loc in grid_locs {
+        container_data, ok := loc.item.definition.data.(inv.ContainerData)
+        if !ok do continue
+        
+        grid := container_data.storage.storage.(inv.ContainerGrid)
+        rect := rl.Rectangle{loc.origin.x, loc.origin.y, f32(grid.width) * cell_size, f32(grid.height) * cell_size}
 
-    // Draw Dragged Item Ghost if applicable
-    if state.grab.is_dragging && state.grab.dragged_item != nil {
-        item := state.grab.dragged_item
-        rl.DrawRectangle(i32(state.ghost.unsnapped_x), i32(state.ghost.unsnapped_y), i32(list_width), i32(item_height), {255, 255, 255, 128})
-        rl.DrawTextEx(style.fonts.regular[ui.font_size.default], str.clone_to_cstring(item.definition.name, context.temp_allocator), {state.ghost.unsnapped_x + 10, state.ghost.unsnapped_y + 10}, f32(ui.font_size.default), 1, rl.BLACK)
+        if rl.CheckCollisionPointRec(mouse_pos, rect) {
+            gw := state.ghost.rotated ? item.definition.height : item.definition.width
+            gh := state.ghost.rotated ? item.definition.width : item.definition.height
+
+            if inv.ContainerGridCheckBounds(container_data.storage, inv.Rect{
+                pos_x = state.ghost.pos_x,
+                pos_y = state.ghost.pos_y,
+                width = gw,
+                height = gh,
+            }) {
+                inv.DrawItemGhost(item,
+                    f32(state.ghost.pos_x),
+                    f32(state.ghost.pos_y),
+                    true,
+                    state.ghost.rotated,
+                    state.ghost.valid,
+                    loc.origin.x,
+                    loc.origin.y,
+                    cell_size,
+                    style)
+            }
+            break
+        }
     }
+
+    inv.DrawItemGhost(item,
+        state.ghost.unsnapped_x,
+        state.ghost.unsnapped_y,
+        false,
+        state.ghost.rotated,
+        state.ghost.valid,
+        0, 0,
+        style.grid.cell_size,
+        style)
 }
 
 draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
-    slot_size: f32 = 100
-    rect := rl.Rectangle{pos.x, pos.y, slot_size, slot_size}
+    rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
     
     // Background
     rl.DrawRectangleRec(rect, style.colors.surface)
@@ -99,23 +116,23 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
     // Label
     slot_name := fmt.tprintf("%v", slot)
     slot_name_cstr := str.clone_to_cstring(slot_name, context.temp_allocator)
-    rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], slot_name_cstr, {pos.x + 5, pos.y + 5}, f32(ui.font_size.caption), 1, style.colors.text)
+    rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], slot_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 5}), f32(ui.font_size.caption), 1, style.colors.text)
     
     if item, ok := state.character.equipment.slots[slot]; ok && item != nil {
         rl.DrawRectangleLinesEx(rect, 2, style.colors.primary)
         
         // Show item name
         item_name_cstr := str.clone_to_cstring(item.definition.name, context.temp_allocator)
-        rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], item_name_cstr, {pos.x + 5, pos.y + 25}, f32(ui.font_size.label), 1, style.colors.success)
+        rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], item_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 25}), f32(ui.font_size.label), 1, style.colors.success)
 
         if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
              // Show number of items if it's a container
             item_count := len(container_data.storage.items)
             count_str := fmt.tprintf("Items: %d", item_count)
             count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
-            rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], count_cstr, {pos.x + 5, pos.y + 80}, f32(ui.font_size.caption), 1, style.colors.text)
+            rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], count_cstr, ui.SnapVector2({pos.x + 5, pos.y + 80}), f32(ui.font_size.caption), 1, style.colors.text)
         }
     } else {
-        rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "EMPTY", {pos.x + slot_size/2 - 20, pos.y + slot_size/2 - 7}, f32(ui.font_size.label), 1, style.colors.secondary)
+        rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "EMPTY", ui.SnapVector2({pos.x + app.SLOT_SIZE/2 - 20, pos.y + app.SLOT_SIZE/2 - 7}), f32(ui.font_size.label), 1, style.colors.secondary)
     }
 }

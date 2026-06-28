@@ -143,7 +143,7 @@ TestItem :: proc(cell_size: f32) -> struct{
 
 TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     char := new(Character)
-    char.name = "Junie"
+    char.name = "Lord Holcrub"
     char.id = "1"
 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
