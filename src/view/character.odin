@@ -6,7 +6,6 @@ import st "../core/state"
 import inv "../core/inventory"
 import app "../core/app"
 import str "core:strings"
-import fmt "core:fmt"
 
 DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     char := state.character
@@ -111,7 +110,7 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
 draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
     rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
     item, ok := state.character.equipment.slots[slot]
-    itemText : cstring = ok ? str.clone_to_cstring(state.character.equipment.slots[slot].definition.name, context.allocator) : str.clone_to_cstring("EMPTY", context.allocator)
+    itemText : cstring = ok ? str.clone_to_cstring(state.character.equipment.slots[slot].definition.name, context.temp_allocator) : str.clone_to_cstring("EMPTY", context.temp_allocator)
     itemTextColor := ok ? style.colors.success : style.colors.text
     fontSize := ui.font_size.label
     font:= style.fonts.regular[fontSize]
@@ -125,7 +124,13 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
     if !ok do return
     if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
         item_count := len(container_data.storage.items)
-        count_str := fmt.tprintf("Items: %d", item_count)
+
+        b := str.Builder{}
+        str.builder_init(&b, context.temp_allocator)
+        str.write_string(&b, "Count: ")
+        str.write_int(&b, item_count)
+        count_str := str.to_string(b)
+
         count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
         rl.DrawTextEx(font, count_cstr, ui.SnapVector2({pos.x + 5, pos.y + app.SLOT_SIZE - app.SPACING + 4}), f32(fontSize), 1, style.colors.text)
     }
