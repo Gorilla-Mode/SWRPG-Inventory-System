@@ -21,24 +21,35 @@ UpdateGhostUnsnapped :: proc(state: ^st.state) {
 }
 
 HandleRotationInput :: proc(state: ^st.state, cell_size: f32) {
-    if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-        item := state.grab.dragged_item
-        if item == nil do return
-        
-        state.ghost.rotated = !state.ghost.rotated
-        h := f32(item.definition.height)
-        new_offset_x, new_offset_y: f32
-        
-        if !state.ghost.rotated {
-            new_offset_x = h * cell_size - state.grab.offset_y
-            new_offset_y = state.grab.offset_x
-        } else {
-            new_offset_x = state.grab.offset_y
-            new_offset_y = h * cell_size - state.grab.offset_x
-        }
-        state.grab.offset_x = new_offset_x
-        state.grab.offset_y = new_offset_y
+    if !rl.IsKeyPressed(rl.KeyboardKey.SPACE) do return
+
+    item := state.grab.dragged_item
+    if item == nil do return
+    if item.definition.width == item.definition.height do return
+
+    current_width: f32
+    current_height: f32
+
+    if state.ghost.rotated {
+        current_width = f32(item.definition.height) * cell_size
+        current_height = f32(item.definition.width) * cell_size
+    } else {
+        current_width = f32(item.definition.width) * cell_size
+        current_height = f32(item.definition.height) * cell_size
     }
+
+    old_x := state.grab.offset_x
+    old_y := state.grab.offset_y
+
+    if state.ghost.rotated {
+        state.grab.offset_x = old_y
+        state.grab.offset_y = current_width - old_x
+    } else {
+        state.grab.offset_x = current_height - old_y
+        state.grab.offset_y = old_x
+    }
+
+    state.ghost.rotated = !state.ghost.rotated
 }
 
 InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
