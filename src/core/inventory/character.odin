@@ -23,9 +23,10 @@ GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemI
     if container == nil do return
     for item in container.items {
         append(all_items, item)
-        if container_data, ok := item.definition.data.(ContainerData); ok {
-            GetItemsFromContainer(container_data.storage, all_items)
-        }
+        container_data, ok := item.definition.data.(ContainerData)
+        if !ok do continue
+
+        GetItemsFromContainer(container_data.storage, all_items)
     }
 }
 
@@ -33,9 +34,11 @@ GetAllCharacterItems :: proc(char: ^Character) -> [dynamic]^ItemInstance {
     all_items := make([dynamic]^ItemInstance, context.temp_allocator)
     for _, item in char.equipment.slots {
         if item == nil do continue
-        if container_data, ok := item.definition.data.(ContainerData); ok {
-            GetItemsFromContainer(container_data.storage, &all_items)
-        }
+
+        container_data, ok := item.definition.data.(ContainerData)
+        if !ok do continue
+
+        GetItemsFromContainer(container_data.storage, &all_items)
     }
     return all_items
 }
@@ -43,11 +46,14 @@ GetAllCharacterItems :: proc(char: ^Character) -> [dynamic]^ItemInstance {
 FindContainerForItem :: proc(char: ^Character, item_to_find: ^ItemInstance) -> ^Container {
     for _, item in char.equipment.slots {
         if item == nil do continue
-        if container_data, ok := item.definition.data.(ContainerData); ok {
-            if found := FindInContainerRecursive(container_data.storage, item_to_find); found != nil {
-                return found
-            }
-        }
+
+        container_data, ok := item.definition.data.(ContainerData)
+        if !ok do continue
+
+        found := FindInContainerRecursive(container_data.storage, item_to_find)
+        if found == nil do continue
+
+        return found
     }
     return nil
 }
@@ -56,11 +62,14 @@ FindInContainerRecursive :: proc(container: ^Container, item_to_find: ^ItemInsta
     if container == nil do return nil
     for item in container.items {
         if item == item_to_find do return container
-        if container_data, ok := item.definition.data.(ContainerData); ok {
-            if found := FindInContainerRecursive(container_data.storage, item_to_find); found != nil {
-                return found
-            }
-        }
+
+        container_data, ok := item.definition.data.(ContainerData)
+        if !ok do continue
+
+        found := FindInContainerRecursive(container_data.storage, item_to_find)
+        if found == nil do continue
+
+        return found
     }
     return nil
 }
@@ -95,11 +104,12 @@ RemoveItemFromCurrentLocation :: proc(char: ^Character, item: ^ItemInstance) {
 IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
     data, ok := item.definition.data.(ContainerData)
     if !ok do return false
-    
+
     if data.storage == target do return true
-    
+
     for sub_item in data.storage.items {
-        if IsContainerInItem(sub_item, target) do return true
+        if !IsContainerInItem(sub_item, target) do continue
+        return true
     }
     return false
 }
@@ -113,10 +123,8 @@ MoveItemToContainer :: proc(char: ^Character, container: ^Container, item: ^Item
     if IsContainerInItem(item, container) do return
 
     RemoveItemFromCurrentLocation(char, item)
-    
     item.pos_x = x
     item.pos_y = y
     item.rotated = rotated
-    
     append(&container.items, item)
 }
