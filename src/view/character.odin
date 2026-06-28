@@ -39,10 +39,11 @@ DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
     for loc in grid_locs {
         inv.DrawContainerGrid(loc.item.definition, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
 
-        if container_data, ok := loc.item.definition.data.(inv.ContainerData); ok {
-            if(app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) || state.grab.selected_item != nil){
-                DrawItemCard(container_data.storage, loc.origin.x, loc.origin.y, state, style)
-            }
+        container_data, ok := loc.item.definition.data.(inv.ContainerData)
+        if !ok do continue
+
+        if app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) || state.grab.selected_item != nil {
+            DrawItemCard(container_data.storage, loc.origin.x, loc.origin.y, state, style)
         }
     }
 }
@@ -67,33 +68,33 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
     for loc in grid_locs {
         container_data, ok := loc.item.definition.data.(inv.ContainerData)
         if !ok do continue
-        
+
         grid := container_data.storage.storage.(inv.ContainerGrid)
         rect := rl.Rectangle{loc.origin.x, loc.origin.y, f32(grid.width) * cell_size, f32(grid.height) * cell_size}
 
-        if rl.CheckCollisionPointRec(mouse_pos, rect) {
-            gw := state.ghost.rotated ? item.definition.height : item.definition.width
-            gh := state.ghost.rotated ? item.definition.width : item.definition.height
+        if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
 
-            if inv.ContainerGridCheckBounds(container_data.storage, inv.Rect{
-                pos_x = state.ghost.pos_x,
-                pos_y = state.ghost.pos_y,
-                width = gw,
-                height = gh,
-            }) {
-                inv.DrawItemGhost(item,
-                    f32(state.ghost.pos_x),
-                    f32(state.ghost.pos_y),
-                    true,
-                    state.ghost.rotated,
-                    state.ghost.valid,
-                    loc.origin.x,
-                    loc.origin.y,
-                    cell_size,
-                    style)
-            }
-            break
+        gw := state.ghost.rotated ? item.definition.height : item.definition.width
+        gh := state.ghost.rotated ? item.definition.width : item.definition.height
+
+        if inv.ContainerGridCheckBounds(container_data.storage, inv.Rect{
+            pos_x = state.ghost.pos_x,
+            pos_y = state.ghost.pos_y,
+            width = gw,
+            height = gh,
+        }) {
+            inv.DrawItemGhost(item,
+                f32(state.ghost.pos_x),
+                f32(state.ghost.pos_y),
+                true,
+                state.ghost.rotated,
+                state.ghost.valid,
+                loc.origin.x,
+                loc.origin.y,
+                cell_size,
+                style)
         }
+        break
     }
 
     inv.DrawItemGhost(item,
@@ -116,22 +117,22 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
     slot_name := fmt.tprintf("%v", slot)
     slot_name_cstr := str.clone_to_cstring(slot_name, context.temp_allocator)
     rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], slot_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 5}), f32(ui.font_size.caption), 1, style.colors.text)
-    
-    if item, ok := state.character.equipment.slots[slot]; ok && item != nil {
-        rl.DrawRectangleLinesEx(rect, 2, style.colors.primary)
-        
-        // Show item name
-        item_name_cstr := str.clone_to_cstring(item.definition.name, context.temp_allocator)
-        rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], item_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 25}), f32(ui.font_size.label), 1, style.colors.success)
 
-        if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
-             // Show number of items if it's a container
-            item_count := len(container_data.storage.items)
-            count_str := fmt.tprintf("Items: %d", item_count)
-            count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
-            rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], count_cstr, ui.SnapVector2({pos.x + 5, pos.y + 80}), f32(ui.font_size.caption), 1, style.colors.text)
-        }
-    } else {
+    item, ok := state.character.equipment.slots[slot]
+    if !ok || item == nil {
         rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "EMPTY", ui.SnapVector2({pos.x + app.SLOT_SIZE/2 - 20, pos.y + app.SLOT_SIZE/2 - 7}), f32(ui.font_size.label), 1, style.colors.secondary)
+        return
+    }
+
+    rl.DrawRectangleLinesEx(rect, 2, style.colors.primary)
+
+    item_name_cstr := str.clone_to_cstring(item.definition.name, context.temp_allocator)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], item_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 25}), f32(ui.font_size.label), 1, style.colors.success)
+
+    if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
+        item_count := len(container_data.storage.items)
+        count_str := fmt.tprintf("Items: %d", item_count)
+        count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
+        rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], count_cstr, ui.SnapVector2({pos.x + 5, pos.y + 80}), f32(ui.font_size.caption), 1, style.colors.text)
     }
 }
