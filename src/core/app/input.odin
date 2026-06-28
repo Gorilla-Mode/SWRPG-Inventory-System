@@ -99,6 +99,8 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
             if rl.IsMouseButtonReleased(.LEFT) && state.ghost.valid {
                 inv.MoveItemToContainer(char, container, state.grab.dragged_item, state.ghost.pos_x, state.ghost.pos_y, state.ghost.rotated)
                 StopDragging(state)
+            } else if rl.IsMouseButtonReleased(.LEFT) {
+                StopDragging(state)
             }
             return
         }
