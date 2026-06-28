@@ -104,7 +104,6 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
 HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_size: f32, slots: map[inv.EquipmentSlot]rl.Rectangle, grid_locs: [dynamic]GridLocation) {
     mouse_pos := rl.GetMousePosition()
 
-    // 1. Check Grids
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         item := GetItemAtMousePos(container, loc.origin.x, loc.origin.y, cell_size)
@@ -113,27 +112,26 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
             return
         }
     }
-    
-    // 2. Check Slots
+
     for slot, rect in slots {
         if item, ok := char.equipment.slots[slot]; ok && item != nil {
             if rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(mouse_pos, rect) {
-                StartDraggingAtSlot(state, item, rect)
+                StartDraggingAtSlot(state, item, rect, cell_size)
                 return
             }
         }
     }
 }
 
-StartDraggingAtSlot :: proc(state: ^st.state, item: ^inv.ItemInstance, rect: rl.Rectangle) {
+StartDraggingAtSlot :: proc(state: ^st.state, item: ^inv.ItemInstance, rect: rl.Rectangle, cell_size: f32) {
     mouse_pos := rl.GetMousePosition()
     state.grab.is_dragging = true
     state.grab.dragged_item = item
     item.grabbed = true
-    state.grab.offset_x = mouse_pos.x - rect.x
-    state.grab.offset_y = mouse_pos.y - rect.y
-    state.ghost.unsnapped_x = rect.x
-    state.ghost.unsnapped_y = rect.y
+    state.grab.offset_x = (f32(item.definition.width) * cell_size) / 2
+    state.grab.offset_y = (f32(item.definition.height) * cell_size) / 2
+    state.ghost.unsnapped_x = mouse_pos.x - state.grab.offset_x
+    state.ghost.unsnapped_y = mouse_pos.y - state.grab.offset_y
     state.ghost.rotated = item.rotated
     state.ghost.valid = true
 }
