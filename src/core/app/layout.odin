@@ -9,7 +9,7 @@ GridLocation :: struct {
     origin: rl.Vector2,
 }
 
-SLOT_SIZE :: 100
+SLOT_SIZE :: 125
 SPACING :: 20
 AVATAR_WIDTH :: 200
 AVATAR_HEIGHT :: 400
