@@ -139,8 +139,8 @@ StartDraggingAtSlot :: proc(state: ^st.state, item: ^inv.ItemInstance, rect: rl.
     state.grab.is_dragging = true
     state.grab.dragged_item = item
     item.grabbed = true
-    state.grab.offset_x = (f32(item.definition.width) * cell_size) / 2
-    state.grab.offset_y = (f32(item.definition.height) * cell_size) / 2
+    state.grab.offset_x = f32(inv.ItemGetWidth(item)) * cell_size / 2
+    state.grab.offset_y = f32(inv.ItemGetHeight(item)) * cell_size / 2
     state.ghost.unsnapped_x = mouse_pos.x - state.grab.offset_x
     state.ghost.unsnapped_y = mouse_pos.y - state.grab.offset_y
     state.ghost.rotated = item.rotated
