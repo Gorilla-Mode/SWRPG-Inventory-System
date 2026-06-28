@@ -44,6 +44,7 @@ CharacterPageLayoutInfo :: struct {
     grid_start_x: f32,
     grid_start_y: f32,
     avatarCenterX: f32,
+    char_start_x: f32,
 }
 
 GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> CharacterPageLayoutInfo {
@@ -53,8 +54,9 @@ GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> Characte
     grid_start_x: f32 = 50 
     grid_start_y: f32 = CHAR_PAGE_GRID_START_Y
     avatarCenterX := f32(state.window.width) / 2
+    char_start_x := f32(i32(avatarCenterX - CHAR_BLOCK_WIDTH / 2))
     
-    return {grid_start_x, grid_start_y, avatarCenterX}
+    return {grid_start_x, grid_start_y, avatarCenterX, char_start_x}
 }
 
 GetCharacterGridLocations :: proc(char: ^inv.Character, start_y: f32, cell_size: f32, start_x: f32) -> [dynamic]GridLocation {

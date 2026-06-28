@@ -14,9 +14,7 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
     layout_info := app.GetCharacterPageLayoutInfo(state, style.grid.cell_size)
     
-    headerCenterX := f32(state.window.width) / 2
-    
-    DrawCharacterHeader(char, headerCenterX, layout_info.grid_start_y, style)
+    DrawCharacterHeader(char, layout_info.char_start_x, layout_info.grid_start_y, style)
     
     grid_locs := app.GetCharacterGridLocations(char, layout_info.grid_start_y, style.grid.cell_size, layout_info.grid_start_x)
     DrawCharacterGrids(grid_locs, style)
@@ -33,10 +31,9 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     }
 }
 
-DrawCharacterHeader :: proc(char: ^inv.Character, centerX: f32, topY: f32, style: ^ui.style) {
+DrawCharacterHeader :: proc(char: ^inv.Character, startX: f32, topY: f32, style: ^ui.style) {
     name_str := str.clone_to_cstring(char.name, context.temp_allocator)
-    name_width := f32(rl.MeasureTextEx(style.fonts.semibold[ui.font_size.header], name_str, f32(ui.font_size.title), 2).x)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({centerX - name_width - app.SPACING, topY - f32(ui.font_size.header)}), f32(ui.font_size.header), 2, style.colors.text)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({startX, topY - f32(ui.font_size.header) - 5}), f32(ui.font_size.header), 2, style.colors.text)
 }
 
 DrawCharacterGrids :: proc(grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
