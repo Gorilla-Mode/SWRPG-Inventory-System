@@ -158,6 +158,9 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
 
     beltItem := new(Item)
     beltItem.name = "Utility Belt"
+    beltItem.height = 1
+    beltItem.width = 4
+    beltItem.description = "A utility belt with various pouches and compartments."
     beltItem.data = ContainerData{
         storage = belt_container,
         sub_category = .Belt

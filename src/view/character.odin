@@ -15,16 +15,15 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     layout_info := app.GetCharacterPageLayoutInfo(state, style.grid.cell_size)
     
     headerCenterX := f32(state.window.width) / 2
-    centerY := (state.window.height + ui.TOP_MARGIN) / 2
-
-    DrawCharacterHeader(char, headerCenterX, style)
     
-    grid_locs := app.GetCharacterGridLocations(char, ui.TOP_MARGIN, style.grid.cell_size, layout_info.grid_start_x)
+    DrawCharacterHeader(char, headerCenterX, layout_info.grid_start_y, style)
+    
+    grid_locs := app.GetCharacterGridLocations(char, layout_info.grid_start_y, style.grid.cell_size, layout_info.grid_start_x)
     DrawCharacterGrids(grid_locs, style)
 
-    DrawCharacterAvatar(layout_info.avatarCenterX, centerY, style)
+    DrawCharacterAvatar(layout_info.avatarCenterX, layout_info.grid_start_y + app.AVATAR_HEIGHT / 2, style)
 
-    slots := app.GetCharacterSlotRects(state, layout_info.avatarCenterX)
+    slots := app.GetCharacterSlotRects(state, layout_info.avatarCenterX, layout_info.grid_start_y)
     for slot, rect in slots {
         draw_slot(slot, {rect.x, rect.y}, state, style)
     }
@@ -34,10 +33,10 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     }
 }
 
-DrawCharacterHeader :: proc(char: ^inv.Character, centerX: f32, style: ^ui.style) {
+DrawCharacterHeader :: proc(char: ^inv.Character, centerX: f32, topY: f32, style: ^ui.style) {
     name_str := str.clone_to_cstring(char.name, context.temp_allocator)
-    name_width := f32(rl.MeasureTextEx(style.fonts.bold[ui.font_size.title], name_str, f32(ui.font_size.title), 2).x)
-    rl.DrawTextEx(style.fonts.bold[ui.font_size.title], name_str, ui.SnapVector2({centerX - name_width / 2, ui.TOP_MARGIN}), f32(ui.font_size.title), 2, style.colors.text)
+    name_width := f32(rl.MeasureTextEx(style.fonts.semibold[ui.font_size.header], name_str, f32(ui.font_size.title), 2).x)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({centerX - name_width - app.SPACING, topY - f32(ui.font_size.header)}), f32(ui.font_size.header), 2, style.colors.text)
 }
 
 DrawCharacterGrids :: proc(grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
@@ -108,12 +107,10 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
 
 draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
     rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
-    
-    // Background
+
     rl.DrawRectangleRec(rect, style.colors.surface)
     rl.DrawRectangleLinesEx(rect, 1, style.colors.secondary)
-    
-    // Label
+
     slot_name := fmt.tprintf("%v", slot)
     slot_name_cstr := str.clone_to_cstring(slot_name, context.temp_allocator)
     rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], slot_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 5}), f32(ui.font_size.caption), 1, style.colors.text)
