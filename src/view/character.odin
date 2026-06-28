@@ -110,29 +110,23 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
 
 draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
     rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
+    item, ok := state.character.equipment.slots[slot]
+    itemText : cstring = ok ? str.clone_to_cstring(state.character.equipment.slots[slot].definition.name, context.allocator) : str.clone_to_cstring("EMPTY", context.allocator)
+    itemTextColor := ok ? style.colors.success : style.colors.text
+    fontSize := ui.font_size.label
+    font:= style.fonts.regular[fontSize]
+    size := rl.MeasureTextEx(font, itemText, f32(fontSize), 0)
+    itemTextPos := ok ? ui.SnapVector2({pos.x + 4, pos.y + 2 }) : ui.SnapVector2({pos.x + app.SLOT_SIZE * 0.5 - size.x * 0.5, pos.y + app.SLOT_SIZE * 0.5 - size.y * 0.5 })
 
     rl.DrawRectangleRec(rect, style.colors.surface)
-    rl.DrawRectangleLinesEx(rect, 1, style.colors.secondary)
+    rl.DrawRectangleLinesEx(rect, 2, style.colors.secondary)
+    rl.DrawTextEx(font, itemText, itemTextPos, f32(fontSize), 0, itemTextColor)
 
-    slot_name := fmt.tprintf("%v", slot)
-    slot_name_cstr := str.clone_to_cstring(slot_name, context.temp_allocator)
-    rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], slot_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 5}), f32(ui.font_size.caption), 1, style.colors.text)
-
-    item, ok := state.character.equipment.slots[slot]
-    if !ok || item == nil {
-        rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "EMPTY", ui.SnapVector2({pos.x + app.SLOT_SIZE/2 - 20, pos.y + app.SLOT_SIZE/2 - 7}), f32(ui.font_size.label), 1, style.colors.secondary)
-        return
-    }
-
-    rl.DrawRectangleLinesEx(rect, 2, style.colors.primary)
-
-    item_name_cstr := str.clone_to_cstring(item.definition.name, context.temp_allocator)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], item_name_cstr, ui.SnapVector2({pos.x + 5, pos.y + 25}), f32(ui.font_size.label), 1, style.colors.success)
-
+    if !ok do return
     if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
         item_count := len(container_data.storage.items)
         count_str := fmt.tprintf("Items: %d", item_count)
         count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
-        rl.DrawTextEx(style.fonts.regular[ui.font_size.caption], count_cstr, ui.SnapVector2({pos.x + 5, pos.y + 80}), f32(ui.font_size.caption), 1, style.colors.text)
+        rl.DrawTextEx(font, count_cstr, ui.SnapVector2({pos.x + 5, pos.y + app.SLOT_SIZE - app.SPACING + 4}), f32(fontSize), 1, style.colors.text)
     }
 }
