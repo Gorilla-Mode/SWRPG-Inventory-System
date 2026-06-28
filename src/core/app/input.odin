@@ -27,27 +27,20 @@ HandleRotationInput :: proc(state: ^st.state, cell_size: f32) {
     if item == nil do return
     if item.definition.width == item.definition.height do return
 
-    current_width: f32
-    current_height: f32
-
-    if state.ghost.rotated {
-        current_width = f32(item.definition.height) * cell_size
-        current_height = f32(item.definition.width) * cell_size
-    } else {
-        current_width = f32(item.definition.width) * cell_size
-        current_height = f32(item.definition.height) * cell_size
-    }
+    current_width := f32(inv.ItemGetWidthRotated(item.definition, state.ghost.rotated)) * cell_size
+    current_height := f32(inv.ItemGetHeightRotated(item.definition, state.ghost.rotated)) * cell_size
 
     old_x := state.grab.offset_x
     old_y := state.grab.offset_y
 
-    if state.ghost.rotated {
+    switch state.ghost.rotated {
+    case true:
         state.grab.offset_x = old_y
         state.grab.offset_y = current_width - old_x
-    } else {
+    case false:
         state.grab.offset_x = current_height - old_y
         state.grab.offset_y = old_x
-    }
+   }
 
     state.ghost.rotated = !state.ghost.rotated
 }
@@ -76,34 +69,36 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
     mouse_pos := rl.GetMousePosition()
 
     for slot, rect in slots {
-        if rl.CheckCollisionPointRec(mouse_pos, rect) {
-            state.ghost.valid = true
-            if rl.IsMouseButtonReleased(.LEFT) {
-                inv.EquipItem(char, slot, state.grab.dragged_item)
-                StopDragging(state)
-            }
-            return
+        if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
+
+        state.ghost.valid = true
+        if rl.IsMouseButtonReleased(.LEFT) {
+            inv.EquipItem(char, slot, state.grab.dragged_item)
+            StopDragging(state)
         }
+
+        return
     }
 
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         grid := container.storage.(inv.ContainerGrid)
         rect := rl.Rectangle{loc.origin.x, loc.origin.y, f32(grid.width) * cell_size, f32(grid.height) * cell_size}
-        
-        if rl.CheckCollisionPointRec(mouse_pos, rect) {
-            state.ghost.pos_x = i16((state.ghost.unsnapped_x - loc.origin.x + cell_size / 2) / cell_size)
-            state.ghost.pos_y = i16((state.ghost.unsnapped_y - loc.origin.y + cell_size / 2) / cell_size)
-            state.ghost.valid = inv.ContainerGridCanPlaceAt(container, state.grab.dragged_item.definition, state.ghost.pos_x, state.ghost.pos_y, state.grab.dragged_item.id, state.ghost.rotated)
-            
-            if rl.IsMouseButtonReleased(.LEFT) && state.ghost.valid {
-                inv.MoveItemToContainer(char, container, state.grab.dragged_item, state.ghost.pos_x, state.ghost.pos_y, state.ghost.rotated)
-                StopDragging(state)
-            } else if rl.IsMouseButtonReleased(.LEFT) {
-                StopDragging(state)
-            }
-            return
+
+        if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
+
+        state.ghost.pos_x = i16((state.ghost.unsnapped_x - loc.origin.x + cell_size / 2) / cell_size)
+        state.ghost.pos_y = i16((state.ghost.unsnapped_y - loc.origin.y + cell_size / 2) / cell_size)
+        state.ghost.valid = inv.ContainerGridCanPlaceAt(container, state.grab.dragged_item.definition, state.ghost.pos_x, state.ghost.pos_y, state.grab.dragged_item.id, state.ghost.rotated)
+
+        if rl.IsMouseButtonReleased(.LEFT) && state.ghost.valid  {
+            inv.MoveItemToContainer(char, container, state.grab.dragged_item, state.ghost.pos_x, state.ghost.pos_y, state.ghost.rotated)
+            StopDragging(state)
+        } else if rl.IsMouseButtonReleased(.LEFT) {
+            StopDragging(state)
         }
+
+        return
     }
 
     if rl.IsMouseButtonReleased(.LEFT) {
@@ -117,19 +112,19 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         item := GetItemAtMousePos(container, loc.origin.x, loc.origin.y, cell_size)
-        if item != nil && rl.IsMouseButtonDown(.LEFT) {
-            StartDragging(state, item, loc.origin.x, loc.origin.y, cell_size)
-            return
-        }
+        if item == nil || !rl.IsMouseButtonDown(.LEFT) do continue
+
+        StartDragging(state, item, loc.origin.x, loc.origin.y, cell_size)
+        return
     }
 
     for slot, rect in slots {
-        if item, ok := char.equipment.slots[slot]; ok && item != nil {
-            if rl.IsMouseButtonDown(.LEFT) && rl.CheckCollisionPointRec(mouse_pos, rect) {
-                StartDraggingAtSlot(state, item, rect, cell_size)
-                return
-            }
-        }
+        item, ok := char.equipment.slots[slot]
+        if !ok || item == nil do continue
+        if !rl.IsMouseButtonDown(.LEFT) || !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
+
+        StartDraggingAtSlot(state, item, rect, cell_size)
+        return
     }
 }
 
@@ -180,20 +175,19 @@ HandleHover :: proc(state: ^st.state, container: ^inv.Container, origin_x, origi
 		return
 	}
 
-	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-		if !inv.ContainerGridCanRotateItem(container, item) do return
+	if !rl.IsKeyPressed(rl.KeyboardKey.SPACE) do return
+	if !inv.ContainerGridCanRotateItem(container, item) do return
 
-		mouse_pos := rl.GetMousePosition()
-		gx := i16((mouse_pos.x - origin_x) / cell_size)
-		gy := i16((mouse_pos.y - origin_y) / cell_size)
+	mouse_pos := rl.GetMousePosition()
+	gx := i16((mouse_pos.x - origin_x) / cell_size)
+	gy := i16((mouse_pos.y - origin_y) / cell_size)
 
-		new_pos_x, new_pos_y := CalculateRotatedPosition(item, gx, gy)
+	new_pos_x, new_pos_y := CalculateRotatedPosition(item, gx, gy)
 
-		if inv.ContainerGridCanPlaceAt(container, item.definition, new_pos_x, new_pos_y, item.id, !item.rotated) {
-			item.pos_x = new_pos_x
-			item.pos_y = new_pos_y
-			item.rotated = !item.rotated
-		}
+	if inv.ContainerGridCanPlaceAt(container, item.definition, new_pos_x, new_pos_y, item.id, !item.rotated) {
+		item.pos_x = new_pos_x
+		item.pos_y = new_pos_y
+		item.rotated = !item.rotated
 	}
 }
 
@@ -283,16 +277,13 @@ ShowItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, style: 
 HideItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, style: ^ui.style, state: ^st.state){
 	if state.grab.selected_item == nil do return
 
-	is_in_container := false
 	for item in container.items {
-		if item == state.grab.selected_item {
-			is_in_container = true
-			break
-		}
-	}
-	if !is_in_container do return
+		if item != state.grab.selected_item do continue
 
-	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style, origin_x, origin_y)) {
-		state.grab.selected_item = nil
+		if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT) && !CheckCollisonItemCard(state, style, origin_x, origin_y)) {
+			state.grab.selected_item = nil
+		}
+
+		return
 	}
 }
