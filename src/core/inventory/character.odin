@@ -8,47 +8,12 @@ EquipmentSlot :: enum{
     Armor
 }
 
-EquipmentSlotWhitelist :: map[EquipmentSlot][dynamic]ItemCategory
-
-CharacterEquipment :: struct{
-    slots: map[EquipmentSlot]^ItemInstance,
-    slot_whitelist: EquipmentSlotWhitelist,
-}
-
-CreateCharacterEquipmentWhitelist :: proc() -> EquipmentSlotWhitelist {
-    whitelist := make(EquipmentSlotWhitelist)
-
-    whitelist[.Backpack] = make([dynamic]ItemCategory)
-    append(&whitelist[.Backpack], ItemCategory.Gear)
-
-    whitelist[.Belt] = make([dynamic]ItemCategory)
-    append(&whitelist[.Belt], ItemCategory.Gear)
-
-    whitelist[.Holster] = make([dynamic]ItemCategory)
-    append(&whitelist[.Holster], ItemCategory.Weapon)
-
-    whitelist[.Back] = make([dynamic]ItemCategory)
-    append(&whitelist[.Back], ItemCategory.Weapon)
-    append(&whitelist[.Back], ItemCategory.Gear)
-
-    whitelist[.Armor] = make([dynamic]ItemCategory)
-    append(&whitelist[.Armor], ItemCategory.Armor)
-    
-    return whitelist
-}
-
-CanEquipInSlot :: proc(whitelist: EquipmentSlotWhitelist, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
-    if item == nil do return false
-
-    allowed_categories, ok := whitelist[slot]
-    if !ok do return false
-
-    for category in allowed_categories {
-        if item.definition.category == category {
-            return true
-        }
-    }
-    return false
+EquipmentSlotString := [EquipmentSlot]string{
+    .Backpack = "Backpack",
+    .Belt = "Belt",
+    .Holster = "Holster",
+    .Back = "Back",
+    .Armor = "Armor"
 }
 
 Character :: struct{
@@ -58,12 +23,31 @@ Character :: struct{
     equipment: CharacterEquipment
 }
 
-EquipmentSlotString := [EquipmentSlot]string{
-    .Backpack = "Backpack",
-    .Belt = "Belt",
-    .Holster = "Holster",
-    .Back = "Back",
-    .Armor = "Armor"
+CharacterEquipment :: struct{
+    slots: map[EquipmentSlot]^ItemInstance,
+}
+
+ItemCategoryMask :: distinct u32
+
+CATEGORY_GEAR   :: ItemCategoryMask(1 << u32(ItemCategory.Gear))
+CATEGORY_WEAPON :: ItemCategoryMask(1 << u32(ItemCategory.Weapon))
+CATEGORY_ARMOR  :: ItemCategoryMask(1 << u32(ItemCategory.Armor))
+
+SlotWhitelist := [EquipmentSlot]ItemCategoryMask{
+    .Backpack = CATEGORY_GEAR,
+    .Belt     = CATEGORY_GEAR,
+    .Holster  = CATEGORY_WEAPON,
+    .Back     = CATEGORY_WEAPON | CATEGORY_GEAR,
+    .Armor    = CATEGORY_ARMOR,
+}
+
+CanEquipInSlot :: proc(slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+    if item == nil do return false
+
+    allowed := SlotWhitelist[slot]
+    item_mask := ItemCategoryMask(1 << u32(item.definition.category))
+
+    return (allowed & item_mask) != 0
 }
 
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
@@ -162,7 +146,7 @@ IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
 }
 
 EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
-    if !CanEquipInSlot(char.equipment.slot_whitelist, slot, item) {
+    if !CanEquipInSlot(slot, item) {
         return false
     }
     

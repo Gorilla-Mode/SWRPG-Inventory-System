@@ -151,7 +151,6 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     char.id = "1"
 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
-    char.equipment.slot_whitelist = CreateCharacterEquipmentWhitelist()
     char.equipment.slots[.Backpack] = backpack
 
     belt_container := new(Container)
