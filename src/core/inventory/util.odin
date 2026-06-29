@@ -28,7 +28,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     backpackItem.base_rarity = 1
     backpackItem.base_price = 100
     backpackItem.qualities = nil
-    backpackItem.category = ItemCategory.Gear
+    backpackItem.category = ItemCategory.Container
     backpackItem.data = ContainerData{
         storage = backpack,
         sub_category = ContainerSubCategory.Backpack
@@ -174,7 +174,7 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     beltItem.height = 1
     beltItem.width = 4
     beltItem.description = "A utility belt with various pouches and compartments."
-    beltItem.category = ItemCategory.Gear
+    beltItem.category = ItemCategory.Container
     beltItem.data = ContainerData{
         storage = belt_container,
         sub_category = .Belt

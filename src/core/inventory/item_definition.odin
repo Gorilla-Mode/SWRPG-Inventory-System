@@ -4,7 +4,8 @@
 ItemCategory :: enum{
     Weapon,
     Armor,
-    Gear
+    Gear,
+    Container
 }
 
 //Tags for the item, used for filtering and organization

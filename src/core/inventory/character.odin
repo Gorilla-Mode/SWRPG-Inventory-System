@@ -53,13 +53,13 @@ CheckSubCategory :: proc(item: ^ItemInstance, rule: EquipmentSlotRule) -> bool {
         if (rule.blacklist_weapons & weapon_mask) != 0 do return false
         return (rule.weapons & weapon_mask) != 0
     case ContainerData:
-        gear_mask := GearSubCategoryMask(1 << u32(data.sub_category))
+        container_mask := ContainerSubCategoryMask(1 << u32(data.sub_category))
 
-        if (rule.blacklist_gear & gear_mask) != 0 do return false
-        return (rule.gear & gear_mask) != 0
+        if (rule.blacklist_container & container_mask) != 0 do return false
+        return (rule.container & container_mask) != 0
     }
 
-    return true //true if item has no sub data
+    return false
 }
 
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
