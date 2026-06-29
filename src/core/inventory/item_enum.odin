@@ -30,3 +30,11 @@ ContainerSubCategory :: enum{
     Clothing,
     Pouch,
 }
+
+GearSubCategory :: enum{
+    Tool,
+    Medical,
+    Electronics,
+    Survival,
+    Miscellaneous,
+}

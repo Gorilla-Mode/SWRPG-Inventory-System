@@ -42,6 +42,13 @@ CONTAINER_CLOTHING :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Clo
 CONTAINER_POUCH    :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Pouch))
 CONTAINER_ALL      :: ContainerSubCategoryMask(CONTAINER_BACKPACK | CONTAINER_BELT | CONTAINER_CLOTHING | CONTAINER_POUCH)
 
+GEAR_TOOL        :: GearSubCategoryMask(1 << u32(GearSubCategory.Tool))
+GEAR_MEDICAL     :: GearSubCategoryMask(1 << u32(GearSubCategory.Medical))
+GEAR_ELECTRONICS :: GearSubCategoryMask(1 << u32(GearSubCategory.Electronics))
+GEAR_SURVIVAL    :: GearSubCategoryMask(1 << u32(GearSubCategory.Survival))
+GEAR_MISC        :: GearSubCategoryMask(1 << u32(GearSubCategory.Miscellaneous))
+GEAR_ALL         :: GearSubCategoryMask(GEAR_TOOL | GEAR_MEDICAL | GEAR_ELECTRONICS | GEAR_SURVIVAL | GEAR_MISC)
+
 SlotWhitelist := [EquipmentSlot]EquipmentSlotRule{
     .Backpack = {
         categories = CATEGORY_CONTAINER,
@@ -60,9 +67,8 @@ SlotWhitelist := [EquipmentSlot]EquipmentSlotRule{
 
     .Back = {
         categories = CATEGORY_ALL,
-        weapons = WEAPON_ALL,
-
-        blacklist_container = CONTAINER_ALL
+        blacklist_categories = CATEGORY_CONTAINER,
+        sub_override = true
     },
 
     .Armor = {

@@ -108,6 +108,9 @@ TestItem :: proc(cell_size: f32) -> struct{
     canteen.base_rarity = 1
     canteen.features = nil
     canteen.category = ItemCategory.Gear
+    canteen.data = GearData {
+        sub_category = GearSubCategory.Survival
+    }
     append_elem(&canteen.features, "Can contain 1L of liquid")
 
     rifle_instance := new(ItemInstance)
