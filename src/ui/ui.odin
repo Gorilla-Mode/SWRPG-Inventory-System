@@ -3,7 +3,7 @@
 import rl "vendor:raylib"
 
 style :: struct{
-    icons: map[Icons]rl.Image,
+    icons: map[Icons]rl.Texture2D,
     fonts: fonts,
     colors: color_palette,
 
@@ -17,3 +17,6 @@ grid :: struct{
     offset_x:  f32,
     offset_y:  f32
 }
+
+HEADER_HEIGHT :: 34
+TOP_MARGIN :: HEADER_HEIGHT + 10

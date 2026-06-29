@@ -4,8 +4,9 @@ import app "../core/app"
 import inv "../core/inventory"
 import ui "../ui"
 import rl "vendor:raylib"
+import st "../core/state"
 
-DrawGrid :: proc(item: ^inv.Item, state: ^app.State, style: ^ui.style){
+DrawGrid :: proc(item: ^inv.Item, state: ^st.state, style: ^ui.style){
     container, ok := item.data.(inv.ContainerData)
     if !ok {
         return
@@ -52,26 +53,36 @@ DrawGrid :: proc(item: ^inv.Item, state: ^app.State, style: ^ui.style){
         style)
     }
 
-    if(app.ShowItemCard(container.storage, style, state) || state.grab.selected_item != nil){
-        DrawItemCard(container.storage, state, style)
+    if(app.ShowItemCard(container.storage, style.grid.origin_x, style.grid.origin_y, style, state) || state.grab.selected_item != nil){
+        DrawItemCard(container.storage, style.grid.origin_x, style.grid.origin_y, state, style)
     }
 }
 
-DrawItemCard :: proc(container: ^inv.Container, state: ^app.State, style: ^ui.style){
+DrawItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, state: ^st.state, style: ^ui.style){
     if state.grab.selected_item != nil {
-        inv.DrawItemCard(state.grab.selected_item,
-        f32(state.grab.selected_item.pos_x),
-        f32(state.grab.selected_item.pos_y),
-        style.grid.origin_x,
-        style.grid.origin_y,
-        style.grid.cell_size,
-        style)
+        is_in_container := false
+        for item in container.items {
+            if item == state.grab.selected_item {
+                is_in_container = true
+                break
+            }
+        }
+
+        if is_in_container {
+            inv.DrawItemCard(state.grab.selected_item,
+            f32(state.grab.selected_item.pos_x),
+            f32(state.grab.selected_item.pos_y),
+            origin_x,
+            origin_y,
+            style.grid.cell_size,
+            style)
+        }
     }
 
-    app.HideItemCard(container, style, state)
+    app.HideItemCard(container, origin_x, origin_y, style, state)
 }
 
-GridGetCenter :: proc(grid_size: rl.Vector2, state: ^app.State) -> rl.Vector2 {
+GridGetCenter :: proc(grid_size: rl.Vector2, state: ^st.state) -> rl.Vector2 {
     center := rl.Vector2{}
     //Cursed wobbly ahh text fix
     center.x = f32(i32((state.window.width - grid_size.x) / 2))

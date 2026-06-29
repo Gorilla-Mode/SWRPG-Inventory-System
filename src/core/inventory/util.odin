@@ -10,7 +10,8 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle: ^Item,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
-    backpackItem: ^Item}
+    backpackItem: ^Item,
+    backpackInstance: ^ItemInstance}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
@@ -31,6 +32,10 @@ TestItem :: proc(cell_size: f32) -> struct{
         storage = backpack,
         sub_category = ContainerSubCategory.Backpack
     }
+
+    backpackInstance := new(ItemInstance)
+    backpackInstance.definition = backpackItem
+    backpackInstance.id = 100
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     sword := new(Item)
@@ -131,8 +136,43 @@ TestItem :: proc(cell_size: f32) -> struct{
         rifle,
         sword_instance,
         rifle_instance,
-        backpackItem
+        backpackItem,
+        backpackInstance
     }
+}
+
+TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+    char := new(Character)
+    char.name = "Lord Holcrub"
+    char.id = "1"
+
+    char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
+    char.equipment.slots[.Backpack] = backpack
+
+    belt_container := new(Container)
+    belt_container.type = .Belt
+    belt_container.storage = ContainerGrid{
+        width = 4,
+        height = 1,
+    }
+
+    beltItem := new(Item)
+    beltItem.name = "Utility Belt"
+    beltItem.height = 1
+    beltItem.width = 4
+    beltItem.description = "A utility belt with various pouches and compartments."
+    beltItem.data = ContainerData{
+        storage = belt_container,
+        sub_category = .Belt
+    }
+
+    beltInstance := new(ItemInstance)
+    beltInstance.definition = beltItem
+    beltInstance.id = 101
+
+    char.equipment.slots[.Belt] = beltInstance
+
+    return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container
@@ -181,17 +221,12 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 // Function to convert the container and its items into a string representation for debugging/ease of use purposes
 ContainerToString :: proc(container: ^Container) -> string {
     builder := str.Builder{}
+    str.builder_init(&builder, context.temp_allocator)
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height)
-    defer {
-        for row in grid {
-            delete(row)
-        }
-        delete(grid)
-    }
+    grid := make([][]rune, container.storage.(ContainerGrid).height, context.temp_allocator)
 
     for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width)
+        grid[y] = make([]rune, container.storage.(ContainerGrid).width, context.temp_allocator)
 
         for x in 0..<container.storage.(ContainerGrid).width {
             grid[y][x] = '.'

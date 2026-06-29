@@ -6,6 +6,7 @@ import ui "ui"
 import inv "core/inventory"
 import app "core/app"
 import v "view"
+import st "core/state"
 
 main :: proc()
 {
@@ -17,51 +18,53 @@ main :: proc()
         }
     }
 
-    state := app.State{}
+    state := st.state{}
     items := inv.TestItem(style.grid.cell_size)
-
-    style.icons = ui.LoadImages()
-    style.colors = ui.LoadColorPalette()
-    defer delete(style.icons)
+    state.character = inv.TestCharacter(items.backpackInstance)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(1280, 720, "SWIS")
-    util.SetDarkTitlebar()
-    rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
-    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
+    rl.InitWindow(1440, 720, "Inventory System")
 
+    style.icons = ui.LoadImages()
+    appIcon := rl.LoadImageFromTexture(style.icons[ui.Icons.app_icon])
+    rl.ImageFormat(&appIcon, rl.PixelFormat.UNCOMPRESSED_R8G8B8A8)
+    rl.SetWindowIcon(appIcon)
+
+    util.SetDarkTitlebar()
+    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
     rl.SetExitKey(nil)
 
+    style.colors = ui.LoadColorPalette()
     style.fonts = ui.LoadFont()
     defer ui.FreeFont(style.fonts)
+    defer ui.FreeImages(style.icons)
 
     for !rl.WindowShouldClose()
     {
+        free_all(context.temp_allocator)
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
-        app.UpdateWindowState(&state)
-
-        app.InputMoveItem(&state,
-        items.backpack,
-        style.grid.origin_x,
-        style.grid.origin_y,
-        style.grid.cell_size)
+        st.UpdateWindowState(&state)
+        
+        switch state.page {
+        case .Inventory:
+            app.InputMoveItem(&state,
+            items.backpack,
+            style.grid.origin_x,
+            style.grid.origin_y,
+            style.grid.cell_size)
+        case .Character:
+            app.InputCharacter(&state, &style)
+        case .Debug, .Catalog:
+        }
 
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
-        "SWIS",
-        {20, 5},
-        f32(ui.font_size.title),
-        0,
-        style.colors.text)
-
-        v.DrawGrid(items.backpackItem, &state, &style)
-        v.DrawDebug(&state, &style)
+        v.DrawUI(&state, &style, items.backpackItem)
 
         rl.EndDrawing()
     }
