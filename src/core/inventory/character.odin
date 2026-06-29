@@ -27,27 +27,93 @@ CharacterEquipment :: struct{
     slots: map[EquipmentSlot]^ItemInstance,
 }
 
-ItemCategoryMask :: distinct u32
+ItemCategoryMask      :: distinct u32
+WeaponSubCategoryMask :: distinct u32
+GearSubCategoryMask   :: distinct u32
+ArmorSubCategoryMask  :: distinct u32
 
 CATEGORY_GEAR   :: ItemCategoryMask(1 << u32(ItemCategory.Gear))
 CATEGORY_WEAPON :: ItemCategoryMask(1 << u32(ItemCategory.Weapon))
 CATEGORY_ARMOR  :: ItemCategoryMask(1 << u32(ItemCategory.Armor))
 
-SlotWhitelist := [EquipmentSlot]ItemCategoryMask{
-    .Backpack = CATEGORY_GEAR,
-    .Belt     = CATEGORY_GEAR,
-    .Holster  = CATEGORY_WEAPON,
-    .Back     = CATEGORY_WEAPON | CATEGORY_GEAR,
-    .Armor    = CATEGORY_ARMOR,
+WEAPON_PISTOL  :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Pistol))
+WEAPON_BLADE   :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Blade))
+WEAPON_CARBINE :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Carbine))
+WEAPON_RIFLE   :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Rifle))
+WEAPON_BLUNT   :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Blunt))
+WEAPON_ALL     :: WeaponSubCategoryMask(WEAPON_PISTOL | WEAPON_BLADE | WEAPON_CARBINE | WEAPON_RIFLE | WEAPON_BLUNT)
+
+CONTAINER_BACKPACK :: GearSubCategoryMask(1 << u32(ContainerSubCategory.Backpack))
+CONTAINER_BELT     :: GearSubCategoryMask(1 << u32(ContainerSubCategory.Belt))
+CONTAINER_CLOTHING :: GearSubCategoryMask(1 << u32(ContainerSubCategory.Clothing))
+CONTAINER_POUCH    :: GearSubCategoryMask(1 << u32(ContainerSubCategory.Pouch))
+CONTAINER_ALL      :: GearSubCategoryMask(CONTAINER_BACKPACK | CONTAINER_BELT | CONTAINER_CLOTHING | CONTAINER_POUCH)
+
+
+
+EquipmentSlotRule :: struct {
+    categories: ItemCategoryMask,
+
+    weapons:  WeaponSubCategoryMask,
+    gear:     GearSubCategoryMask,
+    armor:    ArmorSubCategoryMask,
+
+    sub_override: bool,
+    cat_override: bool,
 }
 
-CanEquipInSlot :: proc(slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+SlotWhitelist := [EquipmentSlot]EquipmentSlotRule{
+    .Backpack = {
+        categories = CATEGORY_GEAR,
+        gear = CONTAINER_BACKPACK,
+    },
+
+    .Belt = {
+        categories = CATEGORY_GEAR,
+         gear = CONTAINER_BELT,
+    },
+
+    .Holster = {
+        categories = CATEGORY_WEAPON,
+        weapons = WEAPON_PISTOL | WEAPON_BLADE,
+        sub_override = true,
+    },
+
+    .Back = {
+        cat_override = true
+    },
+
+    .Armor = {
+        categories = CATEGORY_ARMOR,
+    },
+}
+
+CanEquipInSlot :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
     if item == nil do return false
+    if char == nil do return false
+    if char.equipment.slots[slot] != nil do return false
 
-    allowed := SlotWhitelist[slot]
-    item_mask := ItemCategoryMask(1 << u32(item.definition.category))
+    rule := SlotWhitelist[slot]
+    item_cat := ItemCategoryMask(1 << u32(item.definition.category))
 
-    return (allowed & item_mask) != 0
+    if rule.cat_override == true do return true
+    if (rule.categories & item_cat) == 0 do return false
+    return CheckSubCategory(item, rule)
+}
+
+CheckSubCategory :: proc(item: ^ItemInstance, rule: EquipmentSlotRule) -> bool {
+    if rule.sub_override == true do return true
+
+    switch data in item.definition.data {
+    case WeaponData:
+        weapon_mask := WeaponSubCategoryMask(1 << u32(data.sub_category))
+        return (rule.weapons & weapon_mask) != 0
+    case ContainerData:
+        gear_mask := GearSubCategoryMask(1 << u32(data.sub_category))
+        return (rule.gear & gear_mask) != 0
+    }
+
+    return false
 }
 
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
@@ -146,9 +212,7 @@ IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
 }
 
 EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
-    if !CanEquipInSlot(slot, item) {
-        return false
-    }
+    if !CanEquipInSlot(char, slot, item) do return false
     
     RemoveItemFromCurrentLocation(char, item)
     char.equipment.slots[slot] = item
