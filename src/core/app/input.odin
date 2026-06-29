@@ -71,7 +71,12 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
     for slot, rect in slots {
         if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
 
-        state.ghost.valid = true
+        if !(inv.CanEquipInSlot(char.equipment.slot_whitelist, slot, state.grab.dragged_item)){
+            state.ghost.valid = false
+        } else {
+            state.ghost.valid = true
+        }
+
         if rl.IsMouseButtonReleased(.LEFT) {
             inv.EquipItem(char, slot, state.grab.dragged_item)
             StopDragging(state)

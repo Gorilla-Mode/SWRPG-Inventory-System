@@ -28,6 +28,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     backpackItem.base_rarity = 1
     backpackItem.base_price = 100
     backpackItem.qualities = nil
+    backpackItem.category = ItemCategory.Gear
     backpackItem.data = ContainerData{
         storage = backpack,
         sub_category = ContainerSubCategory.Backpack
@@ -46,6 +47,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     sword.base_rarity = 6
     sword.base_price = 5000
     sword.qualities = nil
+    sword.category = ItemCategory.Weapon
     append_elem(&sword.qualities, "Pierce 5")
 
     rifle := new(Item)
@@ -56,6 +58,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle.base_rarity = 4
     rifle.base_price = 1200
     rifle.qualities = nil
+    rifle.category = ItemCategory.Weapon
     append_elems(&rifle.qualities, "Pirece 1", "Full-Auto")
     rifle.hardpoints = 4
     rifle.data = WeaponData {
@@ -76,6 +79,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     knife.base_price = 200
     knife.base_rarity = 2
     knife.qualities = nil
+    knife.category = ItemCategory.Weapon
     append_elem(&knife.qualities, "Pierce 2")
     knife.hardpoints = 1
     knife.data = WeaponData {
@@ -147,6 +151,7 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     char.id = "1"
 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
+    char.equipment.slot_whitelist = CreateCharacterEquipmentWhitelist()
     char.equipment.slots[.Backpack] = backpack
 
     belt_container := new(Container)
@@ -161,6 +166,7 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     beltItem.height = 1
     beltItem.width = 4
     beltItem.description = "A utility belt with various pouches and compartments."
+    beltItem.category = ItemCategory.Gear
     beltItem.data = ContainerData{
         storage = belt_container,
         sub_category = .Belt
