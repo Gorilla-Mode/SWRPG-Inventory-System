@@ -48,6 +48,14 @@ TestItem :: proc(cell_size: f32) -> struct{
     sword.base_price = 5000
     sword.qualities = nil
     sword.category = ItemCategory.Weapon
+    sword.data = WeaponData {
+        skill = WeaponSkill.Melee,
+        crit = 1,
+        damage = 2,
+        scale = WeaponScale.Personal,
+        rangeband = WeaponRangebands.Engaged,
+        sub_category = WeaponSubCategory.Blade
+    }
     append_elem(&sword.qualities, "Pierce 5")
 
     rifle := new(Item)
@@ -99,6 +107,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     canteen.base_price = 50
     canteen.base_rarity = 1
     canteen.features = nil
+    canteen.category = ItemCategory.Gear
     append_elem(&canteen.features, "Can contain 1L of liquid")
 
     rifle_instance := new(ItemInstance)

@@ -79,12 +79,6 @@ WeaponSkillString :: proc(skill: WeaponSkill) -> string {
     return ""
 }
 
-//Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale
-WeaponScale :: enum{
-    Personal,
-    Planetary
-}
-
 WeaponScaleString :: proc(scale: WeaponScale) -> string {
     switch scale {
         case WeaponScale.Personal:
@@ -93,16 +87,6 @@ WeaponScaleString :: proc(scale: WeaponScale) -> string {
             return "Planetary"
     }
     return ""
-}
-
-WeaponRangebands :: enum{
-    Engaged,
-    Close,
-    Short,
-    Medium,
-    Long,
-    Extreme,
-    Strategic
 }
 
 WeaponRangebandString :: proc(rangeband: WeaponRangebands) -> string {
@@ -125,14 +109,6 @@ WeaponRangebandString :: proc(rangeband: WeaponRangebands) -> string {
     return ""
 }
 
-WeaponSubCategory :: enum{
-    Pistol,
-    Rifle,
-    Carbine,
-    Blade,
-    Blunt,
-}
-
 WeaponSubCategoryString :: proc(sub_category: WeaponSubCategory) -> string {
     switch sub_category {
         case WeaponSubCategory.Pistol:
@@ -153,13 +129,6 @@ ContainerData :: struct{
     storage: ^Container,
 
     sub_category: ContainerSubCategory
-}
-
-ContainerSubCategory :: enum{
-    Backpack,
-    Belt,
-    Clothing,
-    Pouch,
 }
 
 ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string {
