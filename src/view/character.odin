@@ -7,6 +7,11 @@ import inv "../core/inventory"
 import app "../core/app"
 import str "core:strings"
 
+OverlayJob :: struct {
+    storage: ^inv.Container,
+    x, y: f32,
+}
+
 DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     char := state.character
     if char == nil do return
@@ -34,16 +39,26 @@ DrawCharacterHeader :: proc(char: ^inv.Character, startX: f32, topY: f32, style:
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], name_str, ui.SnapVector2({startX, topY - f32(ui.font_size.header) - 2}), f32(ui.font_size.header), 2, style.colors.text)
 }
 
-DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocation, style: ^ui.style) {
+DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocation, style: ^ui.style,) {
+    overlay_jobs: [dynamic]OverlayJob
+    defer delete(overlay_jobs)
+
     for loc in grid_locs {
         inv.DrawContainerGrid(loc.item.definition, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
 
         container_data, ok := loc.item.definition.data.(inv.ContainerData)
         if !ok do continue
 
-        if app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) || state.grab.selected_item != nil {
-            DrawItemCard(container_data.storage, loc.origin.x, loc.origin.y, state, style)
+        should_show := app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) ||
+        state.grab.selected_item != nil
+
+        if should_show {
+            append(&overlay_jobs, OverlayJob{ storage = container_data.storage, x = loc.origin.x, y = loc.origin.y})
         }
+    }
+
+    for job in overlay_jobs {
+        DrawItemCard(job.storage, job.x, job.y, state, style)
     }
 }
 
