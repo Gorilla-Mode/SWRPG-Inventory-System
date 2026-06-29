@@ -110,15 +110,18 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
 draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
     rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
     item, ok := state.character.equipment.slots[slot]
+    slotText : cstring = str.clone_to_cstring(inv.EquipmentSlotString[slot], context.temp_allocator)
     itemText : cstring = ok ? str.clone_to_cstring(state.character.equipment.slots[slot].definition.name, context.temp_allocator) : str.clone_to_cstring("EMPTY", context.temp_allocator)
     itemTextColor := ok ? style.colors.success : style.colors.text
     fontSize := ui.font_size.label
     font:= style.fonts.regular[fontSize]
     size := rl.MeasureTextEx(font, itemText, f32(fontSize), 0)
-    itemTextPos := ok ? ui.SnapVector2({pos.x + 4, pos.y + 2 }) : ui.SnapVector2({pos.x + app.SLOT_SIZE * 0.5 - size.x * 0.5, pos.y + app.SLOT_SIZE * 0.5 - size.y * 0.5 })
+    itemTextPos := ok ? ui.SnapVector2({pos.x + 4, pos.y + size.y + 2 }) : ui.SnapVector2({pos.x + app.SLOT_SIZE * 0.5 - size.x * 0.5, pos.y + app.SLOT_SIZE * 0.5 - size.y * 0.5 })
+    slotTextPos := ui.SnapVector2({pos.x + 4, pos.y + 2 })
 
     rl.DrawRectangleRec(rect, style.colors.surface)
     rl.DrawRectangleLinesEx(rect, 2, style.colors.secondary)
+    rl.DrawTextEx(font, slotText, slotTextPos, f32(fontSize), 0, style.colors.text)
     rl.DrawTextEx(font, itemText, itemTextPos, f32(fontSize), 0, itemTextColor)
 
     if !ok do return

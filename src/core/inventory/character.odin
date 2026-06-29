@@ -19,6 +19,14 @@ Character :: struct{
     equipment: CharacterEquipment
 }
 
+EquipmentSlotString := [EquipmentSlot]string{
+    .Backpack = "Backpack",
+    .Belt = "Belt",
+    .Holster = "Holster",
+    .Back = "Back",
+    .Armor = "Armor"
+}
+
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
     if container == nil do return
     for item in container.items {
