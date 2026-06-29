@@ -4,7 +4,8 @@
 ItemCategory :: enum{
     Weapon,
     Armor,
-    Gear
+    Gear,
+    Container
 }
 
 //Tags for the item, used for filtering and organization
@@ -38,6 +39,7 @@ Item :: struct{
 ItemData :: union{
     WeaponData,
     ContainerData,
+    GearData
 }
 
 WeaponData :: struct{
@@ -141,6 +143,26 @@ ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string
             return "Clothing"
         case ContainerSubCategory.Pouch:
             return "Pouch"
+    }
+    return ""
+}
+
+GearData :: struct{
+    sub_category: GearSubCategory
+}
+
+GearSubCategoryString :: proc(sub_category: GearSubCategory) -> string {
+    switch sub_category {
+        case GearSubCategory.Tool:
+            return "Tool"
+        case GearSubCategory.Medical:
+            return "Medical"
+        case GearSubCategory.Electronics:
+            return "Electronics"
+        case GearSubCategory.Survival:
+            return "Survival"
+        case GearSubCategory.Miscellaneous:
+            return "Miscellaneous"
     }
     return ""
 }
