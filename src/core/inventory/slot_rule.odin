@@ -8,26 +8,26 @@ ContainerSubCategoryMask :: distinct u32
 
 EquipmentSlotRule :: struct {
     categories: ItemCategoryMask,
-    weapons:  WeaponSubCategoryMask,
-    gear:     GearSubCategoryMask,
-    armor:    ArmorSubCategoryMask,
-    container: ContainerSubCategoryMask,
+    weapons:    WeaponSubCategoryMask,
+    gear:       GearSubCategoryMask,
+    armor:      ArmorSubCategoryMask,
+    container:  ContainerSubCategoryMask,
 
     blacklist_categories: ItemCategoryMask,
-    blacklist_weapons:  WeaponSubCategoryMask,
-    blacklist_gear:     GearSubCategoryMask,
-    blacklist_armor:    ArmorSubCategoryMask,
-    blacklist_container: ContainerSubCategoryMask,
+    blacklist_weapons:    WeaponSubCategoryMask,
+    blacklist_gear:       GearSubCategoryMask,
+    blacklist_armor:      ArmorSubCategoryMask,
+    blacklist_container:  ContainerSubCategoryMask,
 
     sub_override: bool,
     cat_override: bool
 }
 
-CATEGORY_GEAR   :: ItemCategoryMask(1 << u32(ItemCategory.Gear))
-CATEGORY_WEAPON :: ItemCategoryMask(1 << u32(ItemCategory.Weapon))
-CATEGORY_ARMOR  :: ItemCategoryMask(1 << u32(ItemCategory.Armor))
+CATEGORY_GEAR      :: ItemCategoryMask(1 << u32(ItemCategory.Gear))
+CATEGORY_WEAPON    :: ItemCategoryMask(1 << u32(ItemCategory.Weapon))
+CATEGORY_ARMOR     :: ItemCategoryMask(1 << u32(ItemCategory.Armor))
 CATEGORY_CONTAINER :: ItemCategoryMask(1 << u32(ItemCategory.Container))
-CATEGORY_ALL    :: ItemCategoryMask(CATEGORY_GEAR | CATEGORY_WEAPON | CATEGORY_ARMOR | CATEGORY_CONTAINER)
+CATEGORY_ALL       :: ItemCategoryMask(CATEGORY_GEAR | CATEGORY_WEAPON | CATEGORY_ARMOR | CATEGORY_CONTAINER)
 
 WEAPON_PISTOL  :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Pistol))
 WEAPON_BLADE   :: WeaponSubCategoryMask(1 << u32(WeaponSubCategory.Blade))
