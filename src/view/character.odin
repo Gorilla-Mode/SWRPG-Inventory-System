@@ -23,11 +23,13 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
     slots := app.GetCharacterSlotRects(state, layout_info.center.start_x, layout_info.top_y)
     for slot, rect in slots {
-        draw_slot(slot, {rect.x, rect.y}, state, style)
+        DrawSlot(slot, {rect.x, rect.y}, state, style)
     }
 
     grid_locs := app.GetCharacterGridLocations(char, layout_info.top_y, style.grid.cell_size, layout_info.left.start_x)
     DrawCharacterGrids(state, grid_locs, style)
+
+    DrawStats(char, &layout_info, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
         DrawCharacterGhost(state, grid_locs, style)
@@ -122,7 +124,7 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
         style)
 }
 
-draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
+DrawSlot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, style: ^ui.style) {
     rect := rl.Rectangle{f32(i32(pos.x)), f32(i32(pos.y)), app.SLOT_SIZE, app.SLOT_SIZE}
     item, ok := state.character.equipment.slots[slot]
     slotText : cstring = str.clone_to_cstring(inv.EquipmentSlotString[slot], context.temp_allocator)
@@ -152,4 +154,27 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
         count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
         rl.DrawTextEx(font, count_cstr, ui.SnapVector2({pos.x + 5, pos.y + app.SLOT_SIZE - 20 }), f32(fontSize), 1, style.colors.text)
     }
+}
+
+DrawStats :: proc(char: ^inv.Character, layout: ^app.CharacterPageLayout, style: ^ui.style) {
+    rect := rl.Rectangle{layout.right.origin_x, layout.top_y, layout.right.width, f32(rl.GetScreenHeight()) - layout.top_y}
+    rect_top : rl.Rectangle = {rect.x, rect.y, rect.width, rect.height / 2}
+    rect_bottom : rl.Rectangle = {rect.x, rect.y + rect.height / 2, rect.width, rect.height / 2}
+
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
+    "Stat", ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
+    f32(ui.font_size.header),
+    2,
+    style.colors.text)
+
+    rl.DrawRectangleRec(rect, style.colors.secondary)
+    rl.DrawRectangleRec(rect_top, style.colors.surface)
+    rl.DrawRectangleRec(rect_bottom, style.colors.primary)
+
+    rl.DrawLineEx({ rect.x, rect.y  + 1}, { rect.x, rect.y + rect.height + 1 }, 2, style.colors.primary)
+    rl.DrawLineEx({ rect.x - 1, rect.y + 1 }, { rect.x + rect.width + 1, rect.y + 1}, 2, style.colors.primary)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], "Equipped Item", ui.SnapVector2({rect_top.x + 5, rect_top.y + 5}), f32(ui.font_size.label), 2, style.colors.text)
+
+    if char.equipment.slots[.Back] == nil do return
+    inv.DrawItem(char.equipment.slots[.Back], rect_top.x + 5, rect_top.y + 30, style.grid.cell_size, style, true)
 }
