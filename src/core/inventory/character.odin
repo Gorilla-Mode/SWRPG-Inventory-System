@@ -8,8 +8,12 @@ EquipmentSlot :: enum{
     Armor
 }
 
-CharacterEquipment :: struct{
-    slots: map[EquipmentSlot]^ItemInstance,
+EquipmentSlotString := [EquipmentSlot]string{
+    .Backpack = "Backpack",
+    .Belt = "Belt",
+    .Holster = "Holster",
+    .Back = "Back",
+    .Armor = "Armor"
 }
 
 Character :: struct{
@@ -17,6 +21,33 @@ Character :: struct{
     name: string,
 
     equipment: CharacterEquipment
+}
+
+CharacterEquipment :: struct{
+    slots: map[EquipmentSlot]^ItemInstance,
+}
+
+ItemCategoryMask :: distinct u32
+
+CATEGORY_GEAR   :: ItemCategoryMask(1 << u32(ItemCategory.Gear))
+CATEGORY_WEAPON :: ItemCategoryMask(1 << u32(ItemCategory.Weapon))
+CATEGORY_ARMOR  :: ItemCategoryMask(1 << u32(ItemCategory.Armor))
+
+SlotWhitelist := [EquipmentSlot]ItemCategoryMask{
+    .Backpack = CATEGORY_GEAR,
+    .Belt     = CATEGORY_GEAR,
+    .Holster  = CATEGORY_WEAPON,
+    .Back     = CATEGORY_WEAPON | CATEGORY_GEAR,
+    .Armor    = CATEGORY_ARMOR,
+}
+
+CanEquipInSlot :: proc(slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+    if item == nil do return false
+
+    allowed := SlotWhitelist[slot]
+    item_mask := ItemCategoryMask(1 << u32(item.definition.category))
+
+    return (allowed & item_mask) != 0
 }
 
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
@@ -114,9 +145,14 @@ IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
     return false
 }
 
-EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) {
+EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+    if !CanEquipInSlot(slot, item) {
+        return false
+    }
+    
     RemoveItemFromCurrentLocation(char, item)
     char.equipment.slots[slot] = item
+    return true
 }
 
 MoveItemToContainer :: proc(char: ^Character, container: ^Container, item: ^ItemInstance, x, y: i16, rotated: bool) {
