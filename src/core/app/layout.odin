@@ -3,6 +3,7 @@
 import rl "vendor:raylib"
 import inv "../inventory"
 import st "../state"
+import ui "../../ui"
 
 GridLocation :: struct {
     item: ^inv.ItemInstance,
@@ -10,21 +11,34 @@ GridLocation :: struct {
 }
 
 SLOT_SIZE :: 125
-SPACING :: 20
+SPACING :: 5
 AVATAR_WIDTH :: 200
 AVATAR_HEIGHT :: 400
+
 GRID_CHAR_SPACING :: 50
-CHAR_PAGE_GRID_START_Y :: 100
+CHAR_PAGE_GRID_START_Y :: 2 * ui.HEADER_HEIGHT + 10
 CHAR_BLOCK_WIDTH :: SLOT_SIZE + SPACING + AVATAR_WIDTH + SPACING + SLOT_SIZE
 
-GetCharacterPageTotalWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
-    max_grid_w := GetMaxGridWidth(char, cell_size)
-    if max_grid_w <= 0 do return CHAR_BLOCK_WIDTH
-    return max_grid_w + GRID_CHAR_SPACING + CHAR_BLOCK_WIDTH
+PageSection :: struct {
+    origin_x: f32,
+    center_x: f32,
+    width:    f32,
+    start_x:  f32,
+}
+
+CharacterPageLayout :: struct {
+    left:   PageSection,
+    center: PageSection,
+    right:  PageSection,
+
+    top_y: f32,
+
+    grid_start_x: f32,
 }
 
 GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
     max_w: f32 = 0
+
     for _, item in char.equipment.slots {
         if item == nil do continue
 
@@ -37,32 +51,59 @@ GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
         w := f32(storage.width) * cell_size
         if w > max_w do max_w = w
     }
+
     return max_w
 }
 
-CharacterPageLayoutInfo :: struct {
-    grid_start_x: f32,
-    grid_start_y: f32,
-    avatarCenterX: f32,
-    char_start_x: f32,
+GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> CharacterPageLayout {
+    w := f32(state.window.width)
+    grid_width := GetMaxGridWidth(state.character, cell_size)
+    section_width := w / 3
+
+    left := PageSection{
+        origin_x = 0,
+        center_x = section_width / 2,
+        width = section_width,
+    }
+    left.start_x = left.center_x - grid_width / 2
+
+    center := PageSection{
+        origin_x = section_width,
+        center_x = section_width + section_width / 2,
+        width = section_width,
+    }
+    center.start_x = center.center_x
+
+    right := PageSection{
+        origin_x = section_width * 2,
+        center_x = section_width * 2 + section_width / 2,
+        width = section_width,
+    }
+    right.start_x = right.center_x - grid_width / 2
+
+    return CharacterPageLayout{
+        left = left,
+        center = center,
+        right = right,
+
+        top_y = CHAR_PAGE_GRID_START_Y
+    }
 }
 
-GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> CharacterPageLayoutInfo {
-    char := state.character
-    if char == nil do return {}
+GetCharacterGridLocations :: proc(
+char: ^inv.Character,
+start_y: f32,
+cell_size: f32,
+start_x: f32,
+) -> [dynamic]GridLocation {
 
-    grid_start_x: f32 = 50
-    grid_start_y: f32 = CHAR_PAGE_GRID_START_Y
-    avatarCenterX := f32(state.window.width) / 2
-    char_start_x := f32(i32(avatarCenterX - CHAR_BLOCK_WIDTH / 2))
-
-    return {grid_start_x, grid_start_y, avatarCenterX, char_start_x}
-}
-
-GetCharacterGridLocations :: proc(char: ^inv.Character, start_y: f32, cell_size: f32, start_x: f32) -> [dynamic]GridLocation {
     locs := make([dynamic]GridLocation, context.temp_allocator)
-    current_y: f32 = start_y
-    priority_slots := []inv.EquipmentSlot{.Backpack, .Belt}
+    current_y := start_y
+
+    priority_slots := []inv.EquipmentSlot{
+        .Backpack,
+        .Belt,
+    }
 
     for slot in priority_slots {
         item, ok := char.equipment.slots[slot]
@@ -71,8 +112,12 @@ GetCharacterGridLocations :: proc(char: ^inv.Character, start_y: f32, cell_size:
         _, is_container := item.definition.data.(inv.ContainerData)
         if !is_container do continue
 
-        append(&locs, GridLocation{item, {start_x, current_y}})
-        current_y += GetItemGridHeight(item, cell_size) + 60
+        append(&locs, GridLocation{
+            item = item,
+            origin = {start_x, current_y},
+        })
+
+        current_y += GetItemGridHeight(item, cell_size) + cell_size
     }
 
     for slot, item in char.equipment.slots {
@@ -81,28 +126,75 @@ GetCharacterGridLocations :: proc(char: ^inv.Character, start_y: f32, cell_size:
         _, ok := item.definition.data.(inv.ContainerData)
         if !ok do continue
 
-        append(&locs, GridLocation{item, {start_x, current_y}})
-        current_y += GetItemGridHeight(item, cell_size) + 60
+        append(&locs, GridLocation{
+            item = item,
+            origin = {start_x, current_y},
+        })
+
+        current_y += GetItemGridHeight(item, cell_size) + cell_size
     }
+
     return locs
 }
 
 GetItemGridHeight :: proc(item: ^inv.ItemInstance, cell_size: f32) -> f32 {
     container_data := item.definition.data.(inv.ContainerData)
+
     storage, ok := container_data.storage.storage.(inv.ContainerGrid)
     if !ok do return 0
+
     return f32(storage.height) * cell_size
 }
 
-GetCharacterSlotRects :: proc(state: ^st.state, centerX: f32, topY: f32) -> map[inv.EquipmentSlot]rl.Rectangle {
-    avatar_rect := rl.Rectangle{f32(i32(centerX - AVATAR_WIDTH / 2)), f32(i32(topY)), AVATAR_WIDTH, AVATAR_HEIGHT}
+GetCharacterSlotRects :: proc(
+state: ^st.state,
+center_x: f32,
+top_y: f32,
+) -> map[inv.EquipmentSlot]rl.Rectangle {
+
+    avatar_rect := rl.Rectangle{
+        x = center_x - AVATAR_WIDTH / 2,
+        y = top_y,
+        width = AVATAR_WIDTH,
+        height = AVATAR_HEIGHT,
+    }
 
     slots := make(map[inv.EquipmentSlot]rl.Rectangle, context.temp_allocator)
-    slots[.Back] = {avatar_rect.x - SLOT_SIZE - SPACING, avatar_rect.y, SLOT_SIZE, SLOT_SIZE}
-    slots[.Armor] = {avatar_rect.x - SLOT_SIZE - SPACING, avatar_rect.y + SLOT_SIZE + SPACING, SLOT_SIZE, SLOT_SIZE}
-    slots[.Backpack] = {avatar_rect.x + avatar_rect.width + SPACING, avatar_rect.y, SLOT_SIZE, SLOT_SIZE}
-    slots[.Belt] = {avatar_rect.x + avatar_rect.width + SPACING, avatar_rect.y + SLOT_SIZE + SPACING, SLOT_SIZE, SLOT_SIZE}
-    slots[.Holster] = {avatar_rect.x + avatar_rect.width + SPACING, avatar_rect.y + (SLOT_SIZE + SPACING) * 2, SLOT_SIZE, SLOT_SIZE}
+
+    slots[.Back] = {
+        avatar_rect.x - SLOT_SIZE - SPACING,
+        avatar_rect.y,
+        SLOT_SIZE,
+        SLOT_SIZE,
+    }
+
+    slots[.Armor] = {
+        avatar_rect.x - SLOT_SIZE - SPACING,
+        avatar_rect.y + SLOT_SIZE + SPACING,
+        SLOT_SIZE,
+        SLOT_SIZE,
+    }
+
+    slots[.Backpack] = {
+        avatar_rect.x + avatar_rect.width + SPACING,
+        avatar_rect.y,
+        SLOT_SIZE,
+        SLOT_SIZE,
+    }
+
+    slots[.Belt] = {
+        avatar_rect.x + avatar_rect.width + SPACING,
+        avatar_rect.y + SLOT_SIZE + SPACING,
+        SLOT_SIZE,
+        SLOT_SIZE,
+    }
+
+    slots[.Holster] = {
+        avatar_rect.x + avatar_rect.width + SPACING,
+        avatar_rect.y + (SLOT_SIZE + SPACING) * 2,
+        SLOT_SIZE,
+        SLOT_SIZE,
+    }
 
     return slots
 }

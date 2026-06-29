@@ -17,16 +17,16 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
     if char == nil do return
 
     layout_info := app.GetCharacterPageLayoutInfo(state, style.grid.cell_size)
-    
-    DrawCharacterHeader(char, layout_info.char_start_x, layout_info.grid_start_y, style)
-    DrawCharacterAvatar(layout_info.avatarCenterX, layout_info.grid_start_y + app.AVATAR_HEIGHT / 2, style)
 
-    slots := app.GetCharacterSlotRects(state, layout_info.avatarCenterX, layout_info.grid_start_y)
+    DrawCharacterHeader(char, layout_info.center.center_x - (app.AVATAR_WIDTH / 2) - app.SPACING - app.SLOT_SIZE, layout_info.top_y, style)
+    DrawCharacterAvatar(layout_info.center.center_x, layout_info.top_y + app.AVATAR_HEIGHT / 2, style)
+
+    slots := app.GetCharacterSlotRects(state, layout_info.center.start_x, layout_info.top_y)
     for slot, rect in slots {
         draw_slot(slot, {rect.x, rect.y}, state, style)
     }
 
-    grid_locs := app.GetCharacterGridLocations(char, layout_info.grid_start_y, style.grid.cell_size, layout_info.grid_start_x)
+    grid_locs := app.GetCharacterGridLocations(char, layout_info.top_y, style.grid.cell_size, layout_info.left.start_x)
     DrawCharacterGrids(state, grid_locs, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
@@ -131,8 +131,8 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
     fontSize := ui.font_size.label
     font:= style.fonts.regular[fontSize]
     size := rl.MeasureTextEx(font, itemText, f32(fontSize), 0)
-    itemTextPos := ok ? ui.SnapVector2({pos.x + 4, pos.y + size.y + 2 }) : ui.SnapVector2({pos.x + app.SLOT_SIZE * 0.5 - size.x * 0.5, pos.y + app.SLOT_SIZE * 0.5 - size.y * 0.5 })
-    slotTextPos := ui.SnapVector2({pos.x + 4, pos.y + 2 })
+    itemTextPos := ok ? ui.SnapVector2({pos.x + 4, pos.y + size.y + 5 }) : ui.SnapVector2({pos.x + app.SLOT_SIZE * 0.5 - size.x * 0.5, pos.y + app.SLOT_SIZE * 0.5 - size.y * 0.5 })
+    slotTextPos := ui.SnapVector2({pos.x + 4, pos.y + 5 })
 
     rl.DrawRectangleRec(rect, style.colors.surface)
     rl.DrawRectangleLinesEx(rect, 2, style.colors.secondary)
@@ -150,6 +150,6 @@ draw_slot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, st
         count_str := str.to_string(b)
 
         count_cstr := str.clone_to_cstring(count_str, context.temp_allocator)
-        rl.DrawTextEx(font, count_cstr, ui.SnapVector2({pos.x + 5, pos.y + app.SLOT_SIZE - app.SPACING + 4}), f32(fontSize), 1, style.colors.text)
+        rl.DrawTextEx(font, count_cstr, ui.SnapVector2({pos.x + 5, pos.y + app.SLOT_SIZE - 20 }), f32(fontSize), 1, style.colors.text)
     }
 }

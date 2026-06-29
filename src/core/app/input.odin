@@ -51,8 +51,8 @@ InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
     cell_size := style.grid.cell_size
     layout_info := GetCharacterPageLayoutInfo(state, cell_size)
-    grid_locs := GetCharacterGridLocations(char, layout_info.grid_start_y, cell_size, layout_info.grid_start_x)
-    slots := GetCharacterSlotRects(state, layout_info.avatarCenterX, layout_info.grid_start_y)
+    grid_locs := GetCharacterGridLocations(char, layout_info.top_y, cell_size, layout_info.left.start_x)
+    slots := GetCharacterSlotRects(state, layout_info.center.start_x, layout_info.top_y)
 
     if state.grab.is_dragging {
         HandleCharacterDragging(state, char, cell_size, slots, grid_locs)
