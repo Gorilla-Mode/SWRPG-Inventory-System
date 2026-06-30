@@ -45,3 +45,7 @@ HexToCol :: proc (hex: u32, alpha: u8 = 255) -> rl.Color
 
     return rl.Color{r, g, b, alpha}
 }
+
+SnapVector2 :: proc(v: rl.Vector2) -> rl.Vector2 {
+    return {f32(i32(v.x)), f32(i32(v.y))}
+}

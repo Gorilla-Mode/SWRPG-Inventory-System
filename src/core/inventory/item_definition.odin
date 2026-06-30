@@ -4,7 +4,8 @@
 ItemCategory :: enum{
     Weapon,
     Armor,
-    Gear
+    Gear,
+    Container
 }
 
 //Tags for the item, used for filtering and organization
@@ -38,6 +39,7 @@ Item :: struct{
 ItemData :: union{
     WeaponData,
     ContainerData,
+    GearData
 }
 
 WeaponData :: struct{
@@ -79,12 +81,6 @@ WeaponSkillString :: proc(skill: WeaponSkill) -> string {
     return ""
 }
 
-//Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale
-WeaponScale :: enum{
-    Personal,
-    Planetary
-}
-
 WeaponScaleString :: proc(scale: WeaponScale) -> string {
     switch scale {
         case WeaponScale.Personal:
@@ -93,16 +89,6 @@ WeaponScaleString :: proc(scale: WeaponScale) -> string {
             return "Planetary"
     }
     return ""
-}
-
-WeaponRangebands :: enum{
-    Engaged,
-    Close,
-    Short,
-    Medium,
-    Long,
-    Extreme,
-    Strategic
 }
 
 WeaponRangebandString :: proc(rangeband: WeaponRangebands) -> string {
@@ -123,14 +109,6 @@ WeaponRangebandString :: proc(rangeband: WeaponRangebands) -> string {
             return "Strategic"
     }
     return ""
-}
-
-WeaponSubCategory :: enum{
-    Pistol,
-    Rifle,
-    Carbine,
-    Blade,
-    Blunt,
 }
 
 WeaponSubCategoryString :: proc(sub_category: WeaponSubCategory) -> string {
@@ -155,13 +133,6 @@ ContainerData :: struct{
     sub_category: ContainerSubCategory
 }
 
-ContainerSubCategory :: enum{
-    Backpack,
-    Belt,
-    Clothing,
-    Pouch,
-}
-
 ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string {
     switch sub_category {
         case ContainerSubCategory.Backpack:
@@ -172,6 +143,26 @@ ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string
             return "Clothing"
         case ContainerSubCategory.Pouch:
             return "Pouch"
+    }
+    return ""
+}
+
+GearData :: struct{
+    sub_category: GearSubCategory
+}
+
+GearSubCategoryString :: proc(sub_category: GearSubCategory) -> string {
+    switch sub_category {
+        case GearSubCategory.Tool:
+            return "Tool"
+        case GearSubCategory.Medical:
+            return "Medical"
+        case GearSubCategory.Electronics:
+            return "Electronics"
+        case GearSubCategory.Survival:
+            return "Survival"
+        case GearSubCategory.Miscellaneous:
+            return "Miscellaneous"
     }
     return ""
 }

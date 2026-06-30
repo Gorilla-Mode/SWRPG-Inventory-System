@@ -28,7 +28,7 @@ DrawWIPPage :: proc(pageName: string, style: ^ui.style) {
     rl.DrawTextEx(
     font,
     text,
-    pos,
+    ui.SnapVector2(pos),
     font_size,
     0,
     style.colors.error,

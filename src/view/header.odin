@@ -14,7 +14,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
 
     rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
     "SWIS",
-    pos,
+    ui.SnapVector2(pos),
     fontSize,
     0,
     style.colors.text)
@@ -25,7 +25,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     buttonWidth,
     buttonHeight,
     st.page.Inventory,
-    style.icons[ui.Icons.character_user]
+    style.icons[ui.Icons.page_inventory]
     )
 
     ButtonDebug := co.ButtonCreate(
@@ -34,7 +34,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     buttonWidth,
     buttonHeight,
     st.page.Debug,
-    style.icons[ui.Icons.item_weapon_type_shotgun]
+    style.icons[ui.Icons.page_debug]
     )
 
     ButtonCharacter := co.ButtonCreate(
@@ -43,7 +43,7 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     buttonWidth,
     buttonHeight,
     st.page.Character,
-    style.icons[ui.Icons.character_user]
+    style.icons[ui.Icons.page_character]
     )
 
     ButtonCatalog := co.ButtonCreate(
@@ -52,14 +52,14 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     buttonWidth,
     buttonHeight,
     st.page.Catalog,
-    style.icons[ui.Icons.item_weapon_type_gunnery]
+    style.icons[ui.Icons.page_catalog]
     )
 
     buttons := []co.Button{
         ButtonInv,
-        ButtonDebug,
         ButtonCharacter,
         ButtonCatalog,
+        ButtonDebug,
     }
 
     co.LayoutButtonsHorizontal(

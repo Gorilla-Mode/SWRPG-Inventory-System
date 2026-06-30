@@ -20,9 +20,14 @@ LoadImages :: proc() -> map[Icons]rl.Texture2D {
     images := make(map[Icons]rl.Texture2D)
 
     for icon, metadata in icon_paths {
-        loaded_image : rl.Texture2D = rl.LoadTexture(metadata.path)
-        rl.SetTextureFilter(loaded_image, rl.TextureFilter.TRILINEAR)
-        images[icon] = loaded_image
+        loaded_image : = rl.LoadImage(metadata.path)
+        rl.ImageResize(&loaded_image, 64, 64)
+        tex := rl.LoadTextureFromImage(loaded_image)
+
+        rl.GenTextureMipmaps(&tex)
+        rl.SetTextureFilter(tex, rl.TextureFilter.TRILINEAR)
+
+        images[icon] = tex
     }
 
     free_all(context.temp_allocator)

@@ -10,7 +10,8 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle: ^Item,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
-    backpackItem: ^Item}
+    backpackItem: ^Item,
+    backpackInstance: ^ItemInstance}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
@@ -27,10 +28,15 @@ TestItem :: proc(cell_size: f32) -> struct{
     backpackItem.base_rarity = 1
     backpackItem.base_price = 100
     backpackItem.qualities = nil
+    backpackItem.category = ItemCategory.Container
     backpackItem.data = ContainerData{
         storage = backpack,
         sub_category = ContainerSubCategory.Backpack
     }
+
+    backpackInstance := new(ItemInstance)
+    backpackInstance.definition = backpackItem
+    backpackInstance.id = 100
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     sword := new(Item)
@@ -41,6 +47,15 @@ TestItem :: proc(cell_size: f32) -> struct{
     sword.base_rarity = 6
     sword.base_price = 5000
     sword.qualities = nil
+    sword.category = ItemCategory.Weapon
+    sword.data = WeaponData {
+        skill = WeaponSkill.Melee,
+        crit = 1,
+        damage = 2,
+        scale = WeaponScale.Personal,
+        rangeband = WeaponRangebands.Engaged,
+        sub_category = WeaponSubCategory.Blade
+    }
     append_elem(&sword.qualities, "Pierce 5")
 
     rifle := new(Item)
@@ -51,6 +66,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle.base_rarity = 4
     rifle.base_price = 1200
     rifle.qualities = nil
+    rifle.category = ItemCategory.Weapon
     append_elems(&rifle.qualities, "Pirece 1", "Full-Auto")
     rifle.hardpoints = 4
     rifle.data = WeaponData {
@@ -71,6 +87,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     knife.base_price = 200
     knife.base_rarity = 2
     knife.qualities = nil
+    knife.category = ItemCategory.Weapon
     append_elem(&knife.qualities, "Pierce 2")
     knife.hardpoints = 1
     knife.data = WeaponData {
@@ -90,6 +107,10 @@ TestItem :: proc(cell_size: f32) -> struct{
     canteen.base_price = 50
     canteen.base_rarity = 1
     canteen.features = nil
+    canteen.category = ItemCategory.Gear
+    canteen.data = GearData {
+        sub_category = GearSubCategory.Survival
+    }
     append_elem(&canteen.features, "Can contain 1L of liquid")
 
     rifle_instance := new(ItemInstance)
@@ -131,8 +152,44 @@ TestItem :: proc(cell_size: f32) -> struct{
         rifle,
         sword_instance,
         rifle_instance,
-        backpackItem
+        backpackItem,
+        backpackInstance
     }
+}
+
+TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+    char := new(Character)
+    char.name = "Lord Holcrub"
+    char.id = "1"
+
+    char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
+    char.equipment.slots[.Backpack] = backpack
+
+    belt_container := new(Container)
+    belt_container.type = .Belt
+    belt_container.storage = ContainerGrid{
+        width = 4,
+        height = 1,
+    }
+
+    beltItem := new(Item)
+    beltItem.name = "Utility Belt"
+    beltItem.height = 1
+    beltItem.width = 4
+    beltItem.description = "A utility belt with various pouches and compartments."
+    beltItem.category = ItemCategory.Container
+    beltItem.data = ContainerData{
+        storage = belt_container,
+        sub_category = .Belt
+    }
+
+    beltInstance := new(ItemInstance)
+    beltInstance.definition = beltItem
+    beltInstance.id = 101
+
+    char.equipment.slots[.Belt] = beltInstance
+
+    return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container
