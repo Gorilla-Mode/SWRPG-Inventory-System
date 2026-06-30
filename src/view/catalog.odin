@@ -31,7 +31,8 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         },
         style,
     st.textField.Catalog_Search,
-    state)
+    state,
+    style.icons[ui.Icons.gui_search])
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
     rl.DrawRectangleRec(rect_right, style.colors.secondary_active)

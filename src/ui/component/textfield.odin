@@ -11,6 +11,8 @@ TextField :: struct {
     image:      rl.Texture2D,
     rect:       rl.Rectangle,
     rect_clear: rl.Rectangle,
+    rect_image: rl.Rectangle,
+    max_length: i32
 }
 
 UpdateTextField :: proc(field: ^TextField){
@@ -32,6 +34,7 @@ UpdateTextField :: proc(field: ^TextField){
     for {
         ch := rl.GetCharPressed()
         if ch == 0 do break
+        if field.state.buffer_length >= field.max_length do break
 
         if ch >= 32 && ch <= 126 {
             append(&field.state.buffer, u8(ch))
@@ -46,19 +49,25 @@ UpdateTextField :: proc(field: ^TextField){
 }
 
 DrawTextField :: proc(field: ^TextField, style: ^ui.style){
-    icon := field.image
+    iconPadding: f32 = 8
+    iconScale := ui.IconScale(field.rect.height - iconPadding)
+
     outline := field.state.is_active ? style.colors.success : style.colors.surface
-    textPos := rl.Vector2{field.rect.x + field.rect.height, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
-    iconSearchPos := rl.Vector2{field.rect.x + 2, field.rect.y + 2}
-    iconClearPos := rl.Vector2{field.rect_clear.x, field.rect_clear.y }
-    iconScale := f32(field.rect.height - 4) / f32(icon.height)
+    textPos := rl.Vector2{field.rect.x + field.rect_image.width + iconPadding, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
+
+    iconSearchPos := ui.CenterIconInSquare(field.rect_image, field.rect_image.height - iconPadding / 2)
+    iconClearPos := ui.CenterIconInSquare(field.rect_clear, field.rect_clear.height - iconPadding / 2)
+    iconClearPos.y -= 2 // Offset, looks goofy when prop aligned
 
     rl.DrawRectangleRec(field.rect, style.colors.surface)
     rl.DrawRectangleLinesEx(field.rect, 2, outline)
-    rl.DrawTextureEx(icon, iconSearchPos, 0, iconScale, style.colors.text)
-    rl.DrawTextureEx(style.icons[ui.Icons.item_weapon_type_melee], iconClearPos, 0, iconScale, style.colors.text)
-    rl.DrawTextEx(style.fonts.regular[ui.font_size.default], TextFieldText(field), textPos, f32(ui.font_size.default), 0, style.colors.text)
+    rl.DrawRectangleRec(field.rect_image, style.colors.secondary)
+    rl.DrawRectangleRec(field.rect_clear, style.colors.secondary)
 
+    rl.DrawTextureEx(field.image, iconSearchPos, 0, iconScale, style.colors.text)
+    rl.DrawTextureEx(style.icons[ui.Icons.gui_trash], iconClearPos, 0, iconScale, style.colors.text)
+
+    rl.DrawTextEx(style.fonts.regular[ui.font_size.default], TextFieldText(field), textPos, f32(ui.font_size.default), 0, style.colors.text)
 }
 
 TextFieldText :: proc(field: ^TextField) -> cstring {
@@ -73,7 +82,7 @@ TextFieldSet :: proc(field: ^TextField, text: string){
 
 }
 
-TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state) -> TextField {
+TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state, image: rl.Texture2D) -> TextField {
     _, ok := state.textFields[field]
     if !ok {
         new_field := st.textFieldState{
@@ -85,13 +94,20 @@ TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textFiel
 
     return TextField{
         state = &state.textFields[field],
-        image = style.icons[ui.Icons.item_weapon_type_melee],
+        image = image,
         rect = rect,
         rect_clear = rl.Rectangle{
-            x = rect.x + rect.width - iconRectSize,
+            x = rect.x + rect.width - iconRectSize - 2,
             y = rect.y + 2,
             width = iconRectSize,
             height = iconRectSize,
-        }
+        },
+        rect_image = rl.Rectangle{
+            x = rect.x + 2,
+            y = rect.y + 2,
+            width = iconRectSize,
+            height = iconRectSize,
+        },
+        max_length = i32((rect.width - (iconRectSize + 4) * 2 - 8) / f32(rl.MeasureText("_", i32(ui.font_size.default)))),
     }
 }

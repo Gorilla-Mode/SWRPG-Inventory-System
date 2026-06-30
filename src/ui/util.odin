@@ -49,3 +49,16 @@ HexToCol :: proc (hex: u32, alpha: u8 = 255) -> rl.Color
 SnapVector2 :: proc(v: rl.Vector2) -> rl.Vector2 {
     return {f32(i32(v.x)), f32(i32(v.y))}
 }
+
+CenterIconInSquare :: proc(square: rl.Rectangle, icon_size: f32) -> rl.Vector2 {
+    return {
+         square.x + (square.width  - icon_size) * 0.5,
+         square.y + (square.height - icon_size) * 0.5,
+    }
+}
+
+DEFAULT_ICON_SIZE :: 64.0
+
+IconScale :: proc(target_size: f32) -> f32 {
+    return target_size / DEFAULT_ICON_SIZE
+}
