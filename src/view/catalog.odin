@@ -3,6 +3,7 @@ import st "../core/state"
 import ui "../ui"
 import app "../core/app"
 import rl "vendor:raylib"
+import comp "../ui/component"
 
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     layout := app.GetCatalogPageLayoutInfo(state, style.grid.cell_size)
@@ -21,9 +22,22 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         height = f32(state.window.height) - layout.top_y
     }
 
+    searchBar := comp.TextFieldCreate(
+        rl.Rectangle{
+            x = layout.left.origin_x + app.PADDING + 2,
+            y = layout.top_y + 2,
+            width = layout.left.width - 4 - app.PADDING,
+            height = 32,
+        },
+        style,
+    st.textField.Catalog_Search,
+    state)
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
     rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
+
+    comp.UpdateTextField(&searchBar)
+    comp.DrawTextField(&searchBar, style)
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
     "Catalog",

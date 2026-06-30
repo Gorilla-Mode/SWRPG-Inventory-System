@@ -9,6 +9,7 @@ state :: struct{
     window:        windowState,
     page:          page,
     character:     ^inv.Character,
+    textFields :   map[textField]textFieldState,
 }
 
 grab :: struct{
@@ -33,12 +34,23 @@ windowState :: struct{
     height: f32,
 }
 
+textFieldState :: struct{
+    is_active: bool,
+    text:      string,
+}
+
 page :: enum{
     Inventory,
     Debug,
     Character,
     Catalog,
 }
+
+textField :: enum {
+    Catalog_Search,
+}
+
+
 
 UpdateWindowState :: proc(state: ^state) {
     state.window.width = f32(rl.GetScreenWidth())

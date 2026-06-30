@@ -14,9 +14,9 @@ Button :: struct {
 }
 
 DrawButton :: proc(
-button: ^Button,
-style: ^ui.style,
-current_page: st.page,
+    button: ^Button,
+    style: ^ui.style,
+    current_page: st.page,
 ) -> bool {
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
