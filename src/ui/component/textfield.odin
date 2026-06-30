@@ -55,8 +55,8 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style){
     outline := field.state.is_active ? style.colors.success : style.colors.surface
     textPos := rl.Vector2{field.rect.x + field.rect_image.width + iconPadding, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
 
-    iconSearchPos := ui.CenterIconInSquare(field.rect_image, field.rect_image.height - iconPadding / 2)
-    iconClearPos := ui.CenterIconInSquare(field.rect_clear, field.rect_clear.height - iconPadding / 2)
+    iconSearchPos := ui.IconGetCenterPos(field.rect_image, field.rect_image.height - iconPadding / 2)
+    iconClearPos := ui.IconGetCenterPos(field.rect_clear, field.rect_clear.height - iconPadding / 2)
     iconClearPos.y -= 2 // Offset, looks goofy when prop aligned
 
     rl.DrawRectangleRec(field.rect, style.colors.surface)
