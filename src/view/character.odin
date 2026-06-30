@@ -26,7 +26,7 @@ DrawCharacter :: proc(state: ^st.state, style: ^ui.style) {
         DrawSlot(slot, {rect.x, rect.y}, state, style)
     }
 
-    grid_locs := app.GetCharacterGridLocations(char, layout_info.top_y, style.grid.cell_size, layout_info.left.start_x)
+    grid_locs := app.GetCharacterGridLocations(char, layout_info.top_y, style.grid.cell_size, layout_info.left.origin_x + app.PADDING)
     DrawCharacterGrids(state, grid_locs, style)
 
     DrawStats(char, &layout_info, style)

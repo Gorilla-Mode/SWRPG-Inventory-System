@@ -15,6 +15,6 @@ DrawUI :: proc(state: ^st.state, style: ^ui.style, items: ^inv.Item) {
     case st.page.Character:
         DrawCharacter(state, style)
     case st.page.Catalog:
-        DrawWIPPage("Catalog", style)
+        DrawCatalog(state, style)
     }
 }
