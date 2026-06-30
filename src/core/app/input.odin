@@ -117,7 +117,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         item := GetItemAtMousePos(container, loc.origin.x, loc.origin.y, cell_size)
-        if item == nil || !rl.IsMouseButtonDown(.LEFT) do continue
+        if item == nil || !rl.IsMouseButtonPressed(.LEFT) do continue
 
         StartDragging(state, item, loc.origin.x, loc.origin.y, cell_size)
         return
@@ -126,7 +126,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for slot, rect in slots {
         item, ok := char.equipment.slots[slot]
         if !ok || item == nil do continue
-        if !rl.IsMouseButtonDown(.LEFT) || !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
+        if !rl.IsMouseButtonPressed(.LEFT) || !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
 
         StartDraggingAtSlot(state, item, rect, cell_size)
         return
