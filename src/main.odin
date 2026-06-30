@@ -19,6 +19,7 @@ main :: proc()
     }
 
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
+    defer delete(state.textFields)
     items := inv.TestItem(style.grid.cell_size)
     state.character = inv.TestCharacter(items.backpackInstance)
 

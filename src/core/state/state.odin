@@ -35,8 +35,9 @@ windowState :: struct{
 }
 
 textFieldState :: struct{
-    is_active: bool,
-    text:      string,
+    is_active:     bool,
+    buffer:        [dynamic]u8,
+    buffer_length: i32,
 }
 
 page :: enum{

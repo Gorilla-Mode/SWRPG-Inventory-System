@@ -66,6 +66,4 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     f32(ui.font_size.header),
     2,
     style.colors.text)
-
-
 }
