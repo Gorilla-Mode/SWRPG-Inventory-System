@@ -4,12 +4,19 @@ import ui "../ui"
 import app "../core/app"
 import rl "vendor:raylib"
 import comp "../ui/component"
+import inv "../core/inventory"
 
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     layout := app.GetCatalogPageLayoutInfo(state, style.grid.cell_size)
     paddingElement: f32 = 2
     buttonWidth: f32 = (layout.left.width - app.PADDING - paddingElement * 5) / 4
     buttonHeight: f32 = 32
+
+    f_bg_color := style.colors.surface
+    f_hover_color := style.colors.secondary_hover
+    f_active_color := style.colors.success
+    f_icon_color := style.colors.text
+    f_icon_bg_color := style.colors.secondary
 
     rect_left_x := layout.left.origin_x + app.PADDING
     rect_left := rl.Rectangle{
@@ -95,17 +102,58 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     comp.UpdateTextField(&searchBar)
     comp.DrawTextField(&searchBar, style, "Search catalog...")
 
-    if comp.DrawButton(&buttonWeaponCat, style, state.page == st.page.Inventory) {
-        state.page = st.page.Inventory
+    if comp.DrawButtonCol(&buttonWeaponCat,
+    style,
+    state.catalog.category == inv.ItemCategory.Weapon,
+    f_bg_color,
+    f_icon_color,
+    f_icon_bg_color,
+    f_hover_color,
+    f_active_color,
+    true,
+    f_hover_color,
+    f_active_color) {
+        state.catalog.category = inv.ItemCategory.Weapon
     }
-    if comp.DrawButton(&buttonGearCat, style, state.page == st.page.Inventory) {
-        state.page = st.page.Inventory
+    if comp.DrawButtonCol(&buttonGearCat,
+    style,
+    state.catalog.category == inv.ItemCategory.Gear,
+    f_bg_color,
+    f_icon_color,
+    f_icon_bg_color,
+    f_hover_color,
+    f_active_color,
+    true,
+    f_hover_color,
+    f_active_color) {
+        state.catalog.category = inv.ItemCategory.Gear
     }
-    if comp.DrawButton(&buttonArmorCat, style, state.page == st.page.Inventory) {
-        state.page = st.page.Inventory
+    if comp.DrawButtonCol(&buttonArmorCat,
+    style,
+    state.catalog.category == inv.ItemCategory.Armor,
+    f_bg_color,
+    f_icon_color,
+    f_icon_bg_color,
+    f_hover_color,
+    f_active_color,
+    true,
+    f_hover_color,
+    f_active_color) {
+        state.catalog.category = inv.ItemCategory.Armor
     }
-    if comp.DrawButton(&buttonContainerCat, style, state.page == st.page.Inventory) {
-        state.page = st.page.Inventory
+    if comp.DrawButtonCol(&buttonContainerCat,
+    style,
+    state.catalog.category == inv.ItemCategory.Container,
+
+    f_bg_color,
+    f_icon_color,
+    f_icon_bg_color,
+    f_hover_color,
+    f_active_color,
+    true,
+    f_hover_color,
+    f_active_color) {
+        state.catalog.category = inv.ItemCategory.Container
     }
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],

@@ -13,6 +13,7 @@ state :: struct{
     page:          page,
     character:     ^inv.Character,
     textFields :   map[textField]textFieldState,
+    catalog:       catalogState,
 }
 
 grab :: struct{
@@ -44,6 +45,10 @@ textFieldState :: struct{
 
     backspace_timer: f32,
     backspace_repeat_timer: f32,
+}
+
+catalogState :: struct{
+    category: inv.ItemCategory,
 }
 
 page :: enum{
