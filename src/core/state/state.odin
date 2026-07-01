@@ -3,6 +3,9 @@
 import inv "../inventory"
 import rl "vendor:raylib"
 
+BACKSPACE_DELAY  :: 0.5
+BACKSPACE_REPEAT :: 0.02
+
 state :: struct{
     grab:          grab,
     ghost:         ghost,
@@ -10,6 +13,7 @@ state :: struct{
     page:          page,
     character:     ^inv.Character,
     textFields :   map[textField]textFieldState,
+    catalog:       catalogState,
 }
 
 grab :: struct{
@@ -38,6 +42,13 @@ textFieldState :: struct{
     is_active:     bool,
     buffer:        [dynamic]u8,
     buffer_length: i32,
+
+    backspace_timer: f32,
+    backspace_repeat_timer: f32,
+}
+
+catalogState :: struct{
+    category: inv.ItemCategory,
 }
 
 page :: enum{
@@ -45,13 +56,14 @@ page :: enum{
     Debug,
     Character,
     Catalog,
+    Shops,
+    Vehicles,
+    Bases
 }
 
 textField :: enum {
     Catalog_Search,
 }
-
-
 
 UpdateWindowState :: proc(state: ^state) {
     state.window.width = f32(rl.GetScreenWidth())

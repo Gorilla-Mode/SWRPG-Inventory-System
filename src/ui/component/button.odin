@@ -9,25 +9,83 @@ Button :: struct {
     text: string,
     rect: rl.Rectangle,
     image: rl.Texture2D,
-
-    page: st.page
 }
 
 DrawButton :: proc(
     button: ^Button,
     style: ^ui.style,
-    current_page: st.page,
+    active: bool
 ) -> bool {
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
 
-    color := style.colors.secondary
-    if button.page == current_page {
-        color = style.colors.secondary_active
-    } else if hovered {
-        color = style.colors.secondary_hover
-    }
 
+    return ButtonGetDraw(button, style, active, hovered, mouse_pos,
+    style.colors.secondary,
+    style.colors.text,
+    style.colors.surface,
+    style.colors.secondary_hover,
+    style.colors.secondary_active,
+    )
+}
+
+DrawButtonCol :: proc(
+    button: ^Button,
+    style: ^ui.style,
+    active: bool,
+    col_rect: rl.Color,
+    col_icon: rl.Color,
+    col_icon_bg: rl.Color,
+    col_hover: rl.Color,
+    col_active: rl.Color,
+    outline: bool = false,
+    col_outline: rl.Color = rl.WHITE,
+    col_outline_active: rl.Color = rl.WHITE,
+) -> bool {
+    mouse_pos := rl.GetMousePosition()
+    hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
+
+    if outline do return ButtonGetDraw(button,
+    style,
+    active,
+    hovered,
+    mouse_pos,
+    col_rect,
+    col_icon,
+    col_icon_bg,
+    col_hover,
+    col_active,
+    outline,
+    col_outline,
+    col_outline_active)
+
+    return ButtonGetDraw(button,
+    style,
+    active,
+    hovered,
+    mouse_pos,
+    col_rect,
+    col_icon,
+    col_icon_bg,
+    col_hover,
+    col_active)
+}
+
+ButtonGetDraw :: proc(
+    button: ^Button,
+    style: ^ui.style,
+    active: bool,
+    hovered: bool,
+    mouse_pos: rl.Vector2,
+    col_rect: rl.Color,
+    col_icon: rl.Color,
+    col_icon_bg: rl.Color,
+    col_hover: rl.Color,
+    col_active: rl.Color,
+    outline: bool = false,
+    col_outline: rl.Color = rl.WHITE,
+    col_outline_active: rl.Color = rl.WHITE,
+) -> bool {
     padding: f32 = 2
     target_size: f32 = button.rect.height - padding * 2
     scale := target_size / f32(button.image.width)
@@ -65,14 +123,43 @@ DrawButton :: proc(
         text_area.y + (text_area.height - text_size.y) / 2,
     }
 
-    rl.DrawRectangleRec(button.rect, color)
-    rl.DrawRectangleRec(icon_rect, style.colors.surface)
+    if outline {
+        rl.DrawRectangleRec(button.rect, col_rect)
+
+        outline_color := col_outline
+
+        if hovered {
+            outline_color = col_hover
+            rl.DrawRectangleLinesEx(button.rect, padding, outline_color)
+        }
+
+        if active {
+            outline_color = col_outline_active
+            rl.DrawRectangleLinesEx(button.rect, padding, outline_color)
+        }
+
+    } else {
+        bg_color := col_rect
+
+        if hovered {
+            bg_color = col_hover
+        }
+
+        if active {
+            bg_color = col_active
+        }
+
+        rl.DrawRectangleRec(button.rect, bg_color)
+    }
+
+    rl.DrawRectangleRec(icon_rect, col_icon_bg)
+
     rl.DrawTextureEx(
     button.image,
     icon_pos,
     0,
     scale,
-    style.colors.text,
+    col_icon,
     )
 
     rl.DrawTextEx(
@@ -102,7 +189,6 @@ ButtonCreate :: proc(
             width = width,
             height = height,
         },
-        page = page,
         image = image,
     }
 }
@@ -112,20 +198,52 @@ LayoutButtonsHorizontal :: proc(
     center: rl.Vector2,
     spacing: f32,
 ) {
-    total_width: f32 = 0
+    if len(buttons) == 0 do return
 
-    for button in buttons {
-        total_width += button.rect.width
-    }
+    button_width  := buttons[0].rect.width
+    button_height := buttons[0].rect.height
 
-    total_width += spacing * f32(len(buttons) - 1)
+    total_width := f32(len(buttons))*button_width +
+    f32(len(buttons)-1)*spacing
 
-    x := center.x - total_width / 2
+    start_x := center.x - total_width/2
+    y := center.y - button_height/2
 
     for i in 0..<len(buttons) {
-        buttons[i].rect.x = x
-        buttons[i].rect.y = center.y - buttons[i].rect.height / 2
+        buttons[i].rect.x = start_x + f32(i)*(button_width + spacing)
+        buttons[i].rect.y = y
+    }
+}
 
-        x += buttons[i].rect.width + spacing
+LayoutButtonsHorizontalRect :: proc(
+    buttons: []^Button,
+    bounds: rl.Rectangle,
+    target_y: f32,
+    spacing: f32,
+    padding_left: f32,
+    padding_right: f32,
+    offset_x: f32 = 0,
+    offset_y: f32 = 0,
+) {
+    if len(buttons) == 0 do return
+
+    button_width  := buttons[0].rect.width
+    button_height := buttons[0].rect.height
+
+    available_width := bounds.width - padding_left - padding_right
+
+    total_width := f32(len(buttons)) * button_width +
+    f32(len(buttons) - 1) * spacing
+
+    start_x := bounds.x +
+    padding_left +
+    (available_width - total_width) / 2 +
+    offset_x
+
+    y := target_y - button_height / 2 + offset_y
+
+    for i in 0..<len(buttons) {
+        buttons[i].rect.x = start_x + f32(i) * (button_width + spacing)
+        buttons[i].rect.y = y
     }
 }

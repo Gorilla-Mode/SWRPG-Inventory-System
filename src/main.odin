@@ -50,7 +50,7 @@ main :: proc()
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
         
-        switch state.page {
+        #partial switch state.page {
         case .Inventory:
             app.InputMoveItem(&state,
             items.backpack,
