@@ -9,6 +9,7 @@ state :: struct{
     window:        windowState,
     page:          page,
     character:     ^inv.Character,
+    textFields :   map[textField]textFieldState,
 }
 
 grab :: struct{
@@ -33,11 +34,24 @@ windowState :: struct{
     height: f32,
 }
 
+textFieldState :: struct{
+    is_active:     bool,
+    buffer:        [dynamic]u8,
+    buffer_length: i32,
+}
+
 page :: enum{
     Inventory,
     Debug,
     Character,
     Catalog,
+    Shops,
+    Vehicles,
+    Bases
+}
+
+textField :: enum {
+    Catalog_Search,
 }
 
 UpdateWindowState :: proc(state: ^state) {

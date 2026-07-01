@@ -5,6 +5,7 @@ import os "core:os"
 import "core:path/filepath"
 import strings "core:strings"
 
+DEFAULT_ICON_SIZE :: 64.0
 
 // Struct to hold the file path for each icon to be loaded.
 IconMetadata :: struct {
@@ -21,7 +22,7 @@ LoadImages :: proc() -> map[Icons]rl.Texture2D {
 
     for icon, metadata in icon_paths {
         loaded_image : = rl.LoadImage(metadata.path)
-        rl.ImageResize(&loaded_image, 64, 64)
+        rl.ImageResize(&loaded_image, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)
         tex := rl.LoadTextureFromImage(loaded_image)
 
         rl.GenTextureMipmaps(&tex)

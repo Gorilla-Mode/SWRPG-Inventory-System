@@ -16,8 +16,9 @@ AVATAR_WIDTH :: 200
 AVATAR_HEIGHT :: 400
 
 GRID_CHAR_SPACING :: 50
-CHAR_PAGE_GRID_START_Y :: 2 * ui.HEADER_HEIGHT + 10
+PAGE_STAR_Y :: 2 * ui.HEADER_HEIGHT + 10
 CHAR_BLOCK_WIDTH :: SLOT_SIZE + SPACING + AVATAR_WIDTH + SPACING + SLOT_SIZE
+PADDING :: 20
 
 PageSection :: struct {
     origin_x: f32,
@@ -36,23 +37,43 @@ CharacterPageLayout :: struct {
     grid_start_x: f32,
 }
 
-GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
-    max_w: f32 = 0
+CatalogPageLayout :: struct {
+    left:   PageSection,
+    right:  PageSection,
 
-    for _, item in char.equipment.slots {
-        if item == nil do continue
+    top_y: f32,
+}
 
-        container_data, ok := item.definition.data.(inv.ContainerData)
-        if !ok do continue
+GetCatalogPageLayoutInfo :: proc(state: ^st.state, cellSize: f32) -> CatalogPageLayout {
+    w := f32(state.window.width)
 
-        storage, is_grid := container_data.storage.storage.(inv.ContainerGrid)
-        if !is_grid do continue
+    left_width  := w / 3
+    right_width := (w * 2) / 3
 
-        w := f32(storage.width) * cell_size
-        if w > max_w do max_w = w
+    // LEFT SECTION
+    left := PageSection{
+        origin_x = 0,
+        width = left_width,
+        center_x = left_width / 2,
     }
 
-    return max_w
+    grid_width := GetMaxGridWidth(state.character, cellSize)
+    left.start_x = left.center_x - grid_width / 2
+
+    // RIGHT SECTION
+    right := PageSection{
+        origin_x = left_width,
+        width = right_width,
+        center_x = left_width + right_width / 2,
+    }
+
+    right.start_x = right.center_x
+
+    return CatalogPageLayout{
+        left = left,
+        right = right,
+        top_y = PAGE_STAR_Y,
+    }
 }
 
 GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> CharacterPageLayout {
@@ -86,7 +107,7 @@ GetCharacterPageLayoutInfo :: proc(state: ^st.state, cell_size: f32) -> Characte
         center = center,
         right = right,
 
-        top_y = CHAR_PAGE_GRID_START_Y
+        top_y = PAGE_STAR_Y
     }
 }
 
@@ -197,4 +218,23 @@ top_y: f32,
     }
 
     return slots
+}
+
+GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
+    max_w: f32 = 0
+
+    for _, item in char.equipment.slots {
+        if item == nil do continue
+
+        container_data, ok := item.definition.data.(inv.ContainerData)
+        if !ok do continue
+
+        storage, is_grid := container_data.storage.storage.(inv.ContainerGrid)
+        if !is_grid do continue
+
+        w := f32(storage.width) * cell_size
+        if w > max_w do max_w = w
+    }
+
+    return max_w
 }

@@ -55,9 +55,39 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     style.icons[ui.Icons.page_catalog]
     )
 
+    ButtonShop := co.ButtonCreate(
+    "Merchants",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    buttonWidth,
+    buttonHeight,
+    st.page.Shops,
+    style.icons[ui.Icons.page_shop]
+    )
+
+    ButtonVehicles := co.ButtonCreate(
+    "Vehicles",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    buttonWidth,
+    buttonHeight,
+    st.page.Vehicles,
+    style.icons[ui.Icons.page_vehicle]
+    )
+
+    ButtonBases := co.ButtonCreate(
+    "Bases",
+    rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
+    buttonWidth,
+    buttonHeight,
+    st.page.Bases,
+    style.icons[ui.Icons.page_bases]
+    )
+
     buttons := []co.Button{
-        ButtonInv,
         ButtonCharacter,
+        ButtonInv,
+        ButtonShop,
+        ButtonVehicles,
+        ButtonBases,
         ButtonCatalog,
         ButtonDebug,
     }

@@ -18,7 +18,8 @@ main :: proc()
         }
     }
 
-    state := st.state{}
+    state := st.state{textFields = make(map[st.textField]st.textFieldState)}
+    defer delete(state.textFields)
     items := inv.TestItem(style.grid.cell_size)
     state.character = inv.TestCharacter(items.backpackInstance)
 
@@ -49,7 +50,7 @@ main :: proc()
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
         
-        switch state.page {
+        #partial switch state.page {
         case .Inventory:
             app.InputMoveItem(&state,
             items.backpack,

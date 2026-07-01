@@ -4,6 +4,7 @@ import inv "../inventory"
 import rl  "vendor:raylib"
 import ui "../../ui"
 import st "../state"
+import app "../app"
 
 InputMoveItem :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	if state.grab.is_dragging {
@@ -51,7 +52,7 @@ InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
     cell_size := style.grid.cell_size
     layout_info := GetCharacterPageLayoutInfo(state, cell_size)
-    grid_locs := GetCharacterGridLocations(char, layout_info.top_y, cell_size, layout_info.left.start_x)
+    grid_locs := GetCharacterGridLocations(char, layout_info.top_y, cell_size, layout_info.left.origin_x + app.PADDING)
     slots := GetCharacterSlotRects(state, layout_info.center.start_x, layout_info.top_y)
 
     if state.grab.is_dragging {
