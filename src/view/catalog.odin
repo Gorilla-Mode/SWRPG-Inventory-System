@@ -38,7 +38,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
 
     comp.UpdateTextField(&searchBar)
-    comp.DrawTextField(&searchBar, style)
+    comp.DrawTextField(&searchBar, style, "Search catalog...")
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
     "Catalog",

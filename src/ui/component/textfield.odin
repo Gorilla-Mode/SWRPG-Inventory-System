@@ -21,9 +21,7 @@ UpdateTextField :: proc(field: ^TextField){
     if rl.IsMouseButtonPressed(.LEFT)
     {
         if rl.CheckCollisionPointRec(mousePos, field.rect_clear) {
-            resize(&field.state.buffer, 0)
-            field.state.buffer_length = 0
-            field.state.is_active = false
+            TextFieldClear(field)
             return
         }
         field.state.is_active = rl.CheckCollisionPointRec(mousePos, field.rect)
@@ -48,26 +46,76 @@ UpdateTextField :: proc(field: ^TextField){
     }
 }
 
-DrawTextField :: proc(field: ^TextField, style: ^ui.style){
+DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
+    mousePos := rl.GetMousePosition()
     iconPadding: f32 = 8
     iconScale := ui.IconScale(field.rect.height - iconPadding)
 
-    outline := field.state.is_active ? style.colors.success : style.colors.surface
+    caretBlinkTime: f64 = 0.75 // seconds
+    show_caret := (i32(rl.GetTime() / caretBlinkTime) % 2) == 0
+
+    outlineCol := field.state.is_active ? style.colors.success : style.colors.surface
     textPos := rl.Vector2{field.rect.x + field.rect_image.width + iconPadding, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
+    textCol := style.colors.text
+    text := field.state.buffer_length > 0 ? TextFieldText(field) : temp
 
     iconSearchPos := ui.IconGetCenterPos(field.rect_image, field.rect_image.height - iconPadding / 2)
     iconClearPos := ui.IconGetCenterPos(field.rect_clear, field.rect_clear.height - iconPadding / 2)
-    iconClearPos.y -= 2 // Offset, looks goofy when prop aligned
+    IconClearCol := rl.CheckCollisionPointRec(mousePos, field.rect_clear) && field.state.buffer_length != 0 ? style.colors.error : style.colors.text
+    iconClearPos.y -= 2 // Offset, looks goofy when properly aligned
+
+    boxRectCollison := rl.CheckCollisionPointRec(mousePos, field.rect)
+    clearRectCollision := rl.CheckCollisionPointRec(mousePos, {field.rect_clear.x - 2, field.rect_clear.y - 2, field.rect_clear.width + 4, field.rect_clear.height + 4})
+
+    if (boxRectCollison &&
+    !field.state.is_active &&
+    !clearRectCollision) {
+        outlineCol = style.colors.secondary_hover
+    }
+
+    if field.state.is_active && field.state.buffer_length == 0 {
+        text = ""
+    }
+
+    if field.state.buffer_length == 0 {
+        textCol.a = 128
+    }
+
+    if boxRectCollison && !clearRectCollision {
+        rl.SetMouseCursor(.IBEAM)
+    } else {
+        rl.SetMouseCursor(.DEFAULT)
+    }
 
     rl.DrawRectangleRec(field.rect, style.colors.surface)
-    rl.DrawRectangleLinesEx(field.rect, 2, outline)
+    rl.DrawRectangleLinesEx(field.rect, 2, outlineCol)
     rl.DrawRectangleRec(field.rect_image, style.colors.secondary)
     rl.DrawRectangleRec(field.rect_clear, style.colors.secondary)
 
     rl.DrawTextureEx(field.image, iconSearchPos, 0, iconScale, style.colors.text)
-    rl.DrawTextureEx(style.icons[ui.Icons.gui_trash], iconClearPos, 0, iconScale, style.colors.text)
+    rl.DrawTextureEx(style.icons[ui.Icons.gui_trash], iconClearPos, 0, iconScale, IconClearCol)
 
-    rl.DrawTextEx(style.fonts.regular[ui.font_size.default], TextFieldText(field), textPos, f32(ui.font_size.default), 0, style.colors.text)
+    rl.DrawTextEx(style.fonts.regular[ui.font_size.default], text, textPos, f32(ui.font_size.default), 0, textCol)
+
+    if clearRectCollision && field.state.buffer_length != 0 {
+        rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "Clear?",
+        {mousePos.x + 4, mousePos.y - (f32(ui.font_size.label) / 2) - 4},
+        f32(ui.font_size.label),
+        1,
+        style.colors.text)
+    }
+
+    if field.state.is_active && show_caret {
+        text_width := rl.MeasureTextEx(style.fonts.regular[ui.font_size.default], text, f32(ui.font_size.default), 0)
+
+        rl.DrawRectangle(
+        i32(textPos.x + text_width.x) + 2,
+        i32(textPos.y),
+        1,
+        i32(ui.font_size.default),
+        style.colors.text,
+        )
+    }
 }
 
 TextFieldText :: proc(field: ^TextField) -> cstring {
@@ -75,11 +123,13 @@ TextFieldText :: proc(field: ^TextField) -> cstring {
 }
 
 TextFieldClear :: proc(field: ^TextField){
-
+    resize(&field.state.buffer, 0)
+    field.state.buffer_length = 0
+    field.state.is_active = false
 }
 
 TextFieldSet :: proc(field: ^TextField, text: string){
-
+    panic("Not implemented yet")
 }
 
 TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state, image: rl.Texture2D) -> TextField {
@@ -108,6 +158,6 @@ TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textFiel
             width = iconRectSize,
             height = iconRectSize,
         },
-        max_length = i32((rect.width - (iconRectSize + 4) * 2 - 8) / f32(rl.MeasureText("_", i32(ui.font_size.default)))),
+        max_length = i32(rect.width - (iconRectSize + 4) * 2 - 8) / rl.MeasureText("_", i32(ui.font_size.default)),
     }
 }

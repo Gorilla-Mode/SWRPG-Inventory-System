@@ -51,8 +51,6 @@ textField :: enum {
     Catalog_Search,
 }
 
-
-
 UpdateWindowState :: proc(state: ^state) {
     state.window.width = f32(rl.GetScreenWidth())
     state.window.height = f32(rl.GetScreenHeight())
