@@ -17,6 +17,7 @@ TextField :: struct {
 
 UpdateTextField :: proc(field: ^TextField){
     mousePos := rl.GetMousePosition()
+    dt := rl.GetFrameTime()
 
     if rl.IsMouseButtonPressed(.LEFT)
     {
@@ -40,7 +41,29 @@ UpdateTextField :: proc(field: ^TextField){
         }
     }
 
-    if rl.IsKeyPressed(.BACKSPACE) && field.state.buffer_length > 0 {
+    if rl.IsKeyPressed(.BACKSPACE) {
+        DeleteCharTextField(field)
+    }
+
+    if rl.IsKeyDown(.BACKSPACE) {
+        field.state.backspace_timer += dt
+
+        if field.state.backspace_timer >= st.BACKSPACE_DELAY {
+            field.state.backspace_repeat_timer += dt
+
+            if field.state.backspace_repeat_timer >= st.BACKSPACE_REPEAT {
+                DeleteCharTextField(field)
+                field.state.backspace_repeat_timer = 0
+            }
+        }
+    } else {
+        field.state.backspace_timer = 0
+        field.state.backspace_repeat_timer = 0
+    }
+}
+
+DeleteCharTextField :: proc(field: ^TextField){
+    if field.state.buffer_length > 0 {
         resize(&field.state.buffer, field.state.buffer_length - 1)
         field.state.buffer_length -= 1
     }
@@ -137,6 +160,8 @@ TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textFiel
     if !ok {
         new_field := st.textFieldState{
             is_active = false,
+            backspace_repeat_timer = 0.05,
+            backspace_timer = 0.5
         }
         state.textFields[field] = new_field
     }

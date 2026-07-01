@@ -3,6 +3,9 @@
 import inv "../inventory"
 import rl "vendor:raylib"
 
+BACKSPACE_DELAY  :: 0.5
+BACKSPACE_REPEAT :: 0.02
+
 state :: struct{
     grab:          grab,
     ghost:         ghost,
@@ -38,6 +41,9 @@ textFieldState :: struct{
     is_active:     bool,
     buffer:        [dynamic]u8,
     buffer_length: i32,
+
+    backspace_timer: f32,
+    backspace_repeat_timer: f32,
 }
 
 page :: enum{
