@@ -50,7 +50,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     buttonWidth,
     buttonHeight,
     st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_gunnery]
+    style.icons[ui.Icons.category_weapons]
     )
 
     buttonGearCat := comp.ButtonCreate(
@@ -59,16 +59,16 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     buttonWidth,
     buttonHeight,
     st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_melee]
+    style.icons[ui.Icons.category_gear]
     )
 
     buttonArmorCat := comp.ButtonCreate(
-    "Armor",
+    "Clothing",
     layout.left.center_x,
     buttonWidth,
     buttonHeight,
     st.page.Inventory,
-    style.icons[ui.Icons.gui_cart]
+    style.icons[ui.Icons.category_clothing]
     )
 
     buttonContainerCat := comp.ButtonCreate(
@@ -77,7 +77,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     buttonWidth,
     buttonHeight,
     st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_melee]
+    style.icons[ui.Icons.category_storage]
     )
 
     buttonsCategory := []^comp.Button{
