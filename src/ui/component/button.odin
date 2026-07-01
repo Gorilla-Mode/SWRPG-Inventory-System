@@ -9,20 +9,18 @@ Button :: struct {
     text: string,
     rect: rl.Rectangle,
     image: rl.Texture2D,
-
-    page: st.page
 }
 
 DrawButton :: proc(
     button: ^Button,
     style: ^ui.style,
-    current_page: st.page,
+    active: bool,
 ) -> bool {
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
 
     color := style.colors.secondary
-    if button.page == current_page {
+    if active {
         color = style.colors.secondary_active
     } else if hovered {
         color = style.colors.secondary_hover
@@ -102,7 +100,6 @@ ButtonCreate :: proc(
             width = width,
             height = height,
         },
-        page = page,
         image = image,
     }
 }
@@ -112,20 +109,19 @@ LayoutButtonsHorizontal :: proc(
     center: rl.Vector2,
     spacing: f32,
 ) {
-    total_width: f32 = 0
+    if len(buttons) == 0 do return
 
-    for button in buttons {
-        total_width += button.rect.width
-    }
+    button_width  := buttons[0].rect.width
+    button_height := buttons[0].rect.height
 
-    total_width += spacing * f32(len(buttons) - 1)
+    total_width := f32(len(buttons))*button_width +
+    f32(len(buttons)-1)*spacing
 
-    x := center.x - total_width / 2
+    start_x := center.x - total_width/2
+    y := center.y - button_height/2
 
     for i in 0..<len(buttons) {
-        buttons[i].rect.x = x
-        buttons[i].rect.y = center.y - buttons[i].rect.height / 2
-
-        x += buttons[i].rect.width + spacing
+        buttons[i].rect.x = start_x + f32(i)*(button_width + spacing)
+        buttons[i].rect.y = y
     }
 }

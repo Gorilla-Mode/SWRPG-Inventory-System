@@ -92,6 +92,16 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
         ButtonDebug,
     }
 
+    pages := []st.page{
+        .Character,
+        .Inventory,
+        .Shops,
+        .Vehicles,
+        .Bases,
+        .Catalog,
+        .Debug,
+    }
+
     co.LayoutButtonsHorizontal(
     buttons,
     rl.Vector2{state.window.width / 2, header_y / 2},
@@ -99,8 +109,8 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     )
 
     for i in 0..<len(buttons) {
-        if co.DrawButton(&buttons[i], style, state.page) {
-            state.page = buttons[i].page
+        if co.DrawButton(&buttons[i], style, state.page == pages[i]) {
+            state.page = pages[i]
         }
     }
 
