@@ -45,8 +45,30 @@ DrawButtonCol :: proc(
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
 
-    if outline do return ButtonGetDraw(button, style, active, hovered, mouse_pos, col_rect, col_icon, col_icon_bg, col_hover, col_active, outline, col_outline, col_outline_active)
-    return ButtonGetDraw(button, style, active, hovered, mouse_pos, col_rect, col_icon, col_icon_bg, col_hover, col_active)
+    if outline do return ButtonGetDraw(button,
+    style,
+    active,
+    hovered,
+    mouse_pos,
+    col_rect,
+    col_icon,
+    col_icon_bg,
+    col_hover,
+    col_active,
+    outline,
+    col_outline,
+    col_outline_active)
+
+    return ButtonGetDraw(button,
+    style,
+    active,
+    hovered,
+    mouse_pos,
+    col_rect,
+    col_icon,
+    col_icon_bg,
+    col_hover,
+    col_active)
 }
 
 ButtonGetDraw :: proc(
