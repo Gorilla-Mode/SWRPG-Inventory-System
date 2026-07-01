@@ -45,6 +45,9 @@ page :: enum{
     Debug,
     Character,
     Catalog,
+    Shops,
+    Vehicles,
+    Bases
 }
 
 textField :: enum {
