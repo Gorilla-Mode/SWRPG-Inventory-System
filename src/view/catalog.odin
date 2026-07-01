@@ -7,6 +7,9 @@ import comp "../ui/component"
 
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     layout := app.GetCatalogPageLayoutInfo(state, style.grid.cell_size)
+    paddingElement: f32 = 2
+    buttonWidth: f32 = (layout.left.width - app.PADDING - paddingElement * 5) / 4
+    buttonHeight: f32 = 32
 
     rect_left_x := layout.left.origin_x + app.PADDING
     rect_left := rl.Rectangle{
@@ -24,9 +27,9 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
 
     searchBar := comp.TextFieldCreate(
         rl.Rectangle{
-            x = layout.left.origin_x + app.PADDING + 2,
-            y = layout.top_y + 2,
-            width = layout.left.width - 4 - app.PADDING,
+            x = layout.left.origin_x + app.PADDING + paddingElement,
+            y = layout.top_y + paddingElement,
+            width = layout.left.width - (paddingElement * 2) - app.PADDING,
             height = 32,
         },
         style,
@@ -34,11 +37,76 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     state,
     style.icons[ui.Icons.gui_search])
 
+    buttonWeaponCat := comp.ButtonCreate(
+    "Weapon",
+    layout.left.center_x,
+    buttonWidth,
+    buttonHeight,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_gunnery]
+    )
+
+    buttonGearCat := comp.ButtonCreate(
+    "Gear",
+    layout.left.center_x,
+    buttonWidth,
+    buttonHeight,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_melee]
+    )
+
+    buttonArmorCat := comp.ButtonCreate(
+    "Armor",
+    layout.left.center_x,
+    buttonWidth,
+    buttonHeight,
+    st.page.Inventory,
+    style.icons[ui.Icons.gui_cart]
+    )
+
+    buttonContainerCat := comp.ButtonCreate(
+    "Storage",
+    layout.left.center_x,
+    buttonWidth,
+    buttonHeight,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_melee]
+    )
+
+    buttonsCategory := []^comp.Button{
+        &buttonWeaponCat,
+        &buttonGearCat,
+        &buttonArmorCat,
+        &buttonContainerCat,
+    }
+
+    comp.LayoutButtonsHorizontalRect(
+    buttonsCategory,
+    rect_left,
+    layout.top_y + searchBar.rect.height + app.PADDING,
+    paddingElement,
+    paddingElement,
+    paddingElement,
+    )
+
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
     rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
 
     comp.UpdateTextField(&searchBar)
     comp.DrawTextField(&searchBar, style, "Search catalog...")
+
+    if comp.DrawButton(&buttonWeaponCat, style, state.page == st.page.Inventory) {
+        state.page = st.page.Inventory
+    }
+    if comp.DrawButton(&buttonGearCat, style, state.page == st.page.Inventory) {
+        state.page = st.page.Inventory
+    }
+    if comp.DrawButton(&buttonArmorCat, style, state.page == st.page.Inventory) {
+        state.page = st.page.Inventory
+    }
+    if comp.DrawButton(&buttonContainerCat, style, state.page == st.page.Inventory) {
+        state.page = st.page.Inventory
+    }
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
     "Catalog",

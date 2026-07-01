@@ -19,7 +19,7 @@ DrawButton :: proc(
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
 
-    color := style.colors.secondary
+    color := style.colors.surface
     if active {
         color = style.colors.secondary_active
     } else if hovered {
@@ -122,6 +122,39 @@ LayoutButtonsHorizontal :: proc(
 
     for i in 0..<len(buttons) {
         buttons[i].rect.x = start_x + f32(i)*(button_width + spacing)
+        buttons[i].rect.y = y
+    }
+}
+
+LayoutButtonsHorizontalRect :: proc(
+    buttons: []^Button,
+    bounds: rl.Rectangle,
+    target_y: f32,
+    spacing: f32,
+    padding_left: f32,
+    padding_right: f32,
+    offset_x: f32 = 0,
+    offset_y: f32 = 0,
+) {
+    if len(buttons) == 0 do return
+
+    button_width  := buttons[0].rect.width
+    button_height := buttons[0].rect.height
+
+    available_width := bounds.width - padding_left - padding_right
+
+    total_width := f32(len(buttons)) * button_width +
+    f32(len(buttons) - 1) * spacing
+
+    start_x := bounds.x +
+    padding_left +
+    (available_width - total_width) / 2 +
+    offset_x
+
+    y := target_y - button_height / 2 + offset_y
+
+    for i in 0..<len(buttons) {
+        buttons[i].rect.x = start_x + f32(i) * (button_width + spacing)
         buttons[i].rect.y = y
     }
 }
