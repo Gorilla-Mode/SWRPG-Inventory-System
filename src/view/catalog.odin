@@ -9,6 +9,37 @@ import inv "../core/inventory"
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     layout := app.GetCatalogPageLayoutInfo(state, style.grid.cell_size)
     paddingElement: f32 = 2
+    rect_left_x := layout.left.origin_x + app.PADDING
+    rect_right := rl.Rectangle{
+        x = layout.right.origin_x,
+        y = layout.top_y,
+        width = layout.right.width - app.PADDING,
+        height = f32(state.window.height) - layout.top_y
+    }
+    rect_left := rl.Rectangle{
+        x = rect_left_x,
+        y = layout.top_y,
+        width = layout.left.width - rect_left_x,
+        height = f32(state.window.height) - layout.top_y
+    }
+    
+    DrawCatalogItems(state, style, layout, paddingElement, rect_left)
+
+    rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
+    "Statisitcs",
+    ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
+    f32(ui.font_size.header),
+    2,
+    style.colors.text)
+}
+
+DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) {
+    f_bg_color := style.colors.surface
+    f_hover_color := style.colors.secondary_hover
+    f_active_color := style.colors.success
+    f_icon_color := style.colors.text
+    f_icon_bg_color := style.colors.secondary
 
     // - padding times elements +1 and divide by number of elements
     buttonWidthBase: f32 = (layout.left.width - app.PADDING )
@@ -20,34 +51,16 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     buttonHeight: f32 = 32
     buttonSubHeight: f32 = 26
 
-    f_bg_color := style.colors.surface
-    f_hover_color := style.colors.secondary_hover
-    f_active_color := style.colors.success
-    f_icon_color := style.colors.text
-    f_icon_bg_color := style.colors.secondary
 
-    rect_left_x := layout.left.origin_x + app.PADDING
-    rect_left := rl.Rectangle{
-        x = rect_left_x,
-        y = layout.top_y,
-        width = layout.left.width - rect_left_x,
-        height = f32(state.window.height) - layout.top_y
-    }
-    rect_right := rl.Rectangle{
-        x = layout.right.origin_x,
-        y = layout.top_y,
-        width = layout.right.width - app.PADDING,
-        height = f32(state.window.height) - layout.top_y
-    }
 
     searchBar := comp.TextFieldCreate(
-        rl.Rectangle{
-            x = layout.left.origin_x + app.PADDING + paddingElement,
-            y = layout.top_y + paddingElement,
-            width = layout.left.width - (paddingElement * 2) - app.PADDING,
-            height = 32,
-        },
-        style,
+    rl.Rectangle{
+        x = layout.left.origin_x + app.PADDING + paddingElement,
+        y = layout.top_y + paddingElement,
+        width = layout.left.width - (paddingElement * 2) - app.PADDING,
+        height = 32,
+    },
+    style,
     st.textField.Catalog_Search,
     state,
     style.icons[ui.Icons.gui_search])
@@ -265,7 +278,6 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     )
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
-    rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
 
     comp.UpdateTextField(&searchBar)
     comp.DrawTextField(&searchBar, style, "Search catalog...")
@@ -274,165 +286,54 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textCategory, { iconCategoryPos.x + textCategorySize.y + paddingElement, iconCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    if comp.DrawButtonCol(&buttonWeaponCat,
-    style,
-    state.catalog.category == inv.ItemCategory.Weapon,
-    f_bg_color,
-    f_icon_color,
-    f_icon_bg_color,
-    f_hover_color,
-    f_active_color,
-    true,
-    f_hover_color,
-    f_active_color) {
-        state.catalog.category = inv.ItemCategory.Weapon
+    categoryButtons := []^comp.Button{
+        &buttonWeaponCat,
+        &buttonGearCat,
+        &buttonArmorCat,
+        &buttonContainerCat,
     }
-    if comp.DrawButtonCol(&buttonGearCat,
-    style,
-    state.catalog.category == inv.ItemCategory.Gear,
-    f_bg_color,
-    f_icon_color,
-    f_icon_bg_color,
-    f_hover_color,
-    f_active_color,
-    true,
-    f_hover_color,
-    f_active_color) {
-        state.catalog.category = inv.ItemCategory.Gear
-    }
-    if comp.DrawButtonCol(&buttonArmorCat,
-    style,
-    state.catalog.category == inv.ItemCategory.Armor,
-    f_bg_color,
-    f_icon_color,
-    f_icon_bg_color,
-    f_hover_color,
-    f_active_color,
-    true,
-    f_hover_color,
-    f_active_color) {
-        state.catalog.category = inv.ItemCategory.Armor
-    }
-    if comp.DrawButtonCol(&buttonContainerCat,
-    style,
-    state.catalog.category == inv.ItemCategory.Container,
 
-    f_bg_color,
-    f_icon_color,
-    f_icon_bg_color,
-    f_hover_color,
-    f_active_color,
-    true,
-    f_hover_color,
-    f_active_color) {
-        state.catalog.category = inv.ItemCategory.Container
+    categoryValues := []inv.ItemCategory{
+        .Weapon,
+        .Gear,
+        .Armor,
+        .Container,
+    }
+
+    for i in 0..<len(categoryButtons) {
+        if comp.DrawButtonCol(categoryButtons[i],
+        style,
+        state.catalog.category == categoryValues[i],
+        f_bg_color,
+        f_icon_color,
+        f_icon_bg_color,
+        f_hover_color,
+        f_active_color,
+        true,
+        f_hover_color,
+        f_active_color) {
+            state.catalog.category = categoryValues[i]
+        }
     }
 
     rl.DrawRectangleRec(categorySubFilterRect, style.colors.surface)
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconSubCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
+    subCategoryButtons:[]^comp.Button = nil
     switch state.catalog.category {
     case .Weapon:
-        if comp.DrawButtonCol(&buttonWeaponRifle,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
-        if comp.DrawButtonCol(&buttonWeaponPistol,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
-        if comp.DrawButtonCol(&buttonWeaponShotgun,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
-        if comp.DrawButtonCol(&buttonWeaponGunnery,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
-        if comp.DrawButtonCol(&buttonWeaponMelee,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
+        subCategoryButtons = buttonsWeapons
     case .Container:
-        if comp.DrawButtonCol(&buttonContainerBelt,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-        if comp.DrawButtonCol(&buttonContainerBackpack,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
+        subCategoryButtons = buttonsContainer
     case .Gear:
-        if comp.DrawButtonCol(&buttonGearTools,
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color){ }
-
+        subCategoryButtons = buttonsGear
     case .Armor:
-        if comp.DrawButtonCol(&buttonClothingSpacesuit,
+        subCategoryButtons = buttonsClothing
+    }
+
+    for i in 0..<len(subCategoryButtons) {
+        _ = comp.DrawButtonCol(subCategoryButtons[i],
         style,
         false,
         f_bg_color,
@@ -442,7 +343,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         f_active_color,
         true,
         f_hover_color,
-        f_active_color){ }
+        f_active_color)
     }
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
@@ -451,11 +352,8 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     f32(ui.font_size.header),
     2,
     style.colors.text)
+}
 
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
-    "Statisitcs",
-    ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
-    f32(ui.font_size.header),
-    2,
-    style.colors.text)
+DrawItemStats :: proc(state: ^st.state, style: ^ui.style){
+
 }
