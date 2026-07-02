@@ -216,7 +216,7 @@ LayoutButtonsHorizontal :: proc(
 }
 
 LayoutButtonsHorizontalRect :: proc(
-    buttons: []^Button,
+    buttons: [dynamic]Button,
     bounds: rl.Rectangle,
     target_y: f32,
     spacing: f32,
