@@ -6,6 +6,14 @@ import rl "vendor:raylib"
 import comp "../ui/component"
 import inv "../core/inventory"
 
+CatalogButtons :: struct {
+    category:  [dynamic]comp.Button,
+    weapons:   [dynamic]comp.Button,
+    containers:[dynamic]comp.Button,
+    gear:      [dynamic]comp.Button,
+    clothing:  [dynamic]comp.Button,
+}
+
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     layout := app.GetCatalogPageLayoutInfo(state, style.grid.cell_size)
     paddingElement: f32 = 2
@@ -36,13 +44,14 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
 
     // - padding times elements +1 and divide by number of elements
     buttonWidthBase: f32 = (layout.left.width - app.PADDING )
-    buttonWidthCat: f32 = (buttonWidthBase - paddingElement * 5) / 4
-    buttonWidthWeapon: f32 = (buttonWidthBase - paddingElement * 6) / 5
-    buttonwidthContainer: f32 = (buttonWidthBase - paddingElement * 3) / 2
-    buttonWidthGear: f32 = (buttonWidthBase - paddingElement * 2) / 1
-    buttonWidthClothing: f32 = (buttonWidthBase - paddingElement * 2) / 1
     buttonHeight: f32 = 32
     buttonSubHeight: f32 = 26
+
+    buttonWidthCat       := CalcButtonWidth(buttonWidthBase, 4, paddingElement)
+    buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
+    buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 2, paddingElement)
+    buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
+    buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
 
     searchBar := comp.TextFieldCreate(
     rl.Rectangle{
@@ -77,22 +86,15 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     subCat_y: f32 = iconSubCategoryPos.y + categorySubFilterRect.height + (buttonHeight / 2) - ((buttonHeight - buttonSubHeight) / 2)
     cat_Y: f32 = layout.top_y + searchBar.rect.height + app.PADDING + textCategorySize.y + (paddingElement * 3)
 
-    buttonsCategory  := CreateCategoryButtons(layout, style, buttonWidthCat, buttonHeight)
-    buttonsWeapons   := CreateWeaponButtons(layout, style, buttonWidthWeapon, buttonSubHeight)
-    buttonsContainer := CreateContainerButtons(layout, style, buttonwidthContainer, buttonSubHeight)
-    buttonsGear      := CreateGearButtons(layout, style, buttonWidthGear, buttonSubHeight)
-    buttonsClothing  := CreateClothingButtons(layout, style, buttonWidthClothing, buttonSubHeight)
+    buttons := CatalogButtons{
+        category   = CreateCategoryButtons(layout, style, buttonWidthCat, buttonHeight),
+        weapons    = CreateWeaponButtons(layout, style, buttonWidthWeapon, buttonSubHeight),
+        containers = CreateContainerButtons(layout, style, buttonWidthContainer, buttonSubHeight),
+        gear       = CreateGearButtons(layout, style, buttonWidthGear, buttonSubHeight),
+        clothing   = CreateClothingButtons(layout, style, buttonWidthClothing, buttonSubHeight),
+    }
 
-    LayoutCatalogButtons(buttonsCategory,
-    buttonsWeapons,
-    buttonsContainer,
-    buttonsGear,
-    buttonsClothing,
-    rect_left,
-    layout,
-    subCat_y,
-    cat_Y,
-    paddingElement)
+    LayoutCatalogButtons(&buttons, rect_left, layout, subCat_y, cat_Y, paddingElement)
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
@@ -113,19 +115,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconSubCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    HandleCatalogButtons(
-    state,
-    style,
-    buttonsCategory,
-    buttonsWeapons,
-    buttonsContainer,
-    buttonsGear,
-    buttonsClothing,
-    f_bg_color,
-    f_icon_color,
-    f_icon_bg_color,
-    f_hover_color,
-    f_active_color)
+    HandleCatalogButtons(state, style, &buttons, f_bg_color, f_icon_color, f_icon_bg_color, f_hover_color, f_active_color)
 }
 
 DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
@@ -299,43 +289,35 @@ CreateClothingButtons :: proc(
 }
 
 LayoutCatalogButtons :: proc(
-    buttons_category: [dynamic]comp.Button,
-    buttons_weapons: [dynamic]comp.Button,
-    buttons_container: [dynamic]comp.Button,
-    buttons_gear: [dynamic]comp.Button,
-    buttons_clothing: [dynamic]comp.Button,
+    buttons: ^CatalogButtons,
     rect_left: rl.Rectangle,
     layout: app.CatalogPageLayout,
     subcat_y: f32,
     cat_y: f32,
     padding: f32,
 ) {
-    comp.LayoutButtonsHorizontalRect(buttons_weapons, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons_container, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons_gear, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons_clothing, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons_category, rect_left, cat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons.weapons, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons.containers, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons.gear, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons.clothing, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons.category, rect_left, cat_y, padding, padding, padding)
 }
 
 HandleCatalogButtons :: proc(
     state: ^st.state,
     style: ^ui.style,
-    buttonsCategory: [dynamic]comp.Button,
-    buttonsWeapons: [dynamic]comp.Button,
-    buttonsContainer: [dynamic]comp.Button,
-    buttonsGear: [dynamic]comp.Button,
-    buttonsClothing: [dynamic]comp.Button,
+    buttons: ^CatalogButtons,
     bgColor: rl.Color,
     iconColor: rl.Color,
     iconBgColor: rl.Color,
     hoverColor: rl.Color,
     activeColor: rl.Color,
 ) {
-    for i in 0..<len(buttonsCategory) {
+    for i in 0..<len(buttons.category) {
         category := inv.ItemCategory(i)
 
         if comp.DrawButtonCol(
-        &buttonsCategory[i],
+        &buttons.category[i],
         style,
         state.catalog.category == category,
         bgColor,
@@ -354,13 +336,13 @@ HandleCatalogButtons :: proc(
 
     switch state.catalog.category {
     case .Weapon:
-        subButtons = buttonsWeapons
+        subButtons = buttons.weapons
     case .Container:
-        subButtons = buttonsContainer
+        subButtons = buttons.containers
     case .Gear:
-        subButtons = buttonsGear
+        subButtons = buttons.gear
     case .Armor:
-        subButtons = buttonsClothing
+        subButtons = buttons.clothing
     }
 
     for i in 0..<len(subButtons) {
@@ -378,4 +360,8 @@ HandleCatalogButtons :: proc(
         activeColor,
         )
     }
+}
+
+CalcButtonWidth :: proc(total_width: f32, count: int, padding: f32) -> f32 {
+    return (total_width - padding * f32(count + 1)) / f32(count)
 }
