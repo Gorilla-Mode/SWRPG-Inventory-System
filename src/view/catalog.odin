@@ -115,7 +115,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconSubCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    HandleCatalogButtons(state, style, &buttons, f_bg_color, f_icon_color, f_icon_bg_color, f_hover_color, f_active_color)
+    DrawCatalogButtons(state, style, &buttons, f_bg_color, f_icon_color, f_icon_bg_color, f_hover_color, f_active_color)
 }
 
 DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
@@ -296,14 +296,19 @@ LayoutCatalogButtons :: proc(
     cat_y: f32,
     padding: f32,
 ) {
-    comp.LayoutButtonsHorizontalRect(buttons.weapons, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons.containers, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons.gear, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons.clothing, rect_left, subcat_y, padding, padding, padding)
-    comp.LayoutButtonsHorizontalRect(buttons.category, rect_left, cat_y, padding, padding, padding)
+    button_groups := []^[dynamic]comp.Button{
+        &buttons.weapons,
+        &buttons.containers,
+        &buttons.gear,
+        &buttons.clothing,
+    }
+
+    for group in button_groups {
+        comp.LayoutButtonsHorizontalRect(group^, rect_left, subcat_y, padding, padding, padding)
+    }
 }
 
-HandleCatalogButtons :: proc(
+DrawCatalogButtons :: proc(
     state: ^st.state,
     style: ^ui.style,
     buttons: ^CatalogButtons,
