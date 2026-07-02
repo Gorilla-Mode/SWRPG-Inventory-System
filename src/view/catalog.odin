@@ -75,6 +75,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     }
     textSubCategory: cstring = "Sub-Category"
     subCat_y: f32 = iconSubCategoryPos.y + categorySubFilterRect.height + (buttonHeight / 2) - ((buttonHeight - buttonSubHeight) / 2)
+    cat_Y: f32 = layout.top_y + searchBar.rect.height + app.PADDING + textCategorySize.y + (paddingElement * 3)
 
     buttonsCategory  := CreateCategoryButtons(layout, style, buttonWidthCat, buttonHeight)
     buttonsWeapons   := CreateWeaponButtons(layout, style, buttonWidthWeapon, buttonSubHeight)
@@ -89,9 +90,8 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     buttonsClothing,
     rect_left,
     layout,
-    searchBar,
-    textCategorySize,
     subCat_y,
+    cat_Y,
     paddingElement)
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
@@ -306,51 +306,15 @@ LayoutCatalogButtons :: proc(
     buttons_clothing: [dynamic]comp.Button,
     rect_left: rl.Rectangle,
     layout: app.CatalogPageLayout,
-    search_bar: comp.TextField,
-    text_category_size: rl.Vector2,
     subcat_y: f32,
+    cat_y: f32,
     padding: f32,
 ) {
-    comp.LayoutButtonsHorizontalRect(
-    buttons_weapons,
-    rect_left,
-    subcat_y,
-    padding,
-    padding,
-    padding)
-    comp.LayoutButtonsHorizontalRect(
-    buttons_container,
-    rect_left,
-    subcat_y,
-    padding,
-    padding,
-    padding)
-    comp.LayoutButtonsHorizontalRect(
-    buttons_gear,
-    rect_left,
-    subcat_y,
-    padding,
-    padding,
-    padding,
-    )
-    comp.LayoutButtonsHorizontalRect(
-    buttons_clothing,
-    rect_left,
-    subcat_y,
-    padding,
-    padding,
-    padding)
-    comp.LayoutButtonsHorizontalRect(
-    buttons_category,
-    rect_left,
-    layout.top_y +
-    search_bar.rect.height +
-    app.PADDING +
-    text_category_size.y +
-    (padding * 3),
-    padding,
-    padding,
-    padding)
+    comp.LayoutButtonsHorizontalRect(buttons_weapons, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons_container, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons_gear, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons_clothing, rect_left, subcat_y, padding, padding, padding)
+    comp.LayoutButtonsHorizontalRect(buttons_category, rect_left, cat_y, padding, padding, padding)
 }
 
 HandleCatalogButtons :: proc(
