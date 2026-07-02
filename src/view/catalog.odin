@@ -22,19 +22,12 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         width = layout.left.width - rect_left_x,
         height = f32(state.window.height) - layout.top_y
     }
-    
-    DrawCatalogItems(state, style, layout, paddingElement, rect_left)
 
-    rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
-    "Statisitcs",
-    ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
-    f32(ui.font_size.header),
-    2,
-    style.colors.text)
+    DrawCatalogExplorer(state, style, layout, paddingElement, rect_left)
+    DrawCatalogItemStat(state, style, layout, rect_right)
 }
 
-DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) {
+DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) {
     f_bg_color := style.colors.surface
     f_hover_color := style.colors.secondary_hover
     f_active_color := style.colors.success
@@ -50,8 +43,6 @@ DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.Catalo
     buttonWidthClothing: f32 = (buttonWidthBase - paddingElement * 2) / 1
     buttonHeight: f32 = 32
     buttonSubHeight: f32 = 26
-
-
 
     searchBar := comp.TextFieldCreate(
     rl.Rectangle{
@@ -75,49 +66,6 @@ DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.Catalo
         height = textCategorySize.y + (paddingElement * 2),
     }
 
-    buttonWeaponCat := comp.ButtonCreate(
-    "Weapon",
-    layout.left.center_x,
-    buttonWidthCat,
-    buttonHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_weapons]
-    )
-
-    buttonGearCat := comp.ButtonCreate(
-    "Gear",
-    layout.left.center_x,
-    buttonWidthCat,
-    buttonHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]
-    )
-
-    buttonArmorCat := comp.ButtonCreate(
-    "Clothing",
-    layout.left.center_x,
-    buttonWidthCat,
-    buttonHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_clothing]
-    )
-
-    buttonContainerCat := comp.ButtonCreate(
-    "Storage",
-    layout.left.center_x,
-    buttonWidthCat,
-    buttonHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_storage]
-    )
-
-    buttonsCategory := []^comp.Button{
-        &buttonWeaponCat,
-        &buttonGearCat,
-        &buttonArmorCat,
-        &buttonContainerCat,
-    }
-
     iconSubCategoryPos := rl.Vector2{layout.left.origin_x + app.PADDING + (paddingElement * 2), layout.top_y + searchBar.rect.height + (paddingElement * 5) + categoryFilterRect.height + searchBar.rect.height}
     categorySubFilterRect := rl.Rectangle{
         x = layout.left.origin_x + app.PADDING + paddingElement,
@@ -126,158 +74,33 @@ DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.Catalo
         height = textCategorySize.y + (paddingElement * 2),
     }
     textSubCategory: cstring = "Sub-Category"
-
-    buttonWeaponPistol := comp.ButtonCreate(
-    "Pistol",
-    layout.left.center_x,
-    buttonWidthWeapon,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_pistol]
-    )
-
-    buttonWeaponRifle := comp.ButtonCreate(
-    "Rifle",
-    layout.left.center_x,
-    buttonWidthWeapon,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_rifle]
-    )
-
-    buttonWeaponMelee := comp.ButtonCreate(
-    "Melee",
-    layout.left.center_x,
-    buttonWidthWeapon,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_melee]
-    )
-
-
-    buttonWeaponShotgun := comp.ButtonCreate(
-    "Scatter",
-    layout.left.center_x,
-    buttonWidthWeapon,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_shotgun]
-    )
-
-    buttonWeaponGunnery := comp.ButtonCreate(
-    "Gunnery",
-    layout.left.center_x,
-    buttonWidthWeapon,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_gunnery]
-    )
-
-    buttonContainerBelt := comp.ButtonCreate(
-    "Belt",
-    layout.left.center_x,
-    buttonwidthContainer,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]
-    )
-
-    buttonContainerBackpack := comp.ButtonCreate(
-    "Backpack",
-    layout.left.center_x,
-    buttonwidthContainer,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_storage]
-    )
-
-    buttonGearTools := comp.ButtonCreate(
-    "Tools",
-    layout.left.center_x,
-    buttonWidthGear,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]
-    )
-
-    buttonClothingSpacesuit := comp.ButtonCreate(
-    "Spacesuit",
-    layout.left.center_x,
-    buttonWidthClothing,
-    buttonSubHeight,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_clothing]
-    )
-
-    buttonsWeapons := []^comp.Button{
-        &buttonWeaponPistol,
-        &buttonWeaponRifle,
-        &buttonWeaponMelee,
-        &buttonWeaponShotgun,
-        &buttonWeaponGunnery
-    }
-
-    buttonsContainer := []^comp.Button{
-        &buttonContainerBelt,
-        &buttonContainerBackpack,
-    }
-
-    buttonsGear := []^comp.Button{
-        &buttonGearTools,
-    }
-
-    buttonsClothing := []^comp.Button{
-        &buttonClothingSpacesuit,
-    }
-
     subCat_y: f32 = iconSubCategoryPos.y + categorySubFilterRect.height + (buttonHeight / 2) - ((buttonHeight - buttonSubHeight) / 2)
 
-    comp.LayoutButtonsHorizontalRect(
-    buttonsCategory,
-    rect_left,
-    layout.top_y + searchBar.rect.height + app.PADDING + textCategorySize.y + (paddingElement * 3),
-    paddingElement,
-    paddingElement,
-    paddingElement,
-    )
+    buttonsCategory  := CreateCategoryButtons(layout, style, buttonWidthCat, buttonHeight)
+    buttonsWeapons   := CreateWeaponButtons(layout, style, buttonWidthWeapon, buttonSubHeight)
+    buttonsContainer := CreateContainerButtons(layout, style, buttonwidthContainer, buttonSubHeight)
+    buttonsGear      := CreateGearButtons(layout, style, buttonWidthGear, buttonSubHeight)
+    buttonsClothing  := CreateClothingButtons(layout, style, buttonWidthClothing, buttonSubHeight)
 
-    comp.LayoutButtonsHorizontalRect(
+    LayoutCatalogButtons(buttonsCategory,
     buttonsWeapons,
-    rect_left,
-    subCat_y,
-    paddingElement,
-    paddingElement,
-    paddingElement,
-    )
-
-    comp.LayoutButtonsHorizontalRect(
     buttonsContainer,
-    rect_left,
-    subCat_y,
-    paddingElement,
-    paddingElement,
-    paddingElement,
-    )
-
-    comp.LayoutButtonsHorizontalRect(
     buttonsGear,
-    rect_left,
-    subCat_y,
-    paddingElement,
-    paddingElement,
-    paddingElement,
-    )
-
-    comp.LayoutButtonsHorizontalRect(
     buttonsClothing,
     rect_left,
+    layout,
+    searchBar,
+    textCategorySize,
     subCat_y,
-    paddingElement,
-    paddingElement,
-    paddingElement,
-    )
+    paddingElement)
 
     rl.DrawRectangleRec(rect_left, style.colors.secondary)
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
+    "Catalog",
+    ui.SnapVector2({layout.left.origin_x + app.PADDING, layout.top_y - f32(ui.font_size.header) - 2}),
+    f32(ui.font_size.header),
+    2,
+    style.colors.text)
 
     comp.UpdateTextField(&searchBar)
     comp.DrawTextField(&searchBar, style, "Search catalog...")
@@ -286,74 +109,309 @@ DrawCatalogItems :: proc (state: ^st.state, style: ^ui.style, layout: app.Catalo
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textCategory, { iconCategoryPos.x + textCategorySize.y + paddingElement, iconCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    categoryButtons := []^comp.Button{
-        &buttonWeaponCat,
-        &buttonGearCat,
-        &buttonArmorCat,
-        &buttonContainerCat,
-    }
-
-    categoryValues := []inv.ItemCategory{
-        .Weapon,
-        .Gear,
-        .Armor,
-        .Container,
-    }
-
-    for i in 0..<len(categoryButtons) {
-        if comp.DrawButtonCol(categoryButtons[i],
-        style,
-        state.catalog.category == categoryValues[i],
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color) {
-            state.catalog.category = categoryValues[i]
-        }
-    }
-
     rl.DrawRectangleRec(categorySubFilterRect, style.colors.surface)
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconSubCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    subCategoryButtons:[]^comp.Button = nil
-    switch state.catalog.category {
-    case .Weapon:
-        subCategoryButtons = buttonsWeapons
-    case .Container:
-        subCategoryButtons = buttonsContainer
-    case .Gear:
-        subCategoryButtons = buttonsGear
-    case .Armor:
-        subCategoryButtons = buttonsClothing
-    }
+    HandleCatalogButtons(
+    state,
+    style,
+    buttonsCategory,
+    buttonsWeapons,
+    buttonsContainer,
+    buttonsGear,
+    buttonsClothing,
+    f_bg_color,
+    f_icon_color,
+    f_icon_bg_color,
+    f_hover_color,
+    f_active_color)
+}
 
-    for i in 0..<len(subCategoryButtons) {
-        _ = comp.DrawButtonCol(subCategoryButtons[i],
-        style,
-        false,
-        f_bg_color,
-        f_icon_color,
-        f_icon_bg_color,
-        f_hover_color,
-        f_active_color,
-        true,
-        f_hover_color,
-        f_active_color)
-    }
-
+DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
+    rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
-    "Catalog",
-    ui.SnapVector2({layout.left.origin_x + app.PADDING, layout.top_y - f32(ui.font_size.header) - 2}),
+    "Statisitcs",
+    ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
     f32(ui.font_size.header),
     2,
     style.colors.text)
 }
 
-DrawItemStats :: proc(state: ^st.state, style: ^ui.style){
+CreateCategoryButtons :: proc(
+    layout: app.CatalogPageLayout,
+    style: ^ui.style,
+    button_width: f32,
+    button_height: f32,
+) -> [dynamic]comp.Button {
 
+    buttons := make([dynamic]comp.Button)
+
+    append(&buttons, comp.ButtonCreate(
+    "Weapon",
+    layout.left.center_x,
+    button_width,
+    button_height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_weapons]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Gear",
+    layout.left.center_x,
+    button_width,
+    button_height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_gear]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Clothing",
+    layout.left.center_x,
+    button_width,
+    button_height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_clothing]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Storage",
+    layout.left.center_x,
+    button_width,
+    button_height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_storage]))
+
+    return buttons
+}
+
+CreateWeaponButtons :: proc(
+    layout: app.CatalogPageLayout,
+    style: ^ui.style,
+    width: f32,
+    height: f32,
+) -> [dynamic]comp.Button {
+    buttons := make([dynamic]comp.Button)
+
+    append(&buttons, comp.ButtonCreate(
+    "Pistol",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_pistol]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Rifle",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_rifle]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Melee",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_melee]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Scatter",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_shotgun]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Gunnery",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_gunnery]))
+
+    return buttons
+}
+
+CreateContainerButtons :: proc(
+    layout: app.CatalogPageLayout,
+    style: ^ui.style,
+    width: f32,
+    height: f32,
+) -> [dynamic]comp.Button {
+    buttons := make([dynamic]comp.Button)
+
+    append(&buttons, comp.ButtonCreate(
+    "Belt",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_gear]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Backpack",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_storage]))
+
+    return buttons
+}
+
+CreateGearButtons :: proc(
+    layout: app.CatalogPageLayout,
+    style: ^ui.style,
+    width: f32,
+    height: f32,
+) -> [dynamic]comp.Button {
+    buttons := make([dynamic]comp.Button)
+
+    append(&buttons, comp.ButtonCreate(
+    "Tools",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_gear]))
+
+    return buttons
+}
+
+CreateClothingButtons :: proc(
+    layout: app.CatalogPageLayout,
+    style: ^ui.style,
+    width: f32,
+    height: f32,
+) -> [dynamic]comp.Button {
+    buttons := make([dynamic]comp.Button)
+
+    append(&buttons, comp.ButtonCreate(
+    "Spacesuit",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.category_clothing]))
+
+    return buttons
+}
+
+LayoutCatalogButtons :: proc(
+    buttons_category: [dynamic]comp.Button,
+    buttons_weapons: [dynamic]comp.Button,
+    buttons_container: [dynamic]comp.Button,
+    buttons_gear: [dynamic]comp.Button,
+    buttons_clothing: [dynamic]comp.Button,
+    rect_left: rl.Rectangle,
+    layout: app.CatalogPageLayout,
+    search_bar: comp.TextField,
+    text_category_size: rl.Vector2,
+    subcat_y: f32,
+    padding: f32,
+) {
+    comp.LayoutButtonsHorizontalRect(
+    buttons_weapons,
+    rect_left,
+    subcat_y,
+    padding,
+    padding,
+    padding)
+    comp.LayoutButtonsHorizontalRect(
+    buttons_container,
+    rect_left,
+    subcat_y,
+    padding,
+    padding,
+    padding)
+    comp.LayoutButtonsHorizontalRect(
+    buttons_gear,
+    rect_left,
+    subcat_y,
+    padding,
+    padding,
+    padding,
+    )
+    comp.LayoutButtonsHorizontalRect(
+    buttons_clothing,
+    rect_left,
+    subcat_y,
+    padding,
+    padding,
+    padding)
+    comp.LayoutButtonsHorizontalRect(
+    buttons_category,
+    rect_left,
+    layout.top_y +
+    search_bar.rect.height +
+    app.PADDING +
+    text_category_size.y +
+    (padding * 3),
+    padding,
+    padding,
+    padding)
+}
+
+HandleCatalogButtons :: proc(
+    state: ^st.state,
+    style: ^ui.style,
+    buttonsCategory: [dynamic]comp.Button,
+    buttonsWeapons: [dynamic]comp.Button,
+    buttonsContainer: [dynamic]comp.Button,
+    buttonsGear: [dynamic]comp.Button,
+    buttonsClothing: [dynamic]comp.Button,
+    bgColor: rl.Color,
+    iconColor: rl.Color,
+    iconBgColor: rl.Color,
+    hoverColor: rl.Color,
+    activeColor: rl.Color,
+) {
+    for i in 0..<len(buttonsCategory) {
+        category := inv.ItemCategory(i)
+
+        if comp.DrawButtonCol(
+        &buttonsCategory[i],
+        style,
+        state.catalog.category == category,
+        bgColor,
+        iconColor,
+        iconBgColor,
+        hoverColor,
+        activeColor,
+        true,
+        hoverColor,
+        activeColor,
+        ) {
+            state.catalog.category = category
+        }
+    }
+    subButtons: [dynamic]comp.Button
+
+    switch state.catalog.category {
+    case .Weapon:
+        subButtons = buttonsWeapons
+    case .Container:
+        subButtons = buttonsContainer
+    case .Gear:
+        subButtons = buttonsGear
+    case .Armor:
+        subButtons = buttonsClothing
+    }
+
+    for i in 0..<len(subButtons) {
+        _ = comp.DrawButtonCol(
+        &subButtons[i],
+        style,
+        false,
+        bgColor,
+        iconColor,
+        iconBgColor,
+        hoverColor,
+        activeColor,
+        true,
+        hoverColor,
+        activeColor,
+        )
+    }
 }
