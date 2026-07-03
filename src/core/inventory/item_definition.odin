@@ -117,12 +117,14 @@ WeaponSubCategoryString :: proc(sub_category: WeaponSubCategory) -> string {
             return "Pistol"
         case WeaponSubCategory.Rifle:
             return "Rifle"
-        case WeaponSubCategory.Carbine:
-            return "Carbine"
         case WeaponSubCategory.Blade:
             return "Blade"
         case WeaponSubCategory.Blunt:
             return "Blunt"
+        case WeaponSubCategory.Explosive:
+            return "Explosive"
+        case WeaponSubCategory.Gunnery:
+            return "Gunnery"
     }
     return ""
 }

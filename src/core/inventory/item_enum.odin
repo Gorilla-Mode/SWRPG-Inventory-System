@@ -19,9 +19,10 @@ WeaponRangebands :: enum{
 WeaponSubCategory :: enum{
     Pistol,
     Rifle,
-    Carbine,
     Blade,
     Blunt,
+    Explosive,
+    Gunnery
 }
 
 ContainerSubCategory :: enum{
