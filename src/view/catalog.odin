@@ -93,6 +93,13 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
         gear       = CreateGearButtons(layout, style, buttonWidthGear, buttonSubHeight),
         clothing   = CreateClothingButtons(layout, style, buttonWidthClothing, buttonSubHeight),
     }
+    defer{
+        delete(buttons.category)
+        delete(buttons.weapons)
+        delete(buttons.containers)
+        delete(buttons.gear)
+        delete(buttons.clothing)
+    }
 
     LayoutCatalogButtons(&buttons, rect_left, layout, subCat_y, cat_Y, paddingElement)
 
@@ -306,6 +313,8 @@ LayoutCatalogButtons :: proc(
     for group in button_groups {
         comp.LayoutButtonsHorizontalRect(group^, rect_left, subcat_y, padding, padding, padding)
     }
+
+    comp.LayoutButtonsHorizontalRect(buttons.category, rect_left, cat_y, padding, padding, padding)
 }
 
 DrawCatalogButtons :: proc(
