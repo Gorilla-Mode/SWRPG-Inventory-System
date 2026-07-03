@@ -3,8 +3,8 @@
 //Top level category of the item, used for filtering and organization
 ItemCategory :: enum{
     Weapon,
-    Armor,
     Gear,
+    Armor,
     Container
 }
 
