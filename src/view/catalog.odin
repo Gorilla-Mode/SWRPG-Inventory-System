@@ -357,6 +357,7 @@ DrawCatalogButtons :: proc(
         subButtons = buttons.gear
     case .Armor:
         subButtons = buttons.clothing
+
     }
 
     for i in 0..<len(subButtons) {
