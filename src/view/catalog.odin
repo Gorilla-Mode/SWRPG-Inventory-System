@@ -45,10 +45,10 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     // - padding times elements +1 and divide by number of elements
     buttonWidthBase: f32 = (layout.left.width - app.PADDING )
     buttonHeight: f32 = 32
-    buttonSubHeight: f32 = 26
+    buttonSubHeight: f32 = 24
 
     buttonWidthCat       := CalcButtonWidth(buttonWidthBase, 4, paddingElement)
-    buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
+    buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 7, paddingElement)
     buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 2, paddingElement)
     buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
     buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
@@ -204,28 +204,44 @@ CreateWeaponButtons :: proc(
     style.icons[ui.Icons.item_weapon_type_rifle]))
 
     append(&buttons, comp.ButtonCreate(
-    "Melee",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_melee]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Scatter",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_shotgun]))
-
-    append(&buttons, comp.ButtonCreate(
     "Gunnery",
     layout.left.center_x,
     width,
     height,
     st.page.Inventory,
     style.icons[ui.Icons.item_weapon_type_gunnery]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Explosive",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_explosive]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Blade",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_blade]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Blunt",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_blunt]))
+
+    append(&buttons, comp.ButtonCreate(
+    "Lightsaber",
+    layout.left.center_x,
+    width,
+    height,
+    st.page.Inventory,
+    style.icons[ui.Icons.item_weapon_type_lightsaber]))
 
     return buttons
 }
@@ -326,6 +342,7 @@ DrawCatalogButtons :: proc(
     iconBgColor: rl.Color,
     hoverColor: rl.Color,
     activeColor: rl.Color,
+    font_size_sub: ui.font_size = ui.font_size.label,
 ) {
     for i in 0..<len(buttons.category) {
         category := inv.ItemCategory(i)
@@ -373,6 +390,7 @@ DrawCatalogButtons :: proc(
         true,
         hoverColor,
         activeColor,
+        font_size_sub
         )
     }
 }
