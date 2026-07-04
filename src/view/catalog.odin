@@ -4,14 +4,18 @@ import ui "../ui"
 import app "../core/app"
 import rl "vendor:raylib"
 import comp "../ui/component"
-import inv "../core/inventory"
+
+CatalogButton :: struct {
+    button: comp.Button,
+    value:  st.subCategory,
+}
 
 CatalogButtons :: struct {
-    category:  [dynamic]comp.Button,
-    weapons:   [dynamic]comp.Button,
-    containers:[dynamic]comp.Button,
-    gear:      [dynamic]comp.Button,
-    clothing:  [dynamic]comp.Button,
+    category:   [dynamic]comp.Button,
+    weapons:    [dynamic]CatalogButton,
+    containers: [dynamic]CatalogButton,
+    gear:       [dynamic]CatalogButton,
+    clothing:   [dynamic]CatalogButton,
 }
 
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
@@ -49,8 +53,8 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
 
     buttonWidthCat       := CalcButtonWidth(buttonWidthBase, 4, paddingElement)
     buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 7, paddingElement)
-    buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 2, paddingElement)
-    buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
+    buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
+    buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
     buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
 
     searchBar := comp.TextFieldCreate(
@@ -135,266 +139,3 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
     style.colors.text)
 }
 
-CreateCategoryButtons :: proc(
-    layout: app.CatalogPageLayout,
-    style: ^ui.style,
-    button_width: f32,
-    button_height: f32,
-) -> [dynamic]comp.Button {
-
-    buttons := make([dynamic]comp.Button)
-
-    append(&buttons, comp.ButtonCreate(
-    "Weapon",
-    layout.left.center_x,
-    button_width,
-    button_height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_weapons]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Gear",
-    layout.left.center_x,
-    button_width,
-    button_height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Clothing",
-    layout.left.center_x,
-    button_width,
-    button_height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_clothing]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Storage",
-    layout.left.center_x,
-    button_width,
-    button_height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_storage]))
-
-    return buttons
-}
-
-CreateWeaponButtons :: proc(
-    layout: app.CatalogPageLayout,
-    style: ^ui.style,
-    width: f32,
-    height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
-
-    append(&buttons, comp.ButtonCreate(
-    "Pistol",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_pistol]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Rifle",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_rifle]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Gunnery",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_gunnery]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Explosive",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_explosive]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Blade",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_blade]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Blunt",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_blunt]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Lightsaber",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_lightsaber]))
-
-    return buttons
-}
-
-CreateContainerButtons :: proc(
-    layout: app.CatalogPageLayout,
-    style: ^ui.style,
-    width: f32,
-    height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
-
-    append(&buttons, comp.ButtonCreate(
-    "Belt",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]))
-
-    append(&buttons, comp.ButtonCreate(
-    "Backpack",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_storage]))
-
-    return buttons
-}
-
-CreateGearButtons :: proc(
-    layout: app.CatalogPageLayout,
-    style: ^ui.style,
-    width: f32,
-    height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
-
-    append(&buttons, comp.ButtonCreate(
-    "Tools",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]))
-
-    return buttons
-}
-
-CreateClothingButtons :: proc(
-    layout: app.CatalogPageLayout,
-    style: ^ui.style,
-    width: f32,
-    height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
-
-    append(&buttons, comp.ButtonCreate(
-    "Spacesuit",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_clothing]))
-
-    return buttons
-}
-
-LayoutCatalogButtons :: proc(
-    buttons: ^CatalogButtons,
-    rect_left: rl.Rectangle,
-    layout: app.CatalogPageLayout,
-    subcat_y: f32,
-    cat_y: f32,
-    padding: f32,
-) {
-    button_groups := []^[dynamic]comp.Button{
-        &buttons.weapons,
-        &buttons.containers,
-        &buttons.gear,
-        &buttons.clothing,
-    }
-
-    for group in button_groups {
-        comp.LayoutButtonsHorizontalRect(group^, rect_left, subcat_y, padding, padding, padding)
-    }
-
-    comp.LayoutButtonsHorizontalRect(buttons.category, rect_left, cat_y, padding, padding, padding)
-}
-
-DrawCatalogButtons :: proc(
-    state: ^st.state,
-    style: ^ui.style,
-    buttons: ^CatalogButtons,
-    bgColor: rl.Color,
-    iconColor: rl.Color,
-    iconBgColor: rl.Color,
-    hoverColor: rl.Color,
-    activeColor: rl.Color,
-    font_size_sub: ui.font_size = ui.font_size.label,
-) {
-    for i in 0..<len(buttons.category) {
-        category := inv.ItemCategory(i)
-
-        if comp.DrawButtonCol(
-        &buttons.category[i],
-        style,
-        state.catalog.category == category,
-        bgColor,
-        iconColor,
-        iconBgColor,
-        hoverColor,
-        activeColor,
-        true,
-        hoverColor,
-        activeColor,
-        ) {
-            state.catalog.category = category
-        }
-    }
-    subButtons: [dynamic]comp.Button
-
-    switch state.catalog.category {
-    case .Weapon:
-        subButtons = buttons.weapons
-    case .Container:
-        subButtons = buttons.containers
-    case .Gear:
-        subButtons = buttons.gear
-    case .Armor:
-        subButtons = buttons.clothing
-
-    }
-
-    for i in 0..<len(subButtons) {
-        _ = comp.DrawButtonCol(
-        &subButtons[i],
-        style,
-        false,
-        bgColor,
-        iconColor,
-        iconBgColor,
-        hoverColor,
-        activeColor,
-        true,
-        hoverColor,
-        activeColor,
-        font_size_sub
-        )
-    }
-}
-
-CalcButtonWidth :: proc(total_width: f32, count: int, padding: f32) -> f32 {
-    return (total_width - padding * f32(count + 1)) / f32(count)
-}
