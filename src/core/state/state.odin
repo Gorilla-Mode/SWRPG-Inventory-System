@@ -52,8 +52,12 @@ catalogState :: struct{
     sub_category: subCategory,
 }
 
+NoSubCategory :: enum {
+    None
+}
+
 subCategory :: union {
-    inv.ItemCategory,
+    NoSubCategory,
     inv.WeaponSubCategory,
     inv.GearSubCategory,
     inv.ContainerSubCategory,

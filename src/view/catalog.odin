@@ -403,6 +403,7 @@ DrawCatalogButtons :: proc(
         activeColor,
         ) {
             state.catalog.category = category
+            state.catalog.sub_category = st.NoSubCategory.None
         }
     }
     subButtons: [dynamic]CatalogButton
@@ -436,7 +437,11 @@ DrawCatalogButtons :: proc(
         activeColor,
         font_size_sub,
         ) {
-            state.catalog.sub_category = subButtons[i].value
+            if state.catalog.sub_category == subButtons[i].value {
+                state.catalog.sub_category = st.NoSubCategory.None
+            } else {
+                state.catalog.sub_category = subButtons[i].value
+            }
         }
     }
 }
