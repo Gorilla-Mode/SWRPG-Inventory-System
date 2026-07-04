@@ -6,12 +6,17 @@ import rl "vendor:raylib"
 import comp "../ui/component"
 import inv "../core/inventory"
 
+CatalogButton :: struct {
+    button: comp.Button,
+    value:  st.subCategory,
+}
+
 CatalogButtons :: struct {
-    category:  [dynamic]comp.Button,
-    weapons:   [dynamic]comp.Button,
-    containers:[dynamic]comp.Button,
-    gear:      [dynamic]comp.Button,
-    clothing:  [dynamic]comp.Button,
+    category:   [dynamic]comp.Button,
+    weapons:    [dynamic]CatalogButton,
+    containers: [dynamic]CatalogButton,
+    gear:       [dynamic]CatalogButton,
+    clothing:   [dynamic]CatalogButton,
 }
 
 DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
@@ -184,64 +189,92 @@ CreateWeaponButtons :: proc(
     style: ^ui.style,
     width: f32,
     height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
+) -> [dynamic]CatalogButton {
+    buttons := make([dynamic]CatalogButton)
 
-    append(&buttons, comp.ButtonCreate(
-    "Pistol",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_pistol]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Pistol",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_pistol],
+        ),
+        value = inv.WeaponSubCategory.Pistol,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Rifle",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_rifle]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Rifle",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_rifle],
+        ),
+        value = inv.WeaponSubCategory.Rifle,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Gunnery",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_gunnery]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Gunnery",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_gunnery],
+        ),
+        value = inv.WeaponSubCategory.Gunnery,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Explosive",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_explosive]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Explosive",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_explosive],
+        ),
+        value = inv.WeaponSubCategory.Explosive,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Blade",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_blade]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Blade",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_blade],
+        ),
+        value = inv.WeaponSubCategory.Blade,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Blunt",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_blunt]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Blunt",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_blunt],
+        ),
+        value = inv.WeaponSubCategory.Blunt,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Lightsaber",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.item_weapon_type_lightsaber]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Lightsaber",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.item_weapon_type_lightsaber],
+        ),
+        value = inv.WeaponSubCategory.Lightsaber
+    })
 
     return buttons
 }
@@ -251,24 +284,32 @@ CreateContainerButtons :: proc(
     style: ^ui.style,
     width: f32,
     height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
+) -> [dynamic]CatalogButton {
+    buttons := make([dynamic]CatalogButton)
 
-    append(&buttons, comp.ButtonCreate(
-    "Belt",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Backpack",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_storage],
+        ),
+        value = inv.ContainerSubCategory.Backpack,
+    })
 
-    append(&buttons, comp.ButtonCreate(
-    "Backpack",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_storage]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Belt",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_storage],
+        ),
+        value = inv.ContainerSubCategory.Belt,
+    })
 
     return buttons
 }
@@ -278,17 +319,20 @@ CreateGearButtons :: proc(
     style: ^ui.style,
     width: f32,
     height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
+) -> [dynamic]CatalogButton {
+    buttons := make([dynamic]CatalogButton)
 
-    append(&buttons, comp.ButtonCreate(
-    "Tools",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_gear]))
-
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Tool",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_gear],
+        ),
+        value = inv.GearSubCategory.Tool,
+    })
     return buttons
 }
 
@@ -297,16 +341,20 @@ CreateClothingButtons :: proc(
     style: ^ui.style,
     width: f32,
     height: f32,
-) -> [dynamic]comp.Button {
-    buttons := make([dynamic]comp.Button)
+) -> [dynamic]CatalogButton {
+    buttons := make([dynamic]CatalogButton)
 
-    append(&buttons, comp.ButtonCreate(
-    "Spacesuit",
-    layout.left.center_x,
-    width,
-    height,
-    st.page.Inventory,
-    style.icons[ui.Icons.category_clothing]))
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Clothing",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.GearSubCategory.Miscellaneous, //TODO: Add clothing subcategory
+    })
 
     return buttons
 }
@@ -319,16 +367,10 @@ LayoutCatalogButtons :: proc(
     cat_y: f32,
     padding: f32,
 ) {
-    button_groups := []^[dynamic]comp.Button{
-        &buttons.weapons,
-        &buttons.containers,
-        &buttons.gear,
-        &buttons.clothing,
-    }
-
-    for group in button_groups {
-        comp.LayoutButtonsHorizontalRect(group^, rect_left, subcat_y, padding, padding, padding)
-    }
+    LayoutCatalogButtonGroup(buttons.weapons, rect_left, subcat_y, padding)
+    LayoutCatalogButtonGroup(buttons.containers, rect_left, subcat_y, padding)
+    LayoutCatalogButtonGroup(buttons.gear, rect_left, subcat_y, padding)
+    LayoutCatalogButtonGroup(buttons.clothing, rect_left, subcat_y, padding)
 
     comp.LayoutButtonsHorizontalRect(buttons.category, rect_left, cat_y, padding, padding, padding)
 }
@@ -363,25 +405,27 @@ DrawCatalogButtons :: proc(
             state.catalog.category = category
         }
     }
-    subButtons: [dynamic]comp.Button
+    subButtons: [dynamic]CatalogButton
 
     switch state.catalog.category {
     case .Weapon:
         subButtons = buttons.weapons
+
     case .Container:
         subButtons = buttons.containers
+
     case .Gear:
         subButtons = buttons.gear
+
     case .Armor:
         subButtons = buttons.clothing
-
     }
 
     for i in 0..<len(subButtons) {
-        _ = comp.DrawButtonCol(
-        &subButtons[i],
+        if comp.DrawButtonCol(
+        &subButtons[i].button,
         style,
-        false,
+        state.catalog.sub_category == subButtons[i].value,
         bgColor,
         iconColor,
         iconBgColor,
@@ -390,11 +434,33 @@ DrawCatalogButtons :: proc(
         true,
         hoverColor,
         activeColor,
-        font_size_sub
-        )
+        font_size_sub,
+        ) {
+            state.catalog.sub_category = subButtons[i].value
+        }
     }
 }
 
 CalcButtonWidth :: proc(total_width: f32, count: int, padding: f32) -> f32 {
     return (total_width - padding * f32(count + 1)) / f32(count)
+}
+
+LayoutCatalogButtonGroup :: proc(
+    buttons: [dynamic]CatalogButton,
+    rect: rl.Rectangle,
+    y: f32,
+    padding: f32,
+) {
+    temp := make([dynamic]comp.Button, len(buttons))
+    defer delete(temp)
+
+    for i in 0..<len(buttons) {
+        temp[i] = buttons[i].button
+    }
+
+    comp.LayoutButtonsHorizontalRect(temp, rect, y, padding, padding, padding)
+
+    for i in 0..<len(buttons) {
+        buttons[i].button = temp[i]
+    }
 }

@@ -22,7 +22,8 @@ WeaponSubCategory :: enum{
     Blade,
     Blunt,
     Explosive,
-    Gunnery
+    Gunnery,
+    Lightsaber
 }
 
 ContainerSubCategory :: enum{
