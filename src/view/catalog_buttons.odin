@@ -235,6 +235,55 @@ CreateGearButtons :: proc(
         ),
         value = inv.GearSubCategory.Tool,
     })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Electronic",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_gear],
+        ),
+        value = inv.GearSubCategory.Electronics,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Medical",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_gear],
+        ),
+        value = inv.GearSubCategory.Medical,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Survival",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_gear],
+        ),
+        value = inv.GearSubCategory.Survival,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Misc",
+        layout.left.center_x,
+        width,
+        height,
+        st.page.Inventory,
+        style.icons[ui.Icons.category_gear],
+        ),
+        value = inv.GearSubCategory.Miscellaneous,
+    })
+
     return buttons
 }
 

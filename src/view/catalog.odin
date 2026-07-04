@@ -54,7 +54,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     buttonWidthCat       := CalcButtonWidth(buttonWidthBase, 4, paddingElement)
     buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 7, paddingElement)
     buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
-    buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
+    buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
     buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
 
     searchBar := comp.TextFieldCreate(
