@@ -76,7 +76,7 @@ TestItem :: proc(cell_size: f32) -> struct{
         scale = WeaponScale.Personal,
         range = 300,
         rangeband = WeaponRangebands.Long,
-        sub_category = WeaponSubCategory.Carbine
+        sub_category = WeaponSubCategory.Rifle
     }
 
     knife := new(Item)

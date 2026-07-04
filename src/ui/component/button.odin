@@ -41,6 +41,7 @@ DrawButtonCol :: proc(
     outline: bool = false,
     col_outline: rl.Color = rl.WHITE,
     col_outline_active: rl.Color = rl.WHITE,
+    font_size: ui.font_size = ui.font_size.default,
 ) -> bool {
     mouse_pos := rl.GetMousePosition()
     hovered := rl.CheckCollisionPointRec(mouse_pos, button.rect)
@@ -55,6 +56,7 @@ DrawButtonCol :: proc(
     col_icon_bg,
     col_hover,
     col_active,
+    font_size,
     outline,
     col_outline,
     col_outline_active)
@@ -68,7 +70,8 @@ DrawButtonCol :: proc(
     col_icon,
     col_icon_bg,
     col_hover,
-    col_active)
+    col_active,
+    font_size)
 }
 
 ButtonGetDraw :: proc(
@@ -82,6 +85,7 @@ ButtonGetDraw :: proc(
     col_icon_bg: rl.Color,
     col_hover: rl.Color,
     col_active: rl.Color,
+    font_size: ui.font_size = ui.font_size.default,
     outline: bool = false,
     col_outline: rl.Color = rl.WHITE,
     col_outline_active: rl.Color = rl.WHITE,
@@ -98,9 +102,9 @@ ButtonGetDraw :: proc(
 
     text := str.clone_to_cstring(button.text, context.temp_allocator)
     text_size := rl.MeasureTextEx(
-    style.fonts.semibold[ui.font_size.default],
+    style.fonts.semibold[font_size],
     text,
-    f32(ui.font_size.default),
+    f32(font_size),
     0,
     )
 
@@ -163,10 +167,10 @@ ButtonGetDraw :: proc(
     )
 
     rl.DrawTextEx(
-    style.fonts.semibold[ui.font_size.default],
+    style.fonts.semibold[font_size],
     text,
     ui.SnapVector2(text_pos),
-    f32(ui.font_size.default),
+    f32(font_size),
     0,
     style.colors.text,
     )
@@ -216,7 +220,7 @@ LayoutButtonsHorizontal :: proc(
 }
 
 LayoutButtonsHorizontalRect :: proc(
-    buttons: []^Button,
+    buttons: [dynamic]Button,
     bounds: rl.Rectangle,
     target_y: f32,
     spacing: f32,

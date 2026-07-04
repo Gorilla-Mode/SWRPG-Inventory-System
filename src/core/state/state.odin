@@ -49,6 +49,18 @@ textFieldState :: struct{
 
 catalogState :: struct{
     category: inv.ItemCategory,
+    sub_category: subCategory,
+}
+
+NoSubCategory :: enum {
+    None
+}
+
+subCategory :: union {
+    NoSubCategory,
+    inv.WeaponSubCategory,
+    inv.GearSubCategory,
+    inv.ContainerSubCategory,
 }
 
 page :: enum{
