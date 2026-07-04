@@ -51,8 +51,9 @@ WeaponSubCategory :: enum{
 ContainerSubCategory :: enum{
     Backpack,
     Belt,
-    Clothing,
-    Pouch,
+    Holster,
+    Container,
+    Bandolier
 }
 
 GearSubCategory :: enum{

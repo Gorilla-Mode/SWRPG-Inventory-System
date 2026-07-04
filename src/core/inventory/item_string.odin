@@ -74,10 +74,12 @@ ContainerSubCategoryString :: proc(sub_category: ContainerSubCategory) -> string
         return "Backpack"
     case ContainerSubCategory.Belt:
         return "Belt"
-    case ContainerSubCategory.Clothing:
-        return "Clothing"
-    case ContainerSubCategory.Pouch:
-        return "Pouch"
+    case ContainerSubCategory.Holster:
+        return "Holster"
+    case ContainerSubCategory.Container:
+        return "Container"
+    case ContainerSubCategory.Bandolier:
+        return "Bandolier"
     }
     return ""
 }

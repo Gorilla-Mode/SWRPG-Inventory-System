@@ -40,9 +40,10 @@ WEAPON_ALL       :: WeaponSubCategoryMask(WEAPON_PISTOL | WEAPON_BLADE | WEAPON_
 
 CONTAINER_BACKPACK :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Backpack))
 CONTAINER_BELT     :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Belt))
-CONTAINER_CLOTHING :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Clothing))
-CONTAINER_POUCH    :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Pouch))
-CONTAINER_ALL      :: ContainerSubCategoryMask(CONTAINER_BACKPACK | CONTAINER_BELT | CONTAINER_CLOTHING | CONTAINER_POUCH)
+CONTAINER_HOLSTER  :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Holster))
+CONTAINER_CONTAINER :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Container))
+CONTAINER_BANDOLIER :: ContainerSubCategoryMask(1 << u32(ContainerSubCategory.Bandolier))
+CONTAINER_ALL      :: ContainerSubCategoryMask(CONTAINER_BACKPACK | CONTAINER_BELT | CONTAINER_HOLSTER | CONTAINER_CONTAINER | CONTAINER_BANDOLIER)
 
 GEAR_TOOL        :: GearSubCategoryMask(1 << u32(GearSubCategory.Tool))
 GEAR_MEDICAL     :: GearSubCategoryMask(1 << u32(GearSubCategory.Medical))
