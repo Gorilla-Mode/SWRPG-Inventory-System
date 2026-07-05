@@ -3,10 +3,8 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-// Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     backpack: ^Container,
-    rifle: ^Item,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
     backpackItem: ^Item,
@@ -39,47 +37,6 @@ TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
 
-    rifle := new(Item)
-    rifle.name = "A280C Blaster Rifle"
-    rifle.width = 6
-    rifle.height = 2
-    rifle.description = "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops"
-    rifle.base_rarity = 4
-    rifle.base_price = 1200
-    rifle.qualities = nil
-    rifle.category = ItemCategory.Weapon
-    append_elems(&rifle.qualities, "Pirece 1", "Full-Auto")
-    rifle.hardpoints = 4
-    rifle.data = WeaponData {
-        skill = WeaponSkill.Heavy,
-        crit = 4,
-        damage = 7,
-        scale = WeaponScale.Personal,
-        range = 300,
-        rangeband = WeaponRangebands.Long,
-        sub_category = WeaponSubCategory.Rifle
-    }
-
-    knife := new(Item)
-    knife.name = "Vibroknife"
-    knife.description = "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks."
-    knife.width = 3
-    knife.height = 1
-    knife.base_price = 200
-    knife.base_rarity = 2
-    knife.qualities = nil
-    knife.category = ItemCategory.Weapon
-    append_elem(&knife.qualities, "Pierce 2")
-    knife.hardpoints = 1
-    knife.data = WeaponData {
-        skill = WeaponSkill.Melee,
-        crit = 2,
-        damage = 2,
-        scale = WeaponScale.Personal,
-        rangeband = WeaponRangebands.Engaged,
-        sub_category = WeaponSubCategory.Blade
-    }
-
     canteen := new(Item)
     canteen.name = "Canteen"
     canteen.description = "A small container for carrying water or\nother liquids."
@@ -95,21 +52,21 @@ TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     append_elem(&canteen.features, "Can contain 1L of liquid")
 
     rifle_instance := new(ItemInstance)
-    rifle_instance.definition = rifle
+    rifle_instance.definition = &reg.items["RIFLE"]
     rifle_instance.pos_x = 0
     rifle_instance.pos_y = 1
     rifle_instance.id = 1
     rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
-    sword_instance.definition = &reg.items["1"]
+    sword_instance.definition = &reg.items["RAPIER"]
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
     sword_instance.id = 2
     sword_instance.rotated = false
 
     knife_instance := new(ItemInstance)
-    knife_instance.definition = knife
+    knife_instance.definition = &reg.items["KNIFE"]
     knife_instance.pos_x = 5
     knife_instance.pos_y = 0
     knife_instance.id = 3
@@ -129,7 +86,6 @@ TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
 
     return{
         backpack,
-        rifle,
         sword_instance,
         rifle_instance,
         backpackItem,
@@ -138,7 +94,7 @@ TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
 }
 
 TestRegistry :: proc(registry: ^ItemRegistry){
-    rapierBase, _ := MakeItemBase("1",
+    rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
     "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.",
     5,
@@ -150,7 +106,7 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     { "Pierce 5", "Knockdown" },
     {  },
     ItemCategory.Weapon,
-    {  })
+    { .Melee })
     rapier := MakeItemWeapons(
     rapierBase,
     2,
@@ -161,7 +117,55 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     WeaponScale.Personal,
     WeaponSubCategory.Blade)
 
+    rifleBase, _ := MakeItemBase("RIFLE",
+    "A280C Blaster Rifle",
+    "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops",
+    6,
+    2,
+    4,
+    4,
+    false,
+    1200,
+    { "Pierce 1", "Full-Auto" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    rifle := MakeItemWeapons(
+    rifleBase,
+    7,
+    300,
+    4,
+    WeaponRangebands.Long,
+    WeaponSkill.Heavy,
+    WeaponScale.Personal,
+    WeaponSubCategory.Rifle)
+
+    knifeBase, _ := MakeItemBase("KNIFE",
+    "Vibroknife",
+    "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks.",
+    3,
+    1,
+    2,
+    1,
+    false,
+    200,
+    { "Pierce 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    knife := MakeItemWeapons(
+    knifeBase,
+    2,
+    1,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
     AddItemRegistry(registry, rapier)
+    AddItemRegistry(registry, rifle)
+    AddItemRegistry(registry, knife)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
