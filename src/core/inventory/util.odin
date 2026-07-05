@@ -39,24 +39,22 @@ TestItem :: proc(cell_size: f32) -> struct{
     backpackInstance.id = 100
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
-    sword := new(Item)
-    sword.name = "Vibro Rapier"
-    sword.width = 5
-    sword.height = 1
-    sword.description = "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes."
-    sword.base_rarity = 6
-    sword.base_price = 5000
-    sword.qualities = nil
-    sword.category = ItemCategory.Weapon
-    sword.data = WeaponData {
-        skill = WeaponSkill.Melee,
-        crit = 1,
-        damage = 2,
-        scale = WeaponScale.Personal,
-        rangeband = WeaponRangebands.Engaged,
-        sub_category = WeaponSubCategory.Blade
-    }
-    append_elem(&sword.qualities, "Pierce 5")
+
+
+    rapierBase, _ := MakeItemBase("12", "Vibro Rapier", "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.", 5, 1, 6, 1, false, 5000, nil, nil, ItemCategory.Weapon, nil)
+
+
+    rapier := new(Item)
+        rapier^ = MakeItemWeapons(
+        rapierBase,
+        2,
+        5,
+        1,
+        WeaponRangebands.Engaged,
+        WeaponSkill.Melee,
+        WeaponScale.Personal,
+        WeaponSubCategory.Blade,
+    )
 
     rifle := new(Item)
     rifle.name = "A280C Blaster Rifle"
@@ -121,7 +119,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
-    sword_instance.definition = sword
+    sword_instance.definition = rapier
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
     sword_instance.id = 2
@@ -148,7 +146,7 @@ TestItem :: proc(cell_size: f32) -> struct{
 
     return{
         backpack,
-        sword,
+        rapier,
         rifle,
         sword_instance,
         rifle_instance,

@@ -76,3 +76,26 @@ MakeItemBase :: proc(
         tags = tags,
     }, ok
 }
+
+MakeItemWeapons :: proc (baseItem: Item,
+    damage, range: i16,
+    crit: i8,
+    rangeband: WeaponRangebands,
+    skill: WeaponSkill,
+    scale: WeaponScale,
+    subCategory: WeaponSubCategory
+) -> Item {
+    weapon := baseItem
+
+    weapon.data = WeaponData{
+        damage = damage,
+        range = range,
+        crit = crit,
+        rangeband = rangeband,
+        skill = skill,
+        scale = scale,
+        sub_category = subCategory,
+    }
+
+    return weapon
+}
