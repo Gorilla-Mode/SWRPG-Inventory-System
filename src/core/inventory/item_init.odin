@@ -49,15 +49,30 @@ MakeItemBase :: proc(
     hardpoints: i8,
     restricted: bool,
     base_price: i32,
-    qualities: [dynamic]string,
-    features: [dynamic]string,
+    qualities: []string,
+    features: []string,
     category: ItemCategory,
-    tags: [dynamic]ItemTag,
+    tags: []ItemTag,
 ) -> (Item, ItemError) {
 
     ok := CheckBaseItem(base_rarity, hardpoints, base_price, width, height)
     if !ok.success {
         return Item{}, ok
+    }
+
+    qualities_dyn := make([dynamic]string)
+    for q in qualities {
+        append(&qualities_dyn, q)
+    }
+
+    features_dyn := make([dynamic]string)
+    for f in features {
+        append(&features_dyn, f)
+    }
+
+    tags_dyn := make([dynamic]ItemTag)
+    for t in tags {
+        append(&tags_dyn, t)
     }
 
     return Item{
@@ -70,10 +85,10 @@ MakeItemBase :: proc(
         hardpoints = hardpoints,
         restricted = restricted,
         base_price = base_price,
-        qualities = qualities,
-        features = features,
+        qualities = qualities_dyn,
+        features = features_dyn,
         category = category,
-        tags = tags,
+        tags = tags_dyn,
     }, ok
 }
 

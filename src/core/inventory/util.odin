@@ -147,11 +147,10 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     1,
     false,
     5000,
-    nil,
-    nil,
+    { "Pierce 5", "Knockdown" },
+    {  },
     ItemCategory.Weapon,
-    nil)
-
+    {  })
     rapier := MakeItemWeapons(
     rapierBase,
     2,
