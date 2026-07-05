@@ -160,7 +160,7 @@ CreateContainerButtons :: proc(
         width,
         height,
         st.page.Inventory,
-        style.icons[ui.Icons.category_storage],
+        style.icons[ui.Icons.category_belt],
         ),
         value = inv.ContainerSubCategory.Belt,
     })
@@ -184,7 +184,7 @@ CreateContainerButtons :: proc(
         width,
         height,
         st.page.Inventory,
-        style.icons[ui.Icons.category_storage],
+        style.icons[ui.Icons.category_holster],
         ),
         value = inv.ContainerSubCategory.Holster,
     })
@@ -196,7 +196,7 @@ CreateContainerButtons :: proc(
         width,
         height,
         st.page.Inventory,
-        style.icons[ui.Icons.category_storage],
+        style.icons[ui.Icons.category_bandolier],
         ),
         value = inv.ContainerSubCategory.Bandolier,
     })
@@ -208,7 +208,7 @@ CreateContainerButtons :: proc(
         width,
         height,
         st.page.Inventory,
-        style.icons[ui.Icons.category_storage],
+        style.icons[ui.Icons.category_container],
         ),
         value = inv.ContainerSubCategory.Container,
     })
