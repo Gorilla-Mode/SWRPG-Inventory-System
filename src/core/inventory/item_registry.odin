@@ -41,6 +41,11 @@ AddItemRegistry :: proc(reg: ^ItemRegistry, item: Item) -> RegistryError {
         if !weapon_ok.success {
             return RegistryError{ false, .BaseItemError, weapon_ok.message }
         }
+    case GearData:
+        gear_ok := CheckGearItemItem(item)
+        if !gear_ok.success {
+            return RegistryError{ false, .BaseItemError, gear_ok.message }
+        }
     }
 
     reg.items[item.id] = item

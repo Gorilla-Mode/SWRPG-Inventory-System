@@ -12,6 +12,12 @@ WeaponError :: struct{
     message: string,
 }
 
+GearError :: struct{
+    success: bool,
+    error: GearErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -26,6 +32,11 @@ WeaponErrors :: enum{
     InvalidDamage,
     InvalidRange,
     InvalidCrit,
+    InvalidData,
+}
+
+GearErrors :: enum{
+    Success,
     InvalidData,
 }
 
@@ -69,6 +80,11 @@ CheckWeaponItem :: proc(damage, range: i16, crit: i8) -> (WeaponError) {
     return WeaponError{ true, .Success, "Success" }
 }
 
+CheckGearItem :: proc(item: Item) -> (GearError) {
+    //fr no checks for gear items, but to add later, and consistency with other item types, we have this function
+    return GearError{ true, .Success, "Success" }
+}
+
 CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
     return CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.width, item.height)
 }
@@ -80,6 +96,14 @@ CheckWeaponItemItem :: proc(item: Item) -> (WeaponError) {
 
     weapon := item.data.(WeaponData)
     return CheckWeaponItem(weapon.damage, weapon.range, weapon.crit)
+}
+
+CheckGearItemItem :: proc(item: Item) -> (GearError) {
+    if item.category != .Gear {
+        return GearError{ false, .InvalidData, "Item is not a gear item" }
+    }
+
+    return CheckGearItem(item)
 }
 
 MakeItemBase :: proc(
@@ -161,4 +185,21 @@ MakeItemWeapons :: proc (baseItem: Item,
     }
 
     return weapon, ok
+}
+
+MakeItemGear :: proc (baseItem: Item,
+    subCategory: GearSubCategory
+) -> (Item, GearError) {
+    gear := baseItem
+
+    ok := CheckGearItem(gear)
+    if !ok.success {
+        return Item{}, ok
+    }
+
+    gear.data = GearData{
+        sub_category = subCategory,
+    }
+
+    return gear, ok
 }
