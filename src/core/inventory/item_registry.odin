@@ -34,6 +34,15 @@ AddItemRegistry :: proc(reg: ^ItemRegistry, item: Item) -> RegistryError {
         return RegistryError{ false, .ItemAlreadyExists, "Item with id id already exists" }
     }
 
+    //TODO: Fill in rest
+    #partial switch _ in item.data {
+    case WeaponData:
+        weapon_ok := CheckWeaponItemItem(item)
+        if !weapon_ok.success {
+            return RegistryError{ false, .BaseItemError, weapon_ok.message }
+        }
+    }
+
     reg.items[item.id] = item
     return RegistryError{ true, .Success, "Success" }
 }

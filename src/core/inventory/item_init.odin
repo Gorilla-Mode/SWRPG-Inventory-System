@@ -53,16 +53,16 @@ CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, heigh
     return ItemError{ true, .Success, "Success" }
 }
 
-CheckWeaponItem :: proc(weapon: WeaponData) -> (WeaponError) {
-    if weapon.damage < 1 {
+CheckWeaponItem :: proc(damage, range: i16, crit: i8) -> (WeaponError) {
+    if damage < 1 {
         return WeaponError{ false, .InvalidDamage, "Weapon damage must be greater than or equal to 1" }
     }
 
-    if weapon.range < 0 {
+    if range < 0 {
         return WeaponError{ false, .InvalidRange, "Weapon range must be greater than or equal to 0" }
     }
 
-    if weapon.crit < 1 {
+    if crit < 1 {
         return WeaponError{ false, .InvalidCrit, "Weapon crit must be greater than or equal to 1" }
     }
 
@@ -79,7 +79,7 @@ CheckWeaponItemItem :: proc(item: Item) -> (WeaponError) {
     }
 
     weapon := item.data.(WeaponData)
-    return CheckWeaponItem(weapon)
+    return CheckWeaponItem(weapon.damage, weapon.range, weapon.crit)
 }
 
 MakeItemBase :: proc(
@@ -145,6 +145,11 @@ MakeItemWeapons :: proc (baseItem: Item,
 ) -> (Item, WeaponError) {
     weapon := baseItem
 
+    ok := CheckWeaponItem(damage, range, crit)
+    if !ok.success {
+        return Item{}, ok
+    }
+
     weapon.data = WeaponData{
         damage = damage,
         range = range,
@@ -154,8 +159,6 @@ MakeItemWeapons :: proc (baseItem: Item,
         scale = scale,
         sub_category = subCategory,
     }
-
-    ok := CheckWeaponItem(weapon.data.(WeaponData))
 
     return weapon, ok
 }
