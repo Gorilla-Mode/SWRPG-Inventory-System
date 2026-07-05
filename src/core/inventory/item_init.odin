@@ -26,6 +26,7 @@ WeaponErrors :: enum{
     InvalidDamage,
     InvalidRange,
     InvalidCrit,
+    InvalidData,
 }
 
 CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, height: i16) -> (ItemError) {
@@ -52,24 +53,33 @@ CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, heigh
     return ItemError{ true, .Success, "Success" }
 }
 
-CheckWeapon :: proc(weapon: WeaponData) -> (ItemError) {
+CheckWeaponItem :: proc(weapon: WeaponData) -> (WeaponError) {
     if weapon.damage < 1 {
-        return ItemError{ false, .InvalidPrice, "Weapon damage must be greater than or equal to 1" }
+        return WeaponError{ false, .InvalidDamage, "Weapon damage must be greater than or equal to 1" }
     }
 
     if weapon.range < 0 {
-        return ItemError{ false, .InvalidPrice, "Weapon range must be greater than or equal to 0" }
+        return WeaponError{ false, .InvalidRange, "Weapon range must be greater than or equal to 0" }
     }
 
     if weapon.crit < 1 {
-        return ItemError{ false, .InvalidPrice, "Weapon crit must be greater than or equal to 1" }
+        return WeaponError{ false, .InvalidCrit, "Weapon crit must be greater than or equal to 1" }
     }
 
-    return ItemError{ true, .Success, "Success" }
+    return WeaponError{ true, .Success, "Success" }
 }
 
 CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
     return CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.width, item.height)
+}
+
+CheckWeaponItemItem :: proc(item: Item) -> (WeaponError) {
+    if item.category != .Weapon {
+        return WeaponError{ false, .InvalidData, "Item is not a weapon" }
+    }
+
+    weapon := item.data.(WeaponData)
+    return CheckWeaponItem(weapon)
 }
 
 MakeItemBase :: proc(
@@ -132,7 +142,7 @@ MakeItemWeapons :: proc (baseItem: Item,
     skill: WeaponSkill,
     scale: WeaponScale,
     subCategory: WeaponSubCategory
-) -> (Item, ItemError) {
+) -> (Item, WeaponError) {
     weapon := baseItem
 
     weapon.data = WeaponData{
@@ -145,7 +155,7 @@ MakeItemWeapons :: proc (baseItem: Item,
         sub_category = subCategory,
     }
 
-    ok := CheckWeapon(weapon.data.(WeaponData))
+    ok := CheckWeaponItem(weapon.data.(WeaponData))
 
     return weapon, ok
 }
