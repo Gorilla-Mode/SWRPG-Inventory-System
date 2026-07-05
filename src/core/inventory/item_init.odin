@@ -6,6 +6,12 @@ ItemError :: struct{
     message: string,
 }
 
+WeaponError :: struct{
+    success: bool,
+    error: WeaponErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -13,6 +19,13 @@ ItemErrors :: enum{
     InvalidWidth,
     InvalidHeight,
     InvalidHardpoints,
+}
+
+WeaponErrors :: enum{
+    Success,
+    InvalidDamage,
+    InvalidRange,
+    InvalidCrit,
 }
 
 CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, height: i16) -> (ItemError) {
@@ -37,6 +50,26 @@ CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, heigh
     }
 
     return ItemError{ true, .Success, "Success" }
+}
+
+CheckWeapon :: proc(weapon: WeaponData) -> (ItemError) {
+    if weapon.damage < 1 {
+        return ItemError{ false, .InvalidPrice, "Weapon damage must be greater than or equal to 1" }
+    }
+
+    if weapon.range < 0 {
+        return ItemError{ false, .InvalidPrice, "Weapon range must be greater than or equal to 0" }
+    }
+
+    if weapon.crit < 1 {
+        return ItemError{ false, .InvalidPrice, "Weapon crit must be greater than or equal to 1" }
+    }
+
+    return ItemError{ true, .Success, "Success" }
+}
+
+CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
+    return CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.width, item.height)
 }
 
 MakeItemBase :: proc(
@@ -99,7 +132,7 @@ MakeItemWeapons :: proc (baseItem: Item,
     skill: WeaponSkill,
     scale: WeaponScale,
     subCategory: WeaponSubCategory
-) -> Item {
+) -> (Item, ItemError) {
     weapon := baseItem
 
     weapon.data = WeaponData{
@@ -112,5 +145,7 @@ MakeItemWeapons :: proc (baseItem: Item,
         sub_category = subCategory,
     }
 
-    return weapon
+    ok := CheckWeapon(weapon.data.(WeaponData))
+
+    return weapon, ok
 }

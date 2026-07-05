@@ -107,7 +107,7 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     {  },
     ItemCategory.Weapon,
     { .Melee })
-    rapier := MakeItemWeapons(
+    rapier, _ := MakeItemWeapons(
     rapierBase,
     2,
     5,
@@ -130,7 +130,7 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     {  },
     ItemCategory.Weapon,
     { .Blaster, .Ranged })
-    rifle := MakeItemWeapons(
+    rifle, _ := MakeItemWeapons(
     rifleBase,
     7,
     300,
@@ -153,7 +153,7 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     {  },
     ItemCategory.Weapon,
     { .Melee })
-    knife := MakeItemWeapons(
+    knife, _ := MakeItemWeapons(
     knifeBase,
     2,
     1,
@@ -163,9 +163,15 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     WeaponScale.Personal,
     WeaponSubCategory.Blade)
 
-    AddItemRegistry(registry, rapier)
-    AddItemRegistry(registry, rifle)
-    AddItemRegistry(registry, knife)
+    ok := AddItemRegistry(registry, rapier)
+    fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, rifle)
+    fmt.println("Added rifle to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, knife)
+    fmt.println("Added knife to registry:", ok.success, "Error:", ok.message)
+
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
