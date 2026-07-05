@@ -40,15 +40,14 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
 }
 
 DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) {
-    f_bg_color := style.colors.surface
-    f_hover_color := style.colors.secondary_hover
-    f_active_color := style.colors.success
-    f_icon_color := style.colors.text
+    f_bg_color      := style.colors.surface
+    f_hover_color   := style.colors.secondary_hover
+    f_active_color  := style.colors.success
+    f_icon_color    := style.colors.text
     f_icon_bg_color := style.colors.secondary
 
-    // - padding times elements +1 and divide by number of elements
     buttonWidthBase: f32 = (layout.left.width - app.PADDING )
-    buttonHeight: f32 = 32
+    buttonHeight:    f32 = 32
     buttonSubHeight: f32 = 24
 
     buttonWidthCat       := CalcButtonWidth(buttonWidthBase, 4, paddingElement)
@@ -138,4 +137,3 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
     2,
     style.colors.text)
 }
-
