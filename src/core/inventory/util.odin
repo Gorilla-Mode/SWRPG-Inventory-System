@@ -35,22 +35,6 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     backpackInstance.definition = backpackItem
     backpackInstance.id = 100
 
-    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
-
-    canteen := new(Item)
-    canteen.name = "Canteen"
-    canteen.description = "A small container for carrying water or\nother liquids."
-    canteen.width = 2
-    canteen.height = 2
-    canteen.base_price = 50
-    canteen.base_rarity = 1
-    canteen.features = nil
-    canteen.category = ItemCategory.Gear
-    canteen.data = GearData {
-        sub_category = GearSubCategory.Survival
-    }
-    append_elem(&canteen.features, "Can contain 1L of liquid")
-
     rifle_instance := new(ItemInstance)
     rifle_instance.definition = &reg.items["RIFLE"]
     rifle_instance.pos_x = 0
@@ -73,7 +57,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     knife_instance.rotated = false
 
     canteen_instance := new(ItemInstance)
-    canteen_instance.definition = canteen
+    canteen_instance.definition = &reg.items["CANTEEN"]
     canteen_instance.pos_x = 6
     canteen_instance.pos_y = 1
     canteen_instance.id = 4
@@ -94,6 +78,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
 }
 
 TestRegistry :: proc(registry: ^ItemRegistry){
+    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
     "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.",
@@ -163,6 +148,23 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     WeaponScale.Personal,
     WeaponSubCategory.Blade)
 
+    canteenBase, _ := MakeItemBase("CANTEEN",
+    "Canteen",
+    "A small container for carrying water or\nother liquids.",
+    2,
+    2,
+    1,
+    1,
+    false,
+    50,
+    { "Breach 10" },
+    { "Stores 1L of liquid" },
+    ItemCategory.Gear,
+    {  })
+    canteen, _ := MakeItemGear(
+    canteenBase,
+    GearSubCategory.Survival)
+
     ok := AddItemRegistry(registry, rapier)
     fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
 
@@ -172,6 +174,8 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     ok = AddItemRegistry(registry, knife)
     fmt.println("Added knife to registry:", ok.success, "Error:", ok.message)
 
+    ok = AddItemRegistry(registry, canteen)
+    fmt.println("Added canteen to registry:", ok.success, "Error:", ok.message)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
