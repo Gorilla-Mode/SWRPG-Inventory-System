@@ -4,9 +4,8 @@ import str "core:strings"
 import fmt "core:fmt"
 
 // Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc(cell_size: f32) -> struct{
+TestItem :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     backpack: ^Container,
-    sword: ^Item,
     rifle: ^Item,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
@@ -39,22 +38,6 @@ TestItem :: proc(cell_size: f32) -> struct{
     backpackInstance.id = 100
 
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
-
-
-    rapierBase, _ := MakeItemBase("12", "Vibro Rapier", "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.", 5, 1, 6, 1, false, 5000, nil, nil, ItemCategory.Weapon, nil)
-
-
-    rapier := new(Item)
-        rapier^ = MakeItemWeapons(
-        rapierBase,
-        2,
-        5,
-        1,
-        WeaponRangebands.Engaged,
-        WeaponSkill.Melee,
-        WeaponScale.Personal,
-        WeaponSubCategory.Blade,
-    )
 
     rifle := new(Item)
     rifle.name = "A280C Blaster Rifle"
@@ -119,7 +102,7 @@ TestItem :: proc(cell_size: f32) -> struct{
     rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
-    sword_instance.definition = rapier
+    sword_instance.definition = &reg.items["1"]
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
     sword_instance.id = 2
@@ -146,13 +129,40 @@ TestItem :: proc(cell_size: f32) -> struct{
 
     return{
         backpack,
-        rapier,
         rifle,
         sword_instance,
         rifle_instance,
         backpackItem,
         backpackInstance
     }
+}
+
+TestRegistry :: proc(registry: ^ItemRegistry){
+    rapierBase, _ := MakeItemBase("1",
+    "Vibro Rapier",
+    "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.",
+    5,
+    1,
+    6,
+    1,
+    false,
+    5000,
+    nil,
+    nil,
+    ItemCategory.Weapon,
+    nil)
+
+    rapier := MakeItemWeapons(
+    rapierBase,
+    2,
+    5,
+    1,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
+    AddItemRegistry(registry, rapier)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
