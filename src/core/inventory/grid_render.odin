@@ -46,38 +46,50 @@ DrawItem :: proc(
     origin_x, origin_y: f32,
     cell_size: f32,
     style: ^ui.style,
+    static: bool = false
 ) {
-    width := f32(ItemGetWidth(item))
-    height := f32(ItemGetHeight(item))
+    width : = f32(item.definition.width)
+    height := f32(item.definition.height)
 
-    x := origin_x + f32(item.pos_x) * cell_size
-    y := origin_y + f32(item.pos_y) * cell_size
-
-    rot: f32
+    rot: f32 = 0
     textVec: rl.Vector2
     bgColor := style.colors.primary
     textColor := style.colors.text
     outlineColor := style.colors.surface
-
-    switch item.rotated {
-    case true:
-        rot = 90
-        textVec = rl.Vector2{
-            x + width * cell_size - 5,
-            y + 5,
-        }
-    case false:
-        rot = 0
-        textVec = rl.Vector2{
-            x + 5,
-            y + 5,
-        }
+    x:= origin_x
+    y:= origin_y
+    textVec = rl.Vector2{
+        x + 5,
+        y + 5,
     }
 
-    if item.grabbed {
-        bgColor.a = 128
-        textColor.a = 128
-        outlineColor.a = 128
+    if !static{
+        x = origin_x + f32(item.pos_x) * cell_size
+        y = origin_y + f32(item.pos_y) * cell_size
+        width = f32(ItemGetWidth(item))
+        height = f32(ItemGetHeight(item))
+
+
+        switch item.rotated {
+        case true:
+            rot = 90
+            textVec = rl.Vector2{
+                x + width * cell_size - 5,
+                y + 5,
+            }
+        case false:
+            rot = 0
+            textVec = rl.Vector2{
+                x + 5,
+                y + 5,
+            }
+        }
+
+        if item.grabbed {
+            bgColor.a = 128
+            textColor.a = 128
+            outlineColor.a = 128
+        }
     }
 
     rl.DrawRectangle(

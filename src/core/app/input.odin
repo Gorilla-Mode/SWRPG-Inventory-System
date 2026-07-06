@@ -4,6 +4,7 @@ import inv "../inventory"
 import rl  "vendor:raylib"
 import ui "../../ui"
 import st "../state"
+import app "../app"
 
 InputMoveItem :: proc(state: ^st.state, container: ^inv.Container, origin_x, origin_y, cell_size: f32) {
 	if state.grab.is_dragging {
@@ -51,8 +52,8 @@ InputCharacter :: proc(state: ^st.state, style: ^ui.style) {
 
     cell_size := style.grid.cell_size
     layout_info := GetCharacterPageLayoutInfo(state, cell_size)
-    grid_locs := GetCharacterGridLocations(char, layout_info.grid_start_y, cell_size, layout_info.grid_start_x)
-    slots := GetCharacterSlotRects(state, layout_info.avatarCenterX, layout_info.grid_start_y)
+    grid_locs := GetCharacterGridLocations(char, layout_info.top_y, cell_size, layout_info.left.origin_x + app.PADDING)
+    slots := GetCharacterSlotRects(state, layout_info.center.start_x, layout_info.top_y)
 
     if state.grab.is_dragging {
         HandleCharacterDragging(state, char, cell_size, slots, grid_locs)
@@ -71,7 +72,12 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
     for slot, rect in slots {
         if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
 
-        state.ghost.valid = true
+        if !(inv.CanEquipInSlot(char, slot, state.grab.dragged_item)){
+            state.ghost.valid = false
+        } else {
+            state.ghost.valid = true
+        }
+
         if rl.IsMouseButtonReleased(.LEFT) {
             inv.EquipItem(char, slot, state.grab.dragged_item)
             StopDragging(state)
@@ -112,7 +118,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for loc in grid_locs {
         container := loc.item.definition.data.(inv.ContainerData).storage
         item := GetItemAtMousePos(container, loc.origin.x, loc.origin.y, cell_size)
-        if item == nil || !rl.IsMouseButtonDown(.LEFT) do continue
+        if item == nil || !rl.IsMouseButtonPressed(.LEFT) do continue
 
         StartDragging(state, item, loc.origin.x, loc.origin.y, cell_size)
         return
@@ -121,7 +127,7 @@ HandleCharacterInteraction :: proc(state: ^st.state, char: ^inv.Character, cell_
     for slot, rect in slots {
         item, ok := char.equipment.slots[slot]
         if !ok || item == nil do continue
-        if !rl.IsMouseButtonDown(.LEFT) || !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
+        if !rl.IsMouseButtonPressed(.LEFT) || !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
 
         StartDraggingAtSlot(state, item, rect, cell_size)
         return

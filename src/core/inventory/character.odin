@@ -8,8 +8,12 @@ EquipmentSlot :: enum{
     Armor
 }
 
-CharacterEquipment :: struct{
-    slots: map[EquipmentSlot]^ItemInstance,
+EquipmentSlotString := [EquipmentSlot]string{
+    .Backpack = "Backpack",
+    .Belt = "Belt",
+    .Holster = "Holster",
+    .Back = "Back",
+    .Armor = "Armor"
 }
 
 Character :: struct{
@@ -17,6 +21,50 @@ Character :: struct{
     name: string,
 
     equipment: CharacterEquipment
+}
+
+CharacterEquipment :: struct{
+    slots: map[EquipmentSlot]^ItemInstance,
+}
+
+CanEquipInSlot :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+    if item == nil do return false
+    if char == nil do return false
+    if char.equipment.slots[slot] != nil do return false
+
+    rule := SlotWhitelist[slot]
+    item_cat := ItemCategoryMask(1 << u32(item.definition.category))
+
+    if rule.cat_override == true do return true
+
+    if (rule.categories & item_cat) == 0 do return false
+    if (rule.blacklist_categories & item_cat) != 0 do return false
+
+    return CheckSubCategory(item, rule)
+}
+
+CheckSubCategory :: proc(item: ^ItemInstance, rule: EquipmentSlotRule) -> bool {
+    if rule.sub_override == true do return true
+
+    switch data in item.definition.data {
+    case WeaponData:
+        weapon_mask := WeaponSubCategoryMask(1 << u32(data.sub_category))
+
+        if (rule.blacklist_weapons & weapon_mask) != 0 do return false
+        return (rule.weapons & weapon_mask) != 0
+    case ContainerData:
+        gear_mask := ContainerSubCategoryMask(1 << u32(data.sub_category))
+
+        if (rule.blacklist_container & gear_mask) != 0 do return false
+        return (rule.container & gear_mask) != 0
+    case GearData:
+        gear_mask := GearSubCategoryMask(1 << u32(data.sub_category))
+
+        if (rule.blacklist_gear & gear_mask) != 0 do return false
+        return (rule.gear & gear_mask) != 0
+    }
+
+    return false
 }
 
 GetItemsFromContainer :: proc(container: ^Container, all_items: ^[dynamic]^ItemInstance) {
@@ -114,9 +162,12 @@ IsContainerInItem :: proc(item: ^ItemInstance, target: ^Container) -> bool {
     return false
 }
 
-EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) {
+EquipItem :: proc(char: ^Character, slot: EquipmentSlot, item: ^ItemInstance) -> bool {
+    if !CanEquipInSlot(char, slot, item) do return false
+    
     RemoveItemFromCurrentLocation(char, item)
     char.equipment.slots[slot] = item
+    return true
 }
 
 MoveItemToContainer :: proc(char: ^Character, container: ^Container, item: ^ItemInstance, x, y: i16, rotated: bool) {

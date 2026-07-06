@@ -1,6 +1,28 @@
 ﻿package inventory
 
-//Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale
+ItemCategory :: enum{
+    Weapon,
+    Gear,
+    Armor,
+    Container
+}
+
+ItemTag :: enum{
+    Blaster,
+    Slugthrower,
+    Ranged,
+    Melee,
+}
+
+WeaponSkill :: enum{
+    Light,
+    Heavy,
+    Gunnery,
+    Brawl,
+    Melee,
+    Mechanics
+}
+
 WeaponScale :: enum{
     Personal,
     Planetary
@@ -19,14 +41,25 @@ WeaponRangebands :: enum{
 WeaponSubCategory :: enum{
     Pistol,
     Rifle,
-    Carbine,
     Blade,
     Blunt,
+    Explosive,
+    Gunnery,
+    Lightsaber
 }
 
 ContainerSubCategory :: enum{
     Backpack,
     Belt,
-    Clothing,
-    Pouch,
+    Holster,
+    Container,
+    Bandolier
+}
+
+GearSubCategory :: enum{
+    Tool,
+    Medical,
+    Electronics,
+    Survival,
+    Miscellaneous,
 }

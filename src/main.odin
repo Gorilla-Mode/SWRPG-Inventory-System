@@ -18,9 +18,13 @@ main :: proc()
         }
     }
 
-    state := st.state{}
-    items := inv.TestItem(style.grid.cell_size)
+    state := st.state{textFields = make(map[st.textField]st.textFieldState)}
+    state.ItemRegistry = inv.MakeItemRegistry()
+    inv.TestRegistry(&state.ItemRegistry)
+    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemRegistry)
     state.character = inv.TestCharacter(items.backpackInstance)
+    defer delete(state.textFields)
+    defer delete(state.ItemRegistry.items)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -49,7 +53,7 @@ main :: proc()
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
         
-        switch state.page {
+        #partial switch state.page {
         case .Inventory:
             app.InputMoveItem(&state,
             items.backpack,

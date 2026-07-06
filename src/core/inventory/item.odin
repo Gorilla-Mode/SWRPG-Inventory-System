@@ -21,6 +21,8 @@ GetItemDataString :: proc(item: ^Item) -> string {
             return GetItemWeaponString(item)
         case ContainerData:
             return GetItemContainerString(item)
+        case GearData:
+            return GetItemGearString(item)
     }
     return ""
 }
@@ -79,6 +81,22 @@ GetItemContainerString :: proc(item: ^Item) -> string {
 
     str.write_string(&b, "Storage Type: ")
     str.write_string(&b, ContainerSubCategoryString(data.sub_category))
+    str.write_string(&b, "\n")
+
+    return str.to_string(b)
+}
+
+GetItemGearString :: proc(item: ^Item) -> string {
+    data, ok := item.data.(GearData)
+    if !ok {
+        return ""
+    }
+
+    b: str.Builder
+    str.builder_init(&b, context.temp_allocator)
+
+    str.write_string(&b, "Gear Type: ")
+    str.write_string(&b, GearSubCategoryString(data.sub_category))
     str.write_string(&b, "\n")
 
     return str.to_string(b)
