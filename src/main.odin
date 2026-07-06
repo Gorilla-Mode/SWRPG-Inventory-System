@@ -5,50 +5,70 @@ import util "utils"
 import ui "ui"
 import inv "core/inventory"
 import app "core/app"
-
-window_width: i32 = 1280
-window_height: i32 = 720
+import v "view"
+import st "core/state"
 
 main :: proc()
 {
     defer rl.CloseWindow()
 
-    style := ui.style{}
+    style := ui.style{
+        grid = {
+            cell_size = 50
+        }
+    }
 
-    style.colors = ui.LoadColorPalette()
+    state := st.state{textFields = make(map[st.textField]st.textFieldState)}
+    state.ItemRegistry = inv.MakeItemRegistry()
+    inv.TestRegistry(&state.ItemRegistry)
+    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemRegistry)
+    state.character = inv.TestCharacter(items.backpackInstance)
+    defer delete(state.textFields)
+    defer delete(state.ItemRegistry.items)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
     }
 
     rl.SetConfigFlags(window_flags)
-    rl.InitWindow(window_width, window_height, "SWIS")
-    util.SetDarkTitlebar()
+    rl.InitWindow(1440, 720, "Inventory System")
 
     style.icons = ui.LoadImages()
-    defer delete(style.icons)
-    rl.SetWindowIcon(style.icons[ui.Icons.app_icon])
+    appIcon := rl.LoadImageFromTexture(style.icons[ui.Icons.app_icon])
+    rl.ImageFormat(&appIcon, rl.PixelFormat.UNCOMPRESSED_R8G8B8A8)
+    rl.SetWindowIcon(appIcon)
 
-    style.fonts = ui.LoadFont()
-    defer ui.FreeFont(style.fonts)
-
-    rl.SetTargetFPS(60)
+    util.SetDarkTitlebar()
+    rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
     rl.SetExitKey(nil)
 
-    state := app.State{}
-    items := inv.TestItem()
+    style.colors = ui.LoadColorPalette()
+    style.fonts = ui.LoadFont()
+    defer ui.FreeFont(style.fonts)
+    defer ui.FreeImages(style.icons)
 
     for !rl.WindowShouldClose()
     {
-        app.InputMoveItem(&state, items.rifle_instance, items.backpack)
+        free_all(context.temp_allocator)
+        //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
+        st.UpdateWindowState(&state)
+        
+        #partial switch state.page {
+        case .Inventory:
+            app.InputMoveItem(&state,
+            items.backpack,
+            style.grid.origin_x,
+            style.grid.origin_y,
+            style.grid.cell_size)
+        case .Character:
+            app.InputCharacter(&state, &style)
+        case .Debug, .Catalog:
+        }
 
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        rl.DrawTextEx(style.fonts.bold[ui.font_size.title],"SWIS", {20, 5}, f32(ui.font_size.title), 0, style.colors.text)
-        ui.DrawPalette(style.colors, offset_y = 34)
-
-        inv.DrawContainerGrid(items.backpack, 20, 34 + 100 + 60, 50, &style)
+        v.DrawUI(&state, &style, items.backpackItem)
 
         rl.EndDrawing()
     }

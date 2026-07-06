@@ -3,13 +3,12 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-// Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc() -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     backpack: ^Container,
-    sword: ^Item,
-    rifle: ^Item,
     sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance }
+    rifle_instance: ^ItemInstance,
+    backpackItem: ^Item,
+    backpackInstance: ^ItemInstance}
 {
     backpack := new(Container)
     backpack.type = ContainerType.Backpack
@@ -18,49 +17,47 @@ TestItem :: proc() -> struct{
         height = 10
     }
 
-    sword := new(Item)
-    sword.name = "Sword"
-    sword.width = 5
-    sword.height = 1
+    backpackItem := new(Item)
+    backpackItem.name = "Spacers duffel"
+    backpackItem.width = 8
+    backpackItem.height = 10
+    backpackItem.description = "A standard backpack for carrying items."
+    backpackItem.base_rarity = 1
+    backpackItem.base_price = 100
+    backpackItem.qualities = nil
+    backpackItem.category = ItemCategory.Container
+    backpackItem.data = ContainerData{
+        storage = backpack,
+        sub_category = ContainerSubCategory.Backpack
+    }
 
-    rifle := new(Item)
-    rifle.name = "Rifle"
-    rifle.width = 6
-    rifle.height = 2
-
-    knife := new(Item)
-    knife.name = "Knife"
-    knife.width = 3
-    knife.height = 1
-
-    canteen := new(Item)
-    canteen.name = "Canteen"
-    canteen.width = 2
-    canteen.height = 2
+    backpackInstance := new(ItemInstance)
+    backpackInstance.definition = backpackItem
+    backpackInstance.id = 100
 
     rifle_instance := new(ItemInstance)
-    rifle_instance.definition = rifle
+    rifle_instance.definition = &reg.items["RIFLE"]
     rifle_instance.pos_x = 0
     rifle_instance.pos_y = 1
     rifle_instance.id = 1
     rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
-    sword_instance.definition = sword
+    sword_instance.definition = &reg.items["RAPIER"]
     sword_instance.pos_x = 0
     sword_instance.pos_y = 0
     sword_instance.id = 2
     sword_instance.rotated = false
 
     knife_instance := new(ItemInstance)
-    knife_instance.definition = knife
+    knife_instance.definition = &reg.items["KNIFE"]
     knife_instance.pos_x = 5
     knife_instance.pos_y = 0
     knife_instance.id = 3
     knife_instance.rotated = false
 
     canteen_instance := new(ItemInstance)
-    canteen_instance.definition = canteen
+    canteen_instance.definition = &reg.items["CANTEEN"]
     canteen_instance.pos_x = 6
     canteen_instance.pos_y = 1
     canteen_instance.id = 4
@@ -73,11 +70,147 @@ TestItem :: proc() -> struct{
 
     return{
         backpack,
-        sword,
-        rifle,
         sword_instance,
-        rifle_instance
+        rifle_instance,
+        backpackItem,
+        backpackInstance
     }
+}
+
+TestRegistry :: proc(registry: ^ItemRegistry){
+    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
+    rapierBase, _ := MakeItemBase("RAPIER",
+    "Vibro Rapier",
+    "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.",
+    5,
+    1,
+    6,
+    1,
+    false,
+    5000,
+    { "Pierce 5", "Knockdown" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    rapier, _ := MakeItemWeapons(
+    rapierBase,
+    2,
+    5,
+    1,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
+    rifleBase, _ := MakeItemBase("RIFLE",
+    "A280C Blaster Rifle",
+    "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops",
+    6,
+    2,
+    4,
+    4,
+    false,
+    1200,
+    { "Pierce 1", "Full-Auto" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    rifle, _ := MakeItemWeapons(
+    rifleBase,
+    7,
+    300,
+    4,
+    WeaponRangebands.Long,
+    WeaponSkill.Heavy,
+    WeaponScale.Personal,
+    WeaponSubCategory.Rifle)
+
+    knifeBase, _ := MakeItemBase("KNIFE",
+    "Vibroknife",
+    "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks.",
+    3,
+    1,
+    2,
+    1,
+    false,
+    200,
+    { "Pierce 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    knife, _ := MakeItemWeapons(
+    knifeBase,
+    2,
+    1,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
+    canteenBase, _ := MakeItemBase("CANTEEN",
+    "Canteen",
+    "A small container for carrying water or\nother liquids.",
+    2,
+    2,
+    1,
+    1,
+    false,
+    50,
+    { "Breach 10" },
+    { "Stores 1L of liquid" },
+    ItemCategory.Gear,
+    {  })
+    canteen, _ := MakeItemGear(
+    canteenBase,
+    GearSubCategory.Survival)
+
+    ok := AddItemRegistry(registry, rapier)
+    fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, rifle)
+    fmt.println("Added rifle to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, knife)
+    fmt.println("Added knife to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, canteen)
+    fmt.println("Added canteen to registry:", ok.success, "Error:", ok.message)
+}
+
+TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+    char := new(Character)
+    char.name = "Lord Holcrub"
+    char.id = "1"
+
+    char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
+    char.equipment.slots[.Backpack] = backpack
+
+    belt_container := new(Container)
+    belt_container.type = .Belt
+    belt_container.storage = ContainerGrid{
+        width = 4,
+        height = 1,
+    }
+
+    beltItem := new(Item)
+    beltItem.name = "Utility Belt"
+    beltItem.height = 1
+    beltItem.width = 4
+    beltItem.description = "A utility belt with various pouches and compartments."
+    beltItem.category = ItemCategory.Container
+    beltItem.data = ContainerData{
+        storage = belt_container,
+        sub_category = .Belt
+    }
+
+    beltInstance := new(ItemInstance)
+    beltInstance.definition = beltItem
+    beltInstance.id = 101
+
+    char.equipment.slots[.Belt] = beltInstance
+
+    return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container
@@ -126,17 +259,12 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 // Function to convert the container and its items into a string representation for debugging/ease of use purposes
 ContainerToString :: proc(container: ^Container) -> string {
     builder := str.Builder{}
+    str.builder_init(&builder, context.temp_allocator)
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height)
-    defer {
-        for row in grid {
-            delete(row)
-        }
-        delete(grid)
-    }
+    grid := make([][]rune, container.storage.(ContainerGrid).height, context.temp_allocator)
 
     for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width)
+        grid[y] = make([]rune, container.storage.(ContainerGrid).width, context.temp_allocator)
 
         for x in 0..<container.storage.(ContainerGrid).width {
             grid[y][x] = '.'

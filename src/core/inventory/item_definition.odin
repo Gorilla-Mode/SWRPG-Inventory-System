@@ -1,20 +1,5 @@
 ﻿package inventory
 
-//Top level category of the item, used for filtering and organization
-ItemCategory :: enum{
-    Weapon,
-    Armor,
-    Gear
-}
-
-//Tags for the item, used for filtering and organization
-ItemTag :: enum{
-    Blaster,
-    Slugthrower,
-    Ranged,
-    Melee,
-}
-
 //Item model, as it exists in database
 Item :: struct{
     id:            string,
@@ -25,11 +10,11 @@ Item :: struct{
     hardpoints:    i8,
     restricted:    bool,
     base_price:    i32,
-    qualities:     []string,
-    features:      []string,
+    qualities:     [dynamic]string,
+    features:      [dynamic]string,
 
     category:      ItemCategory,
-    tags:          []ItemTag,
+    tags:          [dynamic]ItemTag,
 
     data:          ItemData
 }
@@ -37,48 +22,27 @@ Item :: struct{
 //Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
+    ContainerData,
+    GearData
 }
 
 WeaponData :: struct{
     damage:       i16,
     range:        i16,
+    rangeband:    WeaponRangebands,
     crit:         i8,
-    type:         WeaponSkill,
+    skill:        WeaponSkill,
     scale:        WeaponScale,
 
     sub_category: WeaponSubCategory,
 }
 
-//The skill used to operate the weapon
-WeaponSkill :: enum{
-    Light,
-    Heavy,
-    Gunnery,
-    Brawl,
-    Melee,
-    Mechanics
+ContainerData :: struct{
+    storage: ^Container,
+
+    sub_category: ContainerSubCategory
 }
 
-//Damage scale of the weapon, e.g planetary damage at 10 is 100 damage at personal scale
-WeaponScale :: enum{
-    Personal,
-    Planetary
-}
-
-WeaponRangebands :: enum{
-    Engaged,
-    Close,
-    Short,
-    Medium,
-    Long,
-    Extreme,
-    Strategic
-}
-
-WeaponSubCategory :: enum{
-    Pistol,
-    Rifle,
-    Carbine,
-    Blade,
-    Blunt,
+GearData :: struct{
+    sub_category: GearSubCategory
 }
