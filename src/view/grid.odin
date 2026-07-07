@@ -6,17 +6,17 @@ import ui "../ui"
 import rl "vendor:raylib"
 import st "../core/state"
 
-DrawGrid :: proc(item: ^inv.Item, state: ^st.state, style: ^ui.style){
-    container, ok := item.data.(inv.ContainerData)
+DrawGrid :: proc(item: ^inv.ItemInstance, state: ^st.state, style: ^ui.style){
+    container, ok := item.definition.data.(inv.ContainerData)
     if !ok {
         return
     }
 
-    gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(container.storage, style.grid.cell_size), state)
+    gridCenter := GridGetCenter(inv.ContainerGridPixelsXY(item, style.grid.cell_size), state)
     style.grid.origin_x = gridCenter.x + style.grid.offset_x
     style.grid.origin_y = gridCenter.y + style.grid.offset_y
 
-    inv.DrawContainerGrid(item, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
+    inv.DrawContainerGrid(item.definition, item, style.grid.origin_x, style.grid.origin_y, style.grid.cell_size, style)
 
     if state.grab.is_dragging && state.grab.dragged_item != nil {
         gw := state.ghost.rotated ? state.grab.dragged_item.definition.height : state.grab.dragged_item.definition.width
@@ -53,15 +53,18 @@ DrawGrid :: proc(item: ^inv.Item, state: ^st.state, style: ^ui.style){
         style)
     }
 
-    if(app.ShowItemCard(container.storage, style.grid.origin_x, style.grid.origin_y, style, state) || state.grab.selected_item != nil){
-        DrawItemCard(container.storage, style.grid.origin_x, style.grid.origin_y, state, style)
+    if(app.ShowItemCard(item, style.grid.origin_x, style.grid.origin_y, style, state) || state.grab.selected_item != nil){
+        DrawItemCard(item, style.grid.origin_x, style.grid.origin_y, state, style)
     }
 }
 
-DrawItemCard :: proc(container: ^inv.Container, origin_x, origin_y: f32, state: ^st.state, style: ^ui.style){
+DrawItemCard :: proc(container: ^inv.ItemInstance, origin_x, origin_y: f32, state: ^st.state, style: ^ui.style){
     if state.grab.selected_item != nil {
         is_in_container := false
-        for item in container.items {
+        container_data, ok := container.data.(inv.ContainerInstanceData)
+        if !ok do return
+
+        for item in container_data.items {
             if item == state.grab.selected_item {
                 is_in_container = true
                 break

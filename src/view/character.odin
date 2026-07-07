@@ -8,7 +8,7 @@ import app "../core/app"
 import str "core:strings"
 
 OverlayJob :: struct {
-    storage: ^inv.Container,
+    item: ^inv.ItemInstance,
     x, y: f32,
 }
 
@@ -46,21 +46,18 @@ DrawCharacterGrids :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
     defer delete(overlay_jobs)
 
     for loc in grid_locs {
-        inv.DrawContainerGrid(loc.item.definition, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
+        inv.DrawContainerGrid(loc.item.definition, loc.item, loc.origin.x, loc.origin.y, style.grid.cell_size, style)
 
-        container_data, ok := loc.item.definition.data.(inv.ContainerData)
-        if !ok do continue
-
-        should_show := app.ShowItemCard(container_data.storage, loc.origin.x, loc.origin.y, style, state) ||
+        should_show := app.ShowItemCard(loc.item, loc.origin.x, loc.origin.y, style, state) ||
         state.grab.selected_item != nil
 
         if should_show {
-            append(&overlay_jobs, OverlayJob{ storage = container_data.storage, x = loc.origin.x, y = loc.origin.y})
+            append(&overlay_jobs, OverlayJob{ item = loc.item, x = loc.origin.x, y = loc.origin.y})
         }
     }
 
     for job in overlay_jobs {
-        DrawItemCard(job.storage, job.x, job.y, state, style)
+        DrawItemCard(job.item, job.x, job.y, state, style)
     }
 }
 
@@ -142,8 +139,11 @@ DrawSlot :: proc(slot: inv.EquipmentSlot, pos: rl.Vector2, state: ^st.state, sty
     rl.DrawTextEx(font, itemText, itemTextPos, f32(fontSize), 0, itemTextColor)
 
     if !ok do return
-    if container_data, is_container := item.definition.data.(inv.ContainerData); is_container {
-        item_count := len(container_data.storage.items)
+    if _, is_container := item.definition.data.(inv.ContainerData); is_container {
+        item_data, has_items := item.data.(inv.ContainerInstanceData)
+        if !has_items do return
+
+        item_count := len(item_data.items)
 
         b := str.Builder{}
         str.builder_init(&b, context.temp_allocator)
