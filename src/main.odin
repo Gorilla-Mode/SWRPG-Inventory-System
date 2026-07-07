@@ -68,7 +68,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        v.DrawUI(&state, &style, items.backpackItem)
+        v.DrawUI(&state, &style, items.backpack)
 
         rl.EndDrawing()
     }

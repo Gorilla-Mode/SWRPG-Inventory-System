@@ -9,11 +9,8 @@ ContainerType :: enum{
 }
 
 Container :: struct{
-    id: string,
     type: ContainerType,
     storage: ContainerStorage,
-
-    items: [dynamic]^ItemInstance
 }
 
 ContainerStorage :: union{
@@ -44,8 +41,13 @@ Rect :: struct {
 }
 
 // Dispatch function to determine if an item can be placed in a container, based on the container's storage type
-ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    switch _ in container.storage{
+ContainerCanPlace :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool{
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
+    if !ok do return false
+
+    switch _ in container_data.storage.storage{
         case ContainerGrid:
             return ContainerCanPlaceGrid(container, item)
         case ContainerSlot:
@@ -56,9 +58,16 @@ ContainerCanPlace :: proc(container: ^Container, item: ^ItemInstance) -> bool{
     return false
 }
 
-ContainerCanPlaceSlot :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    slot, ok := container.storage.(ContainerSlot)
+ContainerCanPlaceSlot :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool{
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
     if !ok {
+        return false
+    }
+
+    slot, slot_ok := container_data.storage.storage.(ContainerSlot)
+    if !slot_ok {
         return false
     }
 
@@ -69,9 +78,16 @@ ContainerCanPlaceSlot :: proc(container: ^Container, item: ^ItemInstance) -> boo
     return true
 }
 
-ContainerCanPlaceVolume :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    vol, ok := container.storage.(ContainerVolume)
+ContainerCanPlaceVolume :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool{
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
     if !ok {
+        return false
+    }
+
+    vol, vol_ok := container_data.storage.storage.(ContainerVolume)
+    if !vol_ok {
         return false
     }
 
@@ -102,13 +118,25 @@ ContainerGridCheckBounds :: proc(container: ^Container, item_bounds: Rect) -> bo
     return true
 }
 
-ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> bool{
-    item_bounds := GetBounds(item)
-    if !ContainerGridCheckBounds(container, item_bounds) {
+ContainerCanPlaceGrid :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool{
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
+    if !ok {
         return false
     }
 
-    for existing in container.items{
+    item_bounds := GetBounds(item)
+    if !ContainerGridCheckBounds(container_data.storage, item_bounds) {
+        return false
+    }
+
+    container_items, items_ok := container.data.(ContainerInstanceData)
+    if !items_ok {
+        return false
+    }
+
+    for existing in container_items.items{
         if existing.id == item.id {
             continue
         }
@@ -127,7 +155,7 @@ ContainerCanPlaceGrid :: proc(container: ^Container, item: ^ItemInstance) -> boo
     return true
 }
 
-ContainerGridCanPlaceAt :: proc(container: ^Container,
+ContainerGridCanPlaceAt :: proc(container: ^ItemInstance,
     Item: ^Item,
     x: i16,
     y: i16,
@@ -155,17 +183,30 @@ ContainerGridRectOverlap :: proc(
         by + bh <= ay)
 }
 
-ContainerAddItem :: proc(container: ^Container, item: ^ItemInstance) -> bool{
+ContainerAddItem :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool{
     if ContainerCanPlace(container, item) {
-        append_elem(&container.items, item)
+        container_data, ok := container.data.(ContainerInstanceData)
+        if !ok {
+            return false
+        }
+
+        append_elem(&container_data.items, item)
+        container.data = container_data
         return true
     }
 
     return false
 }
 
-ContainerGridCanRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
-    _, ok := container.storage.(ContainerGrid)
+ContainerGridCanRotateItem :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool {
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
+    if !ok {
+        return false
+    }
+
+    _, ok = container_data.storage.storage.(ContainerGrid)
     if !ok {
         return false
     }
@@ -177,7 +218,7 @@ ContainerGridCanRotateItem :: proc(container: ^Container, item: ^ItemInstance) -
     return true
 }
 
-ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> bool {
+ContainerGridRotateItem :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool {
     if !ContainerGridCanRotateItem(container, item)
     {
         return false
@@ -193,11 +234,18 @@ ContainerGridRotateItem :: proc(container: ^Container, item: ^ItemInstance) -> b
 }
 
 ContainerGridMoveItem :: proc(
-    container: ^Container,
+    container: ^ItemInstance,
     item:      ^ItemInstance,
     delta_x:   i16 = 0,
     delta_y:   i16 = 0) -> bool {
-    _, ok := container.storage.(ContainerGrid)
+    if container == nil do return false
+
+    container_data, ok := container.definition.data.(ContainerData)
+    if !ok {
+        return false
+    }
+
+    _, ok = container_data.storage.storage.(ContainerGrid)
     if !ok {
         return false
     }
@@ -219,10 +267,17 @@ ContainerGridMoveItem :: proc(
     return true
 }
 
-ContainerGridPixelsXY :: proc(container: ^Container, cell_size: f32) -> rl.Vector2
+ContainerGridPixelsXY :: proc(container: ^ItemInstance, cell_size: f32) -> rl.Vector2
 {
-    grid, ok := container.storage.(ContainerGrid)
+    if container == nil do return {}
+
+    container_data, ok := container.definition.data.(ContainerData)
     if !ok {
+        return {}
+    }
+
+    grid, grid_ok := container_data.storage.storage.(ContainerGrid)
+    if !grid_ok {
         return {}
     }
 

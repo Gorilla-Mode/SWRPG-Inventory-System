@@ -4,15 +4,15 @@ import str "core:strings"
 import fmt "core:fmt"
 
 TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
-    backpack: ^Container,
+    backpack: ^ItemInstance,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
     backpackItem: ^Item,
     backpackInstance: ^ItemInstance}
 {
-    backpack := new(Container)
-    backpack.type = ContainerType.Backpack
-    backpack.storage = ContainerGrid{
+    backpack_storage := new(Container)
+    backpack_storage.type = ContainerType.Backpack
+    backpack_storage.storage = ContainerGrid{
         width  = 8,
         height = 10
     }
@@ -27,13 +27,16 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     backpackItem.qualities = nil
     backpackItem.category = ItemCategory.Container
     backpackItem.data = ContainerData{
-        storage = backpack,
+        storage = backpack_storage,
         sub_category = ContainerSubCategory.Backpack
     }
 
     backpackInstance := new(ItemInstance)
     backpackInstance.definition = backpackItem
     backpackInstance.id = 100
+    backpackInstance.data = ContainerInstanceData{
+        items = make([dynamic]^ItemInstance, context.allocator),
+    }
 
     rifle_instance := new(ItemInstance)
     rifle_instance.definition = &reg.items["RIFLE"]
@@ -63,13 +66,15 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     canteen_instance.id = 4
     canteen_instance.rotated = false
 
-    append_elem(&backpack.items, sword_instance)
-    append_elem(&backpack.items, rifle_instance)
-    append_elem(&backpack.items, knife_instance)
-    append_elem(&backpack.items, canteen_instance)
+    backpack_data := backpackInstance.data.(ContainerInstanceData)
+    append_elem(&backpack_data.items, sword_instance)
+    append_elem(&backpack_data.items, rifle_instance)
+    append_elem(&backpack_data.items, knife_instance)
+    append_elem(&backpack_data.items, canteen_instance)
+    backpackInstance.data = backpack_data
 
     return{
-        backpack,
+        backpackInstance,
         sword_instance,
         rifle_instance,
         backpackItem,
@@ -207,14 +212,25 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     beltInstance := new(ItemInstance)
     beltInstance.definition = beltItem
     beltInstance.id = 101
+    beltInstance.data = ContainerInstanceData{
+        items = make([dynamic]^ItemInstance, context.allocator),
+    }
+
+    beltInstance2 := new(ItemInstance)
+    beltInstance2.definition = beltItem
+    beltInstance2.id = 102
+    beltInstance2.data = ContainerInstanceData{
+        items = make([dynamic]^ItemInstance, context.allocator),
+    }
 
     char.equipment.slots[.Belt] = beltInstance
+    char.equipment.slots[.Armor] = beltInstance2
 
     return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container
-TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_instance: ^ItemInstance, rifle_instance: ^ItemInstance)
+TestInvGrid :: proc(backpack: ^ItemInstance, sword: ^Item, rifle: ^Item, sword_instance: ^ItemInstance, rifle_instance: ^ItemInstance)
 {
     fmt.println()
 
@@ -257,23 +273,27 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 }
 
 // Function to convert the container and its items into a string representation for debugging/ease of use purposes
-ContainerToString :: proc(container: ^Container) -> string {
+ContainerToString :: proc(container: ^ItemInstance) -> string {
     builder := str.Builder{}
     str.builder_init(&builder, context.temp_allocator)
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height, context.temp_allocator)
+    container_data := container.definition.data.(ContainerData)
+    grid_storage := container_data.storage.storage.(ContainerGrid)
+    container_items := container.data.(ContainerInstanceData)
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width, context.temp_allocator)
+    grid := make([][]rune, grid_storage.height, context.temp_allocator)
 
-        for x in 0..<container.storage.(ContainerGrid).width {
+    for y in 0..<grid_storage.height {
+        grid[y] = make([]rune, grid_storage.width, context.temp_allocator)
+
+        for x in 0..<grid_storage.width {
             grid[y][x] = '.'
         }
     }
 
     symbols := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    for item, i in container.items {
+    for item, i in container_items.items {
         symbol := rune(symbols[i % len(symbols)])
         b := GetBounds(item)
 
@@ -283,8 +303,8 @@ ContainerToString :: proc(container: ^Container) -> string {
                 gx := b.pos_x + x
                 gy := b.pos_y + y
 
-                if gx < 0 || gx >= container.storage.(ContainerGrid).width ||
-                gy < 0 || gy >= container.storage.(ContainerGrid).height {
+                if gx < 0 || gx >= grid_storage.width ||
+                gy < 0 || gy >= grid_storage.height {
                     continue
                 }
 
@@ -293,8 +313,8 @@ ContainerToString :: proc(container: ^Container) -> string {
         }
     }
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        for x in 0..<container.storage.(ContainerGrid).width {
+    for y in 0..<grid_storage.height {
+        for x in 0..<grid_storage.width {
             str.write_rune(&builder, grid[y][x])
         }
 

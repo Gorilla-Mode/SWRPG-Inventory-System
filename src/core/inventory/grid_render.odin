@@ -6,18 +6,19 @@ import str "core:strings"
 
 DrawContainerGrid :: proc(
     item: ^Item,
+    container_item: ^ItemInstance,
     origin_x, origin_y: f32,
     cell_size: f32,
     style: ^ui.style
 ) {
-    container, ok := item.data.(ContainerData)
+    container_def, ok := item.data.(ContainerData)
     if !ok {
         return
     }
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], str.clone_to_cstring(item.name, context.temp_allocator), ui.SnapVector2(rl.Vector2{origin_x, origin_y - 25}), f32(ui.font_size.header), 2, style.colors.text)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container.sub_category), context.temp_allocator), ui.SnapVector2(rl.Vector2{origin_x, origin_y - 34}), f32(ui.font_size.caption), 2, style.colors.text)
-    #partial switch storage in container.storage.storage {
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container_def.sub_category), context.temp_allocator), ui.SnapVector2(rl.Vector2{origin_x, origin_y - 34}), f32(ui.font_size.caption), 2, style.colors.text)
+    #partial switch storage in container_def.storage.storage {
     case ContainerGrid:
         for y in 0..<storage.height {
             for x in 0..<storage.width {
@@ -35,7 +36,12 @@ DrawContainerGrid :: proc(
             }
         }
 
-        for item in container.storage.items {
+        container_items, items_ok := container_item.data.(ContainerInstanceData)
+        if !items_ok {
+            return
+        }
+
+        for item in container_items.items {
             DrawItem(item, origin_x, origin_y, cell_size, style)
         }
     }
