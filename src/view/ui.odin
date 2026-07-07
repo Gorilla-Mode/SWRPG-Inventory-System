@@ -4,7 +4,7 @@ import st "../core/state"
 import ui "../ui"
 import inv "../core/inventory"
 
-DrawUI :: proc(state: ^st.state, style: ^ui.style, items: ^inv.Item) {
+DrawUI :: proc(state: ^st.state, style: ^ui.style, items: ^inv.ItemInstance) {
     DrawHeader(style, state)
 
     switch state.page {
