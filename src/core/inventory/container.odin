@@ -9,11 +9,8 @@ ContainerType :: enum{
 }
 
 Container :: struct{
-    id: string,
     type: ContainerType,
     storage: ContainerStorage,
-
-    items: [dynamic]^ItemInstance
 }
 
 ContainerStorage :: union{
