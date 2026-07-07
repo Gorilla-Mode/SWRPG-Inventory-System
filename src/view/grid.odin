@@ -59,30 +59,28 @@ DrawGrid :: proc(item: ^inv.ItemInstance, state: ^st.state, style: ^ui.style){
 }
 
 DrawItemCard :: proc(container: ^inv.ItemInstance, origin_x, origin_y: f32, state: ^st.state, style: ^ui.style){
-    if state.grab.selected_item != nil {
-        is_in_container := false
-        container_data, ok := container.data.(inv.ContainerInstanceData)
-        if !ok do return
+    if state.grab.selected_item != nil do app.HideItemCard(container, origin_x, origin_y, style, state)
 
-        for item in container_data.items {
-            if item == state.grab.selected_item {
-                is_in_container = true
-                break
-            }
-        }
+    is_in_container := false
+    container_data, ok := container.data.(inv.ContainerInstanceData)
+    if !ok do return
 
-        if is_in_container {
-            inv.DrawItemCard(state.grab.selected_item,
-            f32(state.grab.selected_item.pos_x),
-            f32(state.grab.selected_item.pos_y),
-            origin_x,
-            origin_y,
-            style.grid.cell_size,
-            style)
+    for item in container_data.items {
+        if item == state.grab.selected_item {
+            is_in_container = true
+            break
         }
     }
 
-    app.HideItemCard(container, origin_x, origin_y, style, state)
+    if is_in_container {
+        inv.DrawItemCard(state.grab.selected_item,
+        f32(state.grab.selected_item.pos_x),
+        f32(state.grab.selected_item.pos_y),
+        origin_x,
+        origin_y,
+        style.grid.cell_size,
+        style)
+    }
 }
 
 GridGetCenter :: proc(grid_size: rl.Vector2, state: ^st.state) -> rl.Vector2 {
