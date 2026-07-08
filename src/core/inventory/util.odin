@@ -165,7 +165,6 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     spacerDuffelBase,
     8,
     10,
-    ContainerType.Backpack,
     ContainerSubCategory.Backpack)
 
     beltBase, _ := MakeItemBase("UTILITY_BELT",
@@ -185,7 +184,6 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     beltBase,
     4,
     1,
-    ContainerType.Belt,
     ContainerSubCategory.Belt)
 
     ok := AddItemRegistry(registry, rapier)

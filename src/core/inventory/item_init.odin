@@ -100,7 +100,6 @@ MakeItemGear :: proc (baseItem: Item,
 
 MakeItemContainerGrid :: proc(baseItem: Item,
     width, height: i16,
-    type: ContainerType,
     subCategory: ContainerSubCategory
 ) -> (Item, ContainerError) {
     container := baseItem
@@ -121,7 +120,6 @@ MakeItemContainerGrid :: proc(baseItem: Item,
                 width = width,
                 height = height,
             },
-            type = type,
         },
         sub_category = subCategory,
     }

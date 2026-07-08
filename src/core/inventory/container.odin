@@ -2,14 +2,7 @@
 
 import rl "vendor:raylib"
 
-ContainerType :: enum{
-    Backpack,
-    Belt,
-    Clothing,
-}
-
 ContainerDefinition :: struct{
-    type: ContainerType,
     storage: ContainerStorage,
 }
 
