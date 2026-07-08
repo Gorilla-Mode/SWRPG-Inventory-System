@@ -18,6 +18,12 @@ GearError :: struct{
     message: string,
 }
 
+ContainerError :: struct{
+    success: bool,
+    error: ContainerErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -36,6 +42,11 @@ WeaponErrors :: enum{
 }
 
 GearErrors :: enum{
+    Success,
+    InvalidData,
+}
+
+ContainerErrors :: enum{
     Success,
     InvalidData,
 }
@@ -80,6 +91,18 @@ CheckWeaponItem :: proc(damage, range: i16, crit: i8) -> (WeaponError) {
     return WeaponError{ true, .Success, "Success" }
 }
 
+CheckContainerGridItem :: proc(width, height: i16) -> (ContainerError) {
+    if width < 1 {
+        return ContainerError{ false, .InvalidData, "Container width must be greater than 0" }
+    }
+
+    if height < 1 {
+        return ContainerError{ false, .InvalidData, "Container height must be greater than 0" }
+    }
+
+    return ContainerError{ true, .Success, "Success" }
+}
+
 CheckGearItem :: proc(item: Item) -> (GearError) {
     //fr no checks for gear items, but to add later, and consistency with other item types, we have this function
     return GearError{ true, .Success, "Success" }
@@ -90,6 +113,11 @@ CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
 }
 
 CheckWeaponItemItem :: proc(item: Item) -> (WeaponError) {
+    baseItem := CheckBaseItemItem(item)
+    if baseItem.success != true {
+        return WeaponError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
     if item.category != .Weapon {
         return WeaponError{ false, .InvalidData, "Item is not a weapon" }
     }
@@ -99,11 +127,34 @@ CheckWeaponItemItem :: proc(item: Item) -> (WeaponError) {
 }
 
 CheckGearItemItem :: proc(item: Item) -> (GearError) {
+    baseItem := CheckBaseItemItem(item)
+    if baseItem.success != true {
+        return GearError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
     if item.category != .Gear {
         return GearError{ false, .InvalidData, "Item is not a gear item" }
     }
 
     return CheckGearItem(item)
+}
+
+CheckContainerGridItemItem :: proc(item: Item) -> (ContainerError) {
+    baseItem := CheckBaseItemItem(item)
+    if baseItem.success != true {
+        return ContainerError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
+    if item.category != .Container {
+        return ContainerError{ false, .InvalidData, "Item is not a container" }
+    }
+
+    containerGrid, ok := item.data.(ContainerData).containerDef.storage.(ContainerGrid)
+    if !ok {
+        return ContainerError{ false, .InvalidData, "Container storage is not a grid" }
+    }
+
+    return CheckContainerGridItem(containerGrid.width, containerGrid.height)
 }
 
 MakeItemBase :: proc(
@@ -202,4 +253,35 @@ MakeItemGear :: proc (baseItem: Item,
     }
 
     return gear, ok
+}
+
+MakeItemContainerGrid :: proc(baseItem: Item,
+    width, height: i16,
+    type: ContainerType,
+    subCategory: ContainerSubCategory
+) -> (Item, ContainerError) {
+    container := baseItem
+
+    baseItem := CheckBaseItem(container.base_rarity, container.hardpoints, container.base_price, width, height)
+    if !baseItem.success {
+        return Item{}, ContainerError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
+    ok := CheckContainerGridItem(width, height)
+    if !ok.success {
+        return Item{}, ok
+    }
+
+    container.data = ContainerData{
+        containerDef = ContainerDefinition{
+            storage = ContainerGrid{
+                width = width,
+                height = height,
+            },
+            type = type,
+        },
+        sub_category = subCategory,
+    }
+
+    return container, ok
 }

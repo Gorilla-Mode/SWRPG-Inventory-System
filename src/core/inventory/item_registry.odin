@@ -46,6 +46,11 @@ AddItemRegistry :: proc(reg: ^ItemRegistry, item: Item) -> RegistryError {
         if !gear_ok.success {
             return RegistryError{ false, .BaseItemError, gear_ok.message }
         }
+    case ContainerData:
+        container_ok := CheckContainerGridItemItem(item)
+        if !container_ok.success {
+            return RegistryError{ false, .BaseItemError, container_ok.message }
+        }
     }
 
     reg.items[item.id] = item

@@ -22,7 +22,7 @@ main :: proc()
     state.ItemRegistry = inv.MakeItemRegistry()
     inv.TestRegistry(&state.ItemRegistry)
     items := inv.TestItemInstance(style.grid.cell_size, &state.ItemRegistry)
-    state.character = inv.TestCharacter(items.backpackInstance)
+    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemRegistry)
     defer delete(state.textFields)
     defer delete(state.ItemRegistry.items)
 

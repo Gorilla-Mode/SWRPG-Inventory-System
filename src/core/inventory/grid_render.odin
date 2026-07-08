@@ -18,7 +18,7 @@ DrawContainerGrid :: proc(
 
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header], str.clone_to_cstring(item.name, context.temp_allocator), ui.SnapVector2(rl.Vector2{origin_x, origin_y - 25}), f32(ui.font_size.header), 2, style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.caption], str.clone_to_cstring(ContainerSubCategoryString(container_def.sub_category), context.temp_allocator), ui.SnapVector2(rl.Vector2{origin_x, origin_y - 34}), f32(ui.font_size.caption), 2, style.colors.text)
-    #partial switch storage in container_def.storage.storage {
+    #partial switch storage in container_def.containerDef.storage {
     case ContainerGrid:
         for y in 0..<storage.height {
             for x in 0..<storage.width {

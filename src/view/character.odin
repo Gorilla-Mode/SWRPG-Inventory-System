@@ -82,7 +82,7 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
         container_data, ok := loc.item.definition.data.(inv.ContainerData)
         if !ok do continue
 
-        grid := container_data.storage.storage.(inv.ContainerGrid)
+        grid := container_data.containerDef.storage.(inv.ContainerGrid)
         rect := rl.Rectangle{loc.origin.x, loc.origin.y, f32(grid.width) * cell_size, f32(grid.height) * cell_size}
 
         if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue
@@ -90,7 +90,7 @@ DrawCharacterGhost :: proc(state: ^st.state, grid_locs: [dynamic]app.GridLocatio
         gw := state.ghost.rotated ? item.definition.height : item.definition.width
         gh := state.ghost.rotated ? item.definition.width : item.definition.height
 
-        if inv.ContainerGridCheckBounds(container_data.storage, inv.Rect{
+        if inv.ContainerGridCheckBounds(&container_data.containerDef, inv.Rect{
             pos_x = state.ghost.pos_x,
             pos_y = state.ghost.pos_y,
             width = gw,

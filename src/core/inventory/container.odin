@@ -8,7 +8,7 @@ ContainerType :: enum{
     Clothing,
 }
 
-Container :: struct{
+ContainerDefinition :: struct{
     type: ContainerType,
     storage: ContainerStorage,
 }
@@ -47,7 +47,7 @@ ContainerCanPlace :: proc(container: ^ItemInstance, item: ^ItemInstance) -> bool
     container_data, ok := container.definition.data.(ContainerData)
     if !ok do return false
 
-    switch _ in container_data.storage.storage{
+    switch _ in container_data.containerDef.storage{
         case ContainerGrid:
             return ContainerCanPlaceGrid(container, item)
         case ContainerSlot:
@@ -66,7 +66,7 @@ ContainerCanPlaceSlot :: proc(container: ^ItemInstance, item: ^ItemInstance) -> 
         return false
     }
 
-    slot, slot_ok := container_data.storage.storage.(ContainerSlot)
+    slot, slot_ok := container_data.containerDef.storage.(ContainerSlot)
     if !slot_ok {
         return false
     }
@@ -86,7 +86,7 @@ ContainerCanPlaceVolume :: proc(container: ^ItemInstance, item: ^ItemInstance) -
         return false
     }
 
-    vol, vol_ok := container_data.storage.storage.(ContainerVolume)
+    vol, vol_ok := container_data.containerDef.storage.(ContainerVolume)
     if !vol_ok {
         return false
     }
@@ -97,7 +97,7 @@ ContainerCanPlaceVolume :: proc(container: ^ItemInstance, item: ^ItemInstance) -
     return true
 }
 
-ContainerGridCheckBounds :: proc(container: ^Container, item_bounds: Rect) -> bool{
+ContainerGridCheckBounds :: proc(container: ^ContainerDefinition, item_bounds: Rect) -> bool{
     grid, ok := container.storage.(ContainerGrid)
     if !ok {
         return false
@@ -127,7 +127,7 @@ ContainerCanPlaceGrid :: proc(container: ^ItemInstance, item: ^ItemInstance) -> 
     }
 
     item_bounds := GetBounds(item)
-    if !ContainerGridCheckBounds(container_data.storage, item_bounds) {
+    if !ContainerGridCheckBounds(&container_data.containerDef, item_bounds) {
         return false
     }
 
@@ -206,7 +206,7 @@ ContainerGridCanRotateItem :: proc(container: ^ItemInstance, item: ^ItemInstance
         return false
     }
 
-    _, ok = container_data.storage.storage.(ContainerGrid)
+    _, ok = container_data.containerDef.storage.(ContainerGrid)
     if !ok {
         return false
     }
@@ -245,7 +245,7 @@ ContainerGridMoveItem :: proc(
         return false
     }
 
-    _, ok = container_data.storage.storage.(ContainerGrid)
+    _, ok = container_data.containerDef.storage.(ContainerGrid)
     if !ok {
         return false
     }
@@ -276,7 +276,7 @@ ContainerGridPixelsXY :: proc(container: ^ItemInstance, cell_size: f32) -> rl.Ve
         return {}
     }
 
-    grid, grid_ok := container_data.storage.storage.(ContainerGrid)
+    grid, grid_ok := container_data.containerDef.storage.(ContainerGrid)
     if !grid_ok {
         return {}
     }

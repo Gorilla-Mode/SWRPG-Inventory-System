@@ -38,7 +38,7 @@ WeaponData :: struct{
 }
 
 ContainerData :: struct{
-    storage: ^Container,
+    containerDef: ContainerDefinition,
 
     sub_category: ContainerSubCategory
 }
