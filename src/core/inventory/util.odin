@@ -3,36 +3,15 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct{
     backpack: ^ItemInstance,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
-    backpackItem: ^Item,
     backpackInstance: ^ItemInstance}
 {
-    backpack_storage := new(Container)
-    backpack_storage.type = ContainerType.Backpack
-    backpack_storage.storage = ContainerGrid{
-        width  = 8,
-        height = 10
-    }
-
-    backpackItem := new(Item)
-    backpackItem.name = "Spacers duffel"
-    backpackItem.width = 8
-    backpackItem.height = 10
-    backpackItem.description = "A standard backpack for carrying items."
-    backpackItem.base_rarity = 1
-    backpackItem.base_price = 100
-    backpackItem.qualities = nil
-    backpackItem.category = ItemCategory.Container
-    backpackItem.data = ContainerData{
-        storage = backpack_storage,
-        sub_category = ContainerSubCategory.Backpack
-    }
 
     backpackInstance := new(ItemInstance)
-    backpackInstance.definition = backpackItem
+    backpackInstance.definition = &reg.items["SPACER_DUFFEL"]
     backpackInstance.id = 100
     backpackInstance.data = ContainerInstanceData{
         items = make([dynamic]^ItemInstance, context.allocator),
@@ -77,12 +56,11 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
         backpackInstance,
         sword_instance,
         rifle_instance,
-        backpackItem,
         backpackInstance
     }
 }
 
-TestRegistry :: proc(registry: ^ItemRegistry){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -170,6 +148,44 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     canteenBase,
     GearSubCategory.Survival)
 
+    spacerDuffelBase, _ := MakeItemBase("SPACER_DUFFEL",
+    "Spacer's Duffel",
+    "A standard backpack for carrying items.",
+    8,
+    10,
+    1,
+    1,
+    false,
+    100,
+    {  },
+    {  },
+    ItemCategory.Container,
+    {  })
+    spacerDuffel, _ := MakeItemContainerGrid(
+    spacerDuffelBase,
+    8,
+    10,
+    ContainerSubCategory.Backpack)
+
+    beltBase, _ := MakeItemBase("UTILITY_BELT",
+    "Utility Belt",
+    "A utility belt with various pouches and compartments.",
+    4,
+    1,
+    1,
+    1,
+    false,
+    150,
+    {  },
+    {  },
+    ItemCategory.Container,
+    {  })
+    utilityBelt, _ := MakeItemContainerGrid(
+    beltBase,
+    4,
+    1,
+    ContainerSubCategory.Belt)
+
     ok := AddItemRegistry(registry, rapier)
     fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
 
@@ -181,9 +197,15 @@ TestRegistry :: proc(registry: ^ItemRegistry){
 
     ok = AddItemRegistry(registry, canteen)
     fmt.println("Added canteen to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, spacerDuffel)
+    fmt.println("Added spacer duffel to registry:", ok.success, "Error:", ok.message)
+
+    ok = AddItemRegistry(registry, utilityBelt)
+    fmt.println("Added utility belt to registry:", ok.success, "Error:", ok.message)
 }
 
-TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> ^Character {
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
@@ -191,33 +213,15 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
     char.equipment.slots[.Backpack] = backpack
 
-    belt_container := new(Container)
-    belt_container.type = .Belt
-    belt_container.storage = ContainerGrid{
-        width = 4,
-        height = 1,
-    }
-
-    beltItem := new(Item)
-    beltItem.name = "Utility Belt"
-    beltItem.height = 1
-    beltItem.width = 4
-    beltItem.description = "A utility belt with various pouches and compartments."
-    beltItem.category = ItemCategory.Container
-    beltItem.data = ContainerData{
-        storage = belt_container,
-        sub_category = .Belt
-    }
-
     beltInstance := new(ItemInstance)
-    beltInstance.definition = beltItem
+    beltInstance.definition = &reg.items["UTILITY_BELT"]
     beltInstance.id = 101
     beltInstance.data = ContainerInstanceData{
         items = make([dynamic]^ItemInstance, context.allocator),
     }
 
     beltInstance2 := new(ItemInstance)
-    beltInstance2.definition = beltItem
+    beltInstance2.definition = &reg.items["UTILITY_BELT"]
     beltInstance2.id = 102
     beltInstance2.data = ContainerInstanceData{
         items = make([dynamic]^ItemInstance, context.allocator),
@@ -278,7 +282,7 @@ ContainerToString :: proc(container: ^ItemInstance) -> string {
     str.builder_init(&builder, context.temp_allocator)
 
     container_data := container.definition.data.(ContainerData)
-    grid_storage := container_data.storage.storage.(ContainerGrid)
+    grid_storage := container_data.containerDef.storage.(ContainerGrid)
     container_items := container.data.(ContainerInstanceData)
 
     grid := make([][]rune, grid_storage.height, context.temp_allocator)

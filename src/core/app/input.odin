@@ -88,7 +88,7 @@ HandleCharacterDragging :: proc(state: ^st.state, char: ^inv.Character, cell_siz
 
     for loc in grid_locs {
         container_def := loc.item.definition.data.(inv.ContainerData)
-        grid := container_def.storage.storage.(inv.ContainerGrid)
+        grid := container_def.containerDef.storage.(inv.ContainerGrid)
         rect := rl.Rectangle{loc.origin.x, loc.origin.y, f32(grid.width) * cell_size, f32(grid.height) * cell_size}
 
         if !rl.CheckCollisionPointRec(mouse_pos, rect) do continue

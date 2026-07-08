@@ -161,7 +161,7 @@ start_x: f32,
 GetItemGridHeight :: proc(item: ^inv.ItemInstance, cell_size: f32) -> f32 {
     container_data := item.definition.data.(inv.ContainerData)
 
-    storage, ok := container_data.storage.storage.(inv.ContainerGrid)
+    storage, ok := container_data.containerDef.storage.(inv.ContainerGrid)
     if !ok do return 0
 
     return f32(storage.height) * cell_size
@@ -229,7 +229,7 @@ GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
         container_data, ok := item.definition.data.(inv.ContainerData)
         if !ok do continue
 
-        storage, is_grid := container_data.storage.storage.(inv.ContainerGrid)
+        storage, is_grid := container_data.containerDef.storage.(inv.ContainerGrid)
         if !is_grid do continue
 
         w := f32(storage.width) * cell_size

@@ -22,7 +22,7 @@ DrawGrid :: proc(item: ^inv.ItemInstance, state: ^st.state, style: ^ui.style){
         gw := state.ghost.rotated ? state.grab.dragged_item.definition.height : state.grab.dragged_item.definition.width
         gh := state.ghost.rotated ? state.grab.dragged_item.definition.width : state.grab.dragged_item.definition.height
 
-        if inv.ContainerGridCheckBounds(container.storage, inv.Rect{
+        if inv.ContainerGridCheckBounds(&container.containerDef, inv.Rect{
             pos_x = state.ghost.pos_x,
             pos_y = state.ghost.pos_y,
             width = gw,
