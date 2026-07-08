@@ -19,12 +19,12 @@ main :: proc()
     }
 
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
-    state.ItemRegistry = inv.MakeItemRegistry()
-    inv.TestRegistry(&state.ItemRegistry)
-    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemRegistry)
-    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemRegistry)
+    state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
+    inv.TestRegistry(&state.ItemDefinitionRegistry)
+    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry)
+    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry)
     defer delete(state.textFields)
-    defer delete(state.ItemRegistry.items)
+    defer delete(state.ItemDefinitionRegistry.items)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE

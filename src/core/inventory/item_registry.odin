@@ -1,7 +1,11 @@
 ﻿package inventory
 
-ItemRegistry :: struct{
+ItemDefinitionRegistry :: struct{
     items: map[string]Item
+}
+
+ItemInstanceRegistry :: struct{
+    items: map[u64]ItemInstance
 }
 
 RegistryError :: struct{
@@ -16,15 +20,15 @@ RegistryErrors :: enum{
     ItemAlreadyExists,
 }
 
-MakeItemRegistry :: proc() -> ItemRegistry {
-    reg := ItemRegistry{
+MakeItemDefinitionRegistry :: proc() -> ItemDefinitionRegistry {
+    reg := ItemDefinitionRegistry{
         items = make(map[string]Item)
     }
 
     return reg
 }
 
-AddItemRegistry :: proc(reg: ^ItemRegistry, item: Item) -> RegistryError {
+AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, item: Item) -> RegistryError {
     ok := CheckBaseItemItem(item)
     if !ok.success {
         return RegistryError{ false, .BaseItemError, ok.message }
@@ -55,4 +59,12 @@ AddItemRegistry :: proc(reg: ^ItemRegistry, item: Item) -> RegistryError {
 
     reg.items[item.id] = item
     return RegistryError{ true, .Success, "Success" }
+}
+
+MakeItemInstanceRegistry :: proc() -> ItemInstanceRegistry {
+    reg := ItemInstanceRegistry{
+        items = make(map[u64]ItemInstance)
+    }
+
+    return reg
 }

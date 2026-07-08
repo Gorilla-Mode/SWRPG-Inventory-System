@@ -3,7 +3,7 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct{
     backpack: ^ItemInstance,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
@@ -60,7 +60,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemRegistry) -> struct{
     }
 }
 
-TestRegistry :: proc(registry: ^ItemRegistry){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -205,7 +205,7 @@ TestRegistry :: proc(registry: ^ItemRegistry){
     fmt.println("Added utility belt to registry:", ok.success, "Error:", ok.message)
 }
 
-TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemRegistry) -> ^Character {
+TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> ^Character {
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
