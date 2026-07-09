@@ -169,3 +169,30 @@ MakeGearInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: b
 
     return id, ok
 }
+
+MakeContainerInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool, posX: i16 = 0, posY: i16 = 0) -> (u64, InstanceError) {
+    ok := CheckContainerGridItemInstance(definition)
+    if !ok.success {
+        if debug do dbug.Warn(fmt.tprint("Failed to create container instance for item definition:", definition.id,
+        "\n\t\t", ok.message))
+        return 0, ok
+    }
+
+    id: u64 = GenerateInstanceID(reg, debug)
+
+    instance := new(ItemInstance)
+    instance.id = id
+    instance.definition = definition
+    instance.rotated = false
+    instance.pos_x = posX
+    instance.pos_y = posY
+    instance.data = ContainerInstanceData{
+        items = make([dynamic]^ItemInstance, context.allocator),
+    }
+
+    reg.items[instance.id] = instance
+    if debug do dbug.Debug(fmt.tprint("Created container instance for item definition:", definition.id,
+    "\n\t\tInstance ID:", instance.id))
+
+    return id, ok
+}

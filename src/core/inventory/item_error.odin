@@ -190,3 +190,17 @@ CheckGearItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
 
     return InstanceError{ true, .Success, "Success" }
 }
+
+CheckContainerGridItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
+    containerData, ok := itemDefinition.data.(ContainerData)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Item definition is not a container" }
+    }
+
+    _, ok = containerData.containerDef.storage.(ContainerGrid)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Container storage is not a grid" }
+    }
+
+    return InstanceError{ true, .Success, "Success" }
+}

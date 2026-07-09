@@ -6,11 +6,7 @@ import fmt "core:fmt"
 TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> struct{
     backpackInstance: ^ItemInstance, }
 {
-    backpackInstance := new(ItemInstance)
-    backpackInstance.definition = &reg.items["SPACER_DUFFEL"]
-    backpackInstance.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
+    backpackInstance, _ := MakeContainerInstance(&reg.items["SPACER_DUFFEL"], instanceReg, debug)
 
     rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug, 0, 1)
 
@@ -20,15 +16,14 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
 
     canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug, 6, 1)
 
-    backpack_data := backpackInstance.data.(ContainerInstanceData)
-    append_elem(&backpack_data.items, instanceReg.items[sword_instance])
-    append_elem(&backpack_data.items, instanceReg.items[rifle_instance])
-    append_elem(&backpack_data.items, instanceReg.items[knife_instance])
-    append_elem(&backpack_data.items, instanceReg.items[canteen_instance])
-    backpackInstance.data = backpack_data
+
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[rifle_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[sword_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[knife_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[canteen_instance])
 
     return{
-        backpackInstance
+        backpackInstance = instanceReg.items[backpackInstance],
     }
 }
 
@@ -166,7 +161,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     AddItemRegistry(registry, utilityBelt, debug)
 }
 
-TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> ^Character {
+TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
@@ -174,22 +169,11 @@ TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
     char.equipment.slots[.Backpack] = backpack
 
-    beltInstance := new(ItemInstance)
-    beltInstance.definition = &reg.items["UTILITY_BELT"]
-    beltInstance.id = 101
-    beltInstance.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
+    belt1ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
+    belt2ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
 
-    beltInstance2 := new(ItemInstance)
-    beltInstance2.definition = &reg.items["UTILITY_BELT"]
-    beltInstance2.id = 102
-    beltInstance2.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
-
-    char.equipment.slots[.Belt] = beltInstance
-    char.equipment.slots[.Armor] = beltInstance2
+    char.equipment.slots[.Belt] = instanceReg.items[belt1ID]
+    char.equipment.slots[.Armor] = instanceReg.items[belt2ID]
 
     return char
 }

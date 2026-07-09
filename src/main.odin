@@ -7,7 +7,6 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 import st "core/state"
-import fmt "core:fmt"
 
 main :: proc()
 {
@@ -27,15 +26,10 @@ main :: proc()
 
     inv.TestRegistry(&state.ItemDefinitionRegistry, state.debug)
     items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
-    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry)
+    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
     defer delete(state.textFields)
     defer delete(state.ItemDefinitionRegistry.items)
     defer inv.DeleteItemInstanceRegistry(&state.ItemInstanceRegistry)
-
-    fmt.println(state.character.equipment.slots[.Backpack].data.(inv.ContainerInstanceData))
-    for item in state.character.equipment.slots[.Backpack].data.(inv.ContainerInstanceData).items {
-        fmt.println(item.definition.id, item.pos_x, item.pos_y)
-    }
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
