@@ -3,7 +3,7 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry) -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> struct{
     backpack: ^ItemInstance,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
@@ -17,12 +17,12 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
         items = make([dynamic]^ItemInstance, context.allocator),
     }
 
-    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg)
+    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug)
     rifle_instance.pos_y = 1
 
-    sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg)
+    sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg, debug)
 
-    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg)
+    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug)
     knife_instance.pos_x = 5
 
     canteen_instance := new(ItemInstance)
@@ -47,7 +47,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
     }
 }
 
-TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -173,23 +173,12 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
     1,
     ContainerSubCategory.Belt)
 
-    ok := AddItemRegistry(registry, rapier)
-    fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, rifle)
-    fmt.println("Added rifle to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, knife)
-    fmt.println("Added knife to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, canteen)
-    fmt.println("Added canteen to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, spacerDuffel)
-    fmt.println("Added spacer duffel to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, utilityBelt)
-    fmt.println("Added utility belt to registry:", ok.success, "Error:", ok.message)
+    AddItemRegistry(registry, rapier, debug)
+    AddItemRegistry(registry, rifle, debug)
+    AddItemRegistry(registry, knife, debug)
+    AddItemRegistry(registry, canteen, debug)
+    AddItemRegistry(registry, spacerDuffel, debug)
+    AddItemRegistry(registry, utilityBelt, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> ^Character {

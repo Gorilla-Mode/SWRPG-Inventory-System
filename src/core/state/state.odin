@@ -13,11 +13,11 @@ state :: struct{
     page:          page,
     textFields:    map[textField]textFieldState,
     catalog:       catalogState,
+    debug:         bool,
 
     character:               ^inv.Character,
     ItemDefinitionRegistry:  inv.ItemDefinitionRegistry,
     ItemInstanceRegistry:    inv.ItemInstanceRegistry,
-
 }
 
 grab :: struct{

@@ -20,8 +20,10 @@ main :: proc()
 
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
     state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
-    inv.TestRegistry(&state.ItemDefinitionRegistry)
-    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry)
+    state.debug = true
+
+    inv.TestRegistry(&state.ItemDefinitionRegistry, state.debug)
+    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
     state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry)
     defer delete(state.textFields)
     defer delete(state.ItemDefinitionRegistry.items)

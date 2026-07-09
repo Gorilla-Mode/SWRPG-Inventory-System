@@ -1,8 +1,5 @@
 ﻿package inventory
 
-import m "core:math/rand"
-import fmt "core:fmt"
-
 MakeItemBase :: proc(
     id: string,
     name: string,
@@ -128,41 +125,4 @@ MakeItemContainerGrid :: proc(baseItem: Item,
     }
 
     return container, ok
-}
-
-GenerateInstanceID :: proc(reg: ^ItemInstanceRegistry, depth: u16 = 0) -> u64 {
-    if depth > 100 {
-        panic("Failed to generate unique instance ID after 100 attempts")
-    }
-
-    id : u64 = m.uint64()
-
-    if id in reg.items {
-        return GenerateInstanceID(reg, depth + 1)
-    }
-
-    return id
-}
-
-MakeWeaponInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry) -> (^ItemInstance, InstanceError) {
-    ok := CheckWeaponItemInstance(definition)
-    if !ok.success {
-        return nil, ok
-    }
-
-    id: u64 = GenerateInstanceID(reg)
-
-    instance := ItemInstance{
-        id = id,
-        definition = definition,
-        rotated = false,
-        data = WeaponInstanceData{
-            attachments = make([dynamic]^ItemInstance)
-        },
-    }
-
-    reg.items[instance.id] = instance
-    fmt.println("Created instance of weapon ID:", definition.id, "\n\twith instance ID:", instance.id)
-
-    return &reg.items[id], ok
 }
