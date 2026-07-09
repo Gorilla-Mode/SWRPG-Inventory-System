@@ -126,3 +126,25 @@ MakeItemContainerGrid :: proc(baseItem: Item,
 
     return container, ok
 }
+
+MakeWeaponInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry) -> ItemInstance {
+    _, ok := definition.data.(WeaponData)
+    if !ok {
+        panic("Item definition is not a weapon")
+    }
+
+    id: u64 = 100 //TODO: Generate unique ID
+
+    instance := ItemInstance{
+        id = id,
+        definition = definition,
+        rotated = false,
+        data = WeaponInstanceData{
+            attachments = make([dynamic]^ItemInstance)
+        },
+    }
+
+    reg.items[instance.id] = instance
+
+    return instance
+}

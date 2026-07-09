@@ -3,7 +3,7 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct{
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry) -> struct{
     backpack: ^ItemInstance,
     sword_instance: ^ItemInstance,
     rifle_instance: ^ItemInstance,
@@ -17,12 +17,9 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct
         items = make([dynamic]^ItemInstance, context.allocator),
     }
 
-    rifle_instance := new(ItemInstance)
-    rifle_instance.definition = &reg.items["RIFLE"]
-    rifle_instance.pos_x = 0
+    MakeWeaponInstance(&reg.items["RIFLE"], instanceReg)
+    rifle_instance := &instanceReg.items[100]
     rifle_instance.pos_y = 1
-    rifle_instance.id = 1
-    rifle_instance.rotated = false
 
     sword_instance := new(ItemInstance)
     sword_instance.definition = &reg.items["RAPIER"]
@@ -47,7 +44,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct
 
     backpack_data := backpackInstance.data.(ContainerInstanceData)
     append_elem(&backpack_data.items, sword_instance)
-    append_elem(&backpack_data.items, rifle_instance)
+    append_elem(&backpack_data.items, &instanceReg.items[100])
     append_elem(&backpack_data.items, knife_instance)
     append_elem(&backpack_data.items, canteen_instance)
     backpackInstance.data = backpack_data
@@ -55,7 +52,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct
     return{
         backpackInstance,
         sword_instance,
-        rifle_instance,
+        &instanceReg.items[100],
         backpackInstance
     }
 }
