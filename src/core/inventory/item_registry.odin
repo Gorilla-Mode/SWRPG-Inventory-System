@@ -4,12 +4,13 @@ import fmt "core:fmt"
 import m "core:math/rand"
 import dbug "../debug"
 
+//TODO: Consider taking pointers or some other ds, can fuck memory if map resizes
 ItemDefinitionRegistry :: struct{
     items: map[string]Item
 }
 
 ItemInstanceRegistry :: struct{
-    items: map[u64]ItemInstance
+    items: map[u64]^ItemInstance
 }
 
 RegistryError :: struct{
@@ -84,10 +85,18 @@ AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, item: Item, debug: bool) -
 
 MakeItemInstanceRegistry :: proc() -> ItemInstanceRegistry {
     reg := ItemInstanceRegistry{
-        items = make(map[u64]ItemInstance)
+        items = make(map[u64]^ItemInstance, context.allocator,)
     }
 
     return reg
+}
+
+DeleteItemInstanceRegistry :: proc(reg: ^ItemInstanceRegistry) {
+    for _, instance in reg.items {
+        free(instance)
+    }
+
+    delete(reg.items)
 }
 
 GenerateInstanceID :: proc(reg: ^ItemInstanceRegistry, debug: bool, depth: u16 = 0) -> u64 {
@@ -108,54 +117,55 @@ GenerateInstanceID :: proc(reg: ^ItemInstanceRegistry, debug: bool, depth: u16 =
     return id
 }
 
-MakeWeaponInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool) -> (^ItemInstance, InstanceError) {
+MakeWeaponInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool, posX: i16 = 0, posY: i16 = 0) -> (u64, InstanceError) {
     ok := CheckWeaponItemInstance(definition)
     if !ok.success {
         if debug do dbug.Warn(fmt.tprint("Failed to create weapon instance for item definition:", definition.id,
         "\n\t\t", ok.message))
-        return nil, ok
+        return 0, ok
     }
 
     id: u64 = GenerateInstanceID(reg, debug)
 
-    instance := ItemInstance{
-        id = id,
-        definition = definition,
-        rotated = false,
-        data = WeaponInstanceData{
-            attachments = make([dynamic]^ItemInstance)
-        },
+    instance := new(ItemInstance)
+    instance.id = id
+    instance.definition = definition
+    instance.data = WeaponInstanceData{
+        attachments = make([dynamic]^ItemInstance, context.allocator),
     }
+    instance.pos_x = posX
+    instance.pos_y = posY
 
     reg.items[instance.id] = instance
     if debug do dbug.Debug(fmt.tprint("Created weapon instance for item definition:", definition.id,
     "\n\t\tInstance ID:", instance.id))
 
-    return &reg.items[id], ok
+    return id, ok
 }
 
-MakeGearInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool) -> (^ItemInstance, InstanceError) {
+MakeGearInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool, posX: i16 = 0, posY: i16 = 0) -> (u64, InstanceError) {
     ok := CheckGearItemInstance(definition)
     if !ok.success {
         if debug do dbug.Warn(fmt.tprint("Failed to create gear instance for item definition:", definition.id,
         "\n\t\t", ok.message))
-        return nil, ok
+        return 0, ok
     }
 
     id: u64 = GenerateInstanceID(reg, debug)
 
-    instance := ItemInstance{
-        id = id,
-        definition = definition,
-        rotated = false,
-        data = GearInstanceData{
-            attachments = make([dynamic]^ItemInstance)
-        },
+    instance := new(ItemInstance)
+    instance.id = id
+    instance.definition = definition
+    instance.rotated = false
+    instance.pos_x = posX
+    instance.pos_y = posY
+    instance.data = GearInstanceData{
+        attachments = make([dynamic]^ItemInstance)
     }
 
     reg.items[instance.id] = instance
     if debug do dbug.Debug(fmt.tprint("Created gear instance for item definition:", definition.id,
     "\n\t\tInstance ID:", instance.id))
 
-    return &reg.items[id], ok
+    return id, ok
 }

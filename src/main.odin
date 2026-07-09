@@ -7,10 +7,12 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 import st "core/state"
+import fmt "core:fmt"
 
 main :: proc()
 {
     defer rl.CloseWindow()
+    defer free_all(context.allocator)
 
     style := ui.style{
         grid = {
@@ -20,6 +22,7 @@ main :: proc()
 
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
     state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
+    state.ItemInstanceRegistry = inv.MakeItemInstanceRegistry()
     state.debug = true
 
     inv.TestRegistry(&state.ItemDefinitionRegistry, state.debug)
@@ -27,6 +30,12 @@ main :: proc()
     state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry)
     defer delete(state.textFields)
     defer delete(state.ItemDefinitionRegistry.items)
+    defer inv.DeleteItemInstanceRegistry(&state.ItemInstanceRegistry)
+
+    fmt.println(state.character.equipment.slots[.Backpack].data.(inv.ContainerInstanceData))
+    for item in state.character.equipment.slots[.Backpack].data.(inv.ContainerInstanceData).items {
+        fmt.println(item.definition.id, item.pos_x, item.pos_y)
+    }
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -58,7 +67,7 @@ main :: proc()
         #partial switch state.page {
         case .Inventory:
             app.InputMoveItem(&state,
-            items.backpack,
+            items.backpackInstance,
             style.grid.origin_x,
             style.grid.origin_y,
             style.grid.cell_size)
@@ -70,7 +79,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        v.DrawUI(&state, &style, items.backpack)
+        v.DrawUI(&state, &style, items.backpackInstance)
 
         rl.EndDrawing()
     }

@@ -4,42 +4,30 @@ import str "core:strings"
 import fmt "core:fmt"
 
 TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> struct{
-    backpack: ^ItemInstance,
-    sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance,
-    backpackInstance: ^ItemInstance}
+    backpackInstance: ^ItemInstance, }
 {
-
     backpackInstance := new(ItemInstance)
     backpackInstance.definition = &reg.items["SPACER_DUFFEL"]
-    backpackInstance.id = 100
     backpackInstance.data = ContainerInstanceData{
         items = make([dynamic]^ItemInstance, context.allocator),
     }
 
-    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug)
-    rifle_instance.pos_y = 1
+    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug, 0, 1)
 
     sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg, debug)
 
-    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug)
-    knife_instance.pos_x = 5
+    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug, 5)
 
-    canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug)
-    canteen_instance.pos_x = 6
-    canteen_instance.pos_y = 1
+    canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug, 6, 1)
 
     backpack_data := backpackInstance.data.(ContainerInstanceData)
-    append_elem(&backpack_data.items, sword_instance)
-    append_elem(&backpack_data.items, rifle_instance)
-    append_elem(&backpack_data.items, knife_instance)
-    append_elem(&backpack_data.items, canteen_instance)
+    append_elem(&backpack_data.items, instanceReg.items[sword_instance])
+    append_elem(&backpack_data.items, instanceReg.items[rifle_instance])
+    append_elem(&backpack_data.items, instanceReg.items[knife_instance])
+    append_elem(&backpack_data.items, instanceReg.items[canteen_instance])
     backpackInstance.data = backpack_data
 
     return{
-        backpackInstance,
-        sword_instance,
-        rifle_instance,
         backpackInstance
     }
 }
