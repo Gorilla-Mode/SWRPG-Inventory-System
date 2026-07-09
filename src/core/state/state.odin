@@ -11,7 +11,7 @@ state :: struct{
     ghost:         ghost,
     window:        windowState,
     page:          page,
-    textFields:   map[textField]textFieldState,
+    textFields:    map[textField]textFieldState,
     catalog:       catalogState,
 
     character:               ^inv.Character,

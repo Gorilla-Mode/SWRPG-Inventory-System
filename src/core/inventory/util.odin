@@ -17,23 +17,13 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
         items = make([dynamic]^ItemInstance, context.allocator),
     }
 
-    MakeWeaponInstance(&reg.items["RIFLE"], instanceReg)
-    rifle_instance := &instanceReg.items[100]
+    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg)
     rifle_instance.pos_y = 1
 
-    sword_instance := new(ItemInstance)
-    sword_instance.definition = &reg.items["RAPIER"]
-    sword_instance.pos_x = 0
-    sword_instance.pos_y = 0
-    sword_instance.id = 2
-    sword_instance.rotated = false
+    sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg)
 
-    knife_instance := new(ItemInstance)
-    knife_instance.definition = &reg.items["KNIFE"]
+    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg)
     knife_instance.pos_x = 5
-    knife_instance.pos_y = 0
-    knife_instance.id = 3
-    knife_instance.rotated = false
 
     canteen_instance := new(ItemInstance)
     canteen_instance.definition = &reg.items["CANTEEN"]
@@ -44,7 +34,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
 
     backpack_data := backpackInstance.data.(ContainerInstanceData)
     append_elem(&backpack_data.items, sword_instance)
-    append_elem(&backpack_data.items, &instanceReg.items[100])
+    append_elem(&backpack_data.items, rifle_instance)
     append_elem(&backpack_data.items, knife_instance)
     append_elem(&backpack_data.items, canteen_instance)
     backpackInstance.data = backpack_data
@@ -52,7 +42,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
     return{
         backpackInstance,
         sword_instance,
-        &instanceReg.items[100],
+        rifle_instance,
         backpackInstance
     }
 }
