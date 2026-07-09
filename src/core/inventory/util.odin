@@ -25,12 +25,9 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
     knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug)
     knife_instance.pos_x = 5
 
-    canteen_instance := new(ItemInstance)
-    canteen_instance.definition = &reg.items["CANTEEN"]
+    canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug)
     canteen_instance.pos_x = 6
     canteen_instance.pos_y = 1
-    canteen_instance.id = 4
-    canteen_instance.rotated = false
 
     backpack_data := backpackInstance.data.(ContainerInstanceData)
     append_elem(&backpack_data.items, sword_instance)

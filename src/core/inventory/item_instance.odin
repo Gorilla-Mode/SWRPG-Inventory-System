@@ -12,7 +12,9 @@ ItemInstance :: struct{
 
 InstanceData :: union{
     WeaponInstanceData,
-    ContainerInstanceData
+    ContainerInstanceData,
+    ArmorInstanceData,
+    GearInstanceData,
 }
 
 WeaponInstanceData :: struct{
@@ -21,6 +23,14 @@ WeaponInstanceData :: struct{
 
 ContainerInstanceData :: struct{
     items: [dynamic]^ItemInstance,
+}
+
+ArmorInstanceData :: struct{
+    attachments: [dynamic]^ItemInstance,
+}
+
+GearInstanceData :: struct{
+    attachments: [dynamic]^ItemInstance,
 }
 
 ItemGetWidth :: proc(instance: ^ItemInstance) -> i16 {

@@ -133,3 +133,29 @@ MakeWeaponInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug:
 
     return &reg.items[id], ok
 }
+
+MakeGearInstance :: proc(definition: ^Item, reg: ^ItemInstanceRegistry, debug: bool) -> (^ItemInstance, InstanceError) {
+    ok := CheckGearItemInstance(definition)
+    if !ok.success {
+        if debug do dbug.Warn(fmt.tprint("Failed to create gear instance for item definition:", definition.id,
+        "\n\t\t", ok.message))
+        return nil, ok
+    }
+
+    id: u64 = GenerateInstanceID(reg, debug)
+
+    instance := ItemInstance{
+        id = id,
+        definition = definition,
+        rotated = false,
+        data = GearInstanceData{
+            attachments = make([dynamic]^ItemInstance)
+        },
+    }
+
+    reg.items[instance.id] = instance
+    if debug do dbug.Debug(fmt.tprint("Created gear instance for item definition:", definition.id,
+    "\n\t\tInstance ID:", instance.id))
+
+    return &reg.items[id], ok
+}

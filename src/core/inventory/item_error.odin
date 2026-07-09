@@ -181,3 +181,12 @@ CheckWeaponItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
 
     return InstanceError{ true, .Success, "Success" }
 }
+
+CheckGearItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
+    _, ok := itemDefinition.data.(GearData)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Item definition is not a gear item" }
+    }
+
+    return InstanceError{ true, .Success, "Success" }
+}
