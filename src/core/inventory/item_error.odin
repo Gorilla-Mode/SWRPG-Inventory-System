@@ -24,6 +24,12 @@ ContainerError :: struct{
     message: string,
 }
 
+InstanceError :: struct{
+    success: bool,
+    error: InstanceErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -47,6 +53,11 @@ GearErrors :: enum{
 }
 
 ContainerErrors :: enum{
+    Success,
+    InvalidData,
+}
+
+InstanceErrors :: enum{
     Success,
     InvalidData,
 }
@@ -160,4 +171,36 @@ CheckContainerGridItemItem :: proc(item: Item) -> (ContainerError) {
     }
 
     return CheckContainerGridItem(containerGrid.width, containerGrid.height)
+}
+
+CheckWeaponItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
+    _, ok := itemDefinition.data.(WeaponData)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Item definition is not a weapon" }
+    }
+
+    return InstanceError{ true, .Success, "Success" }
+}
+
+CheckGearItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
+    _, ok := itemDefinition.data.(GearData)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Item definition is not a gear item" }
+    }
+
+    return InstanceError{ true, .Success, "Success" }
+}
+
+CheckContainerGridItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
+    containerData, ok := itemDefinition.data.(ContainerData)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Item definition is not a container" }
+    }
+
+    _, ok = containerData.containerDef.storage.(ContainerGrid)
+    if !ok {
+        return InstanceError{ false, .InvalidData, "Container storage is not a grid" }
+    }
+
+    return InstanceError{ true, .Success, "Success" }
 }

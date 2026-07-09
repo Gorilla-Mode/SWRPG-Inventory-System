@@ -3,64 +3,31 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry) -> struct{
-    backpack: ^ItemInstance,
-    sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance,
-    backpackInstance: ^ItemInstance}
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> struct{
+    backpackInstance: ^ItemInstance, }
 {
+    backpackInstance, _ := MakeContainerInstance(&reg.items["SPACER_DUFFEL"], instanceReg, debug)
 
-    backpackInstance := new(ItemInstance)
-    backpackInstance.definition = &reg.items["SPACER_DUFFEL"]
-    backpackInstance.id = 100
-    backpackInstance.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
+    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug, 0, 1)
 
-    rifle_instance := new(ItemInstance)
-    rifle_instance.definition = &reg.items["RIFLE"]
-    rifle_instance.pos_x = 0
-    rifle_instance.pos_y = 1
-    rifle_instance.id = 1
-    rifle_instance.rotated = false
+    sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg, debug)
 
-    sword_instance := new(ItemInstance)
-    sword_instance.definition = &reg.items["RAPIER"]
-    sword_instance.pos_x = 0
-    sword_instance.pos_y = 0
-    sword_instance.id = 2
-    sword_instance.rotated = false
+    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug, 5)
 
-    knife_instance := new(ItemInstance)
-    knife_instance.definition = &reg.items["KNIFE"]
-    knife_instance.pos_x = 5
-    knife_instance.pos_y = 0
-    knife_instance.id = 3
-    knife_instance.rotated = false
+    canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug, 6, 1)
 
-    canteen_instance := new(ItemInstance)
-    canteen_instance.definition = &reg.items["CANTEEN"]
-    canteen_instance.pos_x = 6
-    canteen_instance.pos_y = 1
-    canteen_instance.id = 4
-    canteen_instance.rotated = false
 
-    backpack_data := backpackInstance.data.(ContainerInstanceData)
-    append_elem(&backpack_data.items, sword_instance)
-    append_elem(&backpack_data.items, rifle_instance)
-    append_elem(&backpack_data.items, knife_instance)
-    append_elem(&backpack_data.items, canteen_instance)
-    backpackInstance.data = backpack_data
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[rifle_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[sword_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[knife_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[canteen_instance])
 
     return{
-        backpackInstance,
-        sword_instance,
-        rifle_instance,
-        backpackInstance
+        backpackInstance = instanceReg.items[backpackInstance],
     }
 }
 
-TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -186,26 +153,15 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry){
     1,
     ContainerSubCategory.Belt)
 
-    ok := AddItemRegistry(registry, rapier)
-    fmt.println("Added rapier to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, rifle)
-    fmt.println("Added rifle to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, knife)
-    fmt.println("Added knife to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, canteen)
-    fmt.println("Added canteen to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, spacerDuffel)
-    fmt.println("Added spacer duffel to registry:", ok.success, "Error:", ok.message)
-
-    ok = AddItemRegistry(registry, utilityBelt)
-    fmt.println("Added utility belt to registry:", ok.success, "Error:", ok.message)
+    AddItemRegistry(registry, rapier, debug)
+    AddItemRegistry(registry, rifle, debug)
+    AddItemRegistry(registry, knife, debug)
+    AddItemRegistry(registry, canteen, debug)
+    AddItemRegistry(registry, spacerDuffel, debug)
+    AddItemRegistry(registry, utilityBelt, debug)
 }
 
-TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> ^Character {
+TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
@@ -213,22 +169,11 @@ TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry) -> 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
     char.equipment.slots[.Backpack] = backpack
 
-    beltInstance := new(ItemInstance)
-    beltInstance.definition = &reg.items["UTILITY_BELT"]
-    beltInstance.id = 101
-    beltInstance.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
+    belt1ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
+    belt2ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
 
-    beltInstance2 := new(ItemInstance)
-    beltInstance2.definition = &reg.items["UTILITY_BELT"]
-    beltInstance2.id = 102
-    beltInstance2.data = ContainerInstanceData{
-        items = make([dynamic]^ItemInstance, context.allocator),
-    }
-
-    char.equipment.slots[.Belt] = beltInstance
-    char.equipment.slots[.Armor] = beltInstance2
+    char.equipment.slots[.Belt] = instanceReg.items[belt1ID]
+    char.equipment.slots[.Armor] = instanceReg.items[belt2ID]
 
     return char
 }
