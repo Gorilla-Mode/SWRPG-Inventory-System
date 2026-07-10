@@ -15,7 +15,7 @@ TextField :: struct {
     max_length: i32
 }
 
-UpdateTextField :: proc(field: ^TextField){
+UpdateTextField :: proc(field: ^TextField) -> bool{
     mousePos := rl.GetMousePosition()
     dt := rl.GetFrameTime()
 
@@ -23,12 +23,12 @@ UpdateTextField :: proc(field: ^TextField){
     {
         if rl.CheckCollisionPointRec(mousePos, field.rect_clear) {
             TextFieldClear(field)
-            return
+            return true
         }
         field.state.is_active = rl.CheckCollisionPointRec(mousePos, field.rect)
     }
 
-    if !field.state.is_active do return
+    if !field.state.is_active do return false
 
     for {
         ch := rl.GetCharPressed()
@@ -46,6 +46,7 @@ UpdateTextField :: proc(field: ^TextField){
     }
 
     DeleteCharsTextField(field, dt)
+    return true
 }
 
 DeleteCharTextField :: proc(field: ^TextField){

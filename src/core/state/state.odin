@@ -54,6 +54,8 @@ textFieldState :: struct{
 catalogState :: struct{
     category: inv.ItemCategory,
     sub_category: subCategory,
+
+    scroll_offset: f32,
 }
 
 NoSubCategory :: enum {
