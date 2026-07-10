@@ -115,7 +115,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     2,
     style.colors.text)
 
-    comp.UpdateTextField(&searchBar)
+    if comp.UpdateTextField(&searchBar) do state.catalog.scroll_offset = 0
     comp.DrawTextField(&searchBar, style, "Search catalog...")
 
     rl.DrawRectangleRec(categoryFilterRect, style.colors.surface)
@@ -150,26 +150,28 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
 
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
-    mousePos := rl.GetMousePosition()
+    mousePos:= rl.GetMousePosition()
+    entryHeight: f32 = 100
 
     bounds := rl.Rectangle{
         x = layout.left.origin_x + app.PADDING,
         y = posY,
         width = layout.left.width - app.PADDING,
-        height = app.PADDING - paddingElement,
+        height = app.PADDING + 2 * paddingElement,
     }
 
+    rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
     for item in state.ItemDefinitionRegistry.items {
-        comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, 60, rl.Vector2{app.PADDING + paddingElement, posY})
-        posY += 60 + paddingElement
-        bounds.height += 60 + paddingElement
+        comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, entryHeight, rl.Vector2{app.PADDING + paddingElement, posY}, mousePos)
+        posY += entryHeight + paddingElement
+        bounds.height += entryHeight - paddingElement
     }
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
         state.catalog.scroll_offset -= rl.GetMouseWheelMove() * 15
-        if state.catalog.scroll_offset < 0 do state.catalog.scroll_offset = 0
-
+        if state.catalog.scroll_offset > 0 do state.catalog.scroll_offset = 0
+        if (-1 * state.catalog.scroll_offset + 10) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - 10)
     }
 
-    rl.DrawRectangleRec(bounds, rl.Color{0, 0, 0, 128})
+    rl.EndScissorMode()
 }
