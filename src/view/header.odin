@@ -24,7 +24,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Inventory,
     style.icons[ui.Icons.page_inventory]
     )
 
@@ -33,7 +32,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Debug,
     style.icons[ui.Icons.page_debug]
     )
 
@@ -42,7 +40,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Character,
     style.icons[ui.Icons.page_character]
     )
 
@@ -51,7 +48,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Catalog,
     style.icons[ui.Icons.page_catalog]
     )
 
@@ -60,7 +56,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Shops,
     style.icons[ui.Icons.page_shop]
     )
 
@@ -69,7 +64,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Vehicles,
     style.icons[ui.Icons.page_vehicle]
     )
 
@@ -78,7 +72,6 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     rl.Vector2{f32(rl.GetScreenWidth() / 2), header_y / 2},
     buttonWidth,
     buttonHeight,
-    st.page.Bases,
     style.icons[ui.Icons.page_bases]
     )
 
