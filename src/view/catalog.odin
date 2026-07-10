@@ -35,11 +35,12 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         height = f32(state.window.height) - layout.top_y
     }
 
-    DrawCatalogExplorer(state, style, layout, paddingElement, rect_left)
     DrawCatalogItemStat(state, style, layout, rect_right)
+    explorerBounds := DrawCatalogExplorer(state, style, layout, paddingElement, rect_left)
+    DrawCatalogItemResults(state, style, layout, paddingElement, explorerBounds, rect_left)
 }
 
-DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) {
+DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) -> rl.Rectangle {
     f_bg_color      := style.colors.surface
     f_hover_color   := style.colors.secondary_hover
     f_active_color  := style.colors.success
@@ -126,6 +127,15 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
     DrawCatalogButtons(state, style, &buttons, f_bg_color, f_icon_color, f_icon_bg_color, f_hover_color, f_active_color)
+
+    bounds := rl.Rectangle{
+        x = layout.left.origin_x + app.PADDING,
+        y = layout.top_y + searchBar.rect.height + (paddingElement * 2),
+        width = layout.left.width - app.PADDING,
+        height = ((paddingElement * 3) + categoryFilterRect.height + categorySubFilterRect.height + buttonHeight + buttonSubHeight),
+    }
+
+    return bounds
 }
 
 DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
@@ -136,4 +146,30 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
     f32(ui.font_size.header),
     2,
     style.colors.text)
+}
+
+DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
+    posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
+    mousePos := rl.GetMousePosition()
+
+    bounds := rl.Rectangle{
+        x = layout.left.origin_x + app.PADDING,
+        y = posY,
+        width = layout.left.width - app.PADDING,
+        height = app.PADDING - paddingElement,
+    }
+
+    for item in state.ItemDefinitionRegistry.items {
+        comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, 60, rl.Vector2{app.PADDING + paddingElement, posY})
+        posY += 60 + paddingElement
+        bounds.height += 60 + paddingElement
+    }
+
+    if rl.CheckCollisionPointRec(mousePos, leftRect) {
+        state.catalog.scroll_offset -= rl.GetMouseWheelMove() * 15
+        if state.catalog.scroll_offset < 0 do state.catalog.scroll_offset = 0
+
+    }
+
+    rl.DrawRectangleRec(bounds, rl.Color{0, 0, 0, 128})
 }

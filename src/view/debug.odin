@@ -21,6 +21,6 @@ DrawDebug :: proc(state: ^st.state, style: ^ui.style) {
     
     if comp.DrawButton(&debugButton, style, state.debug == true) {
         state.debug = !state.debug
-        dbug.Debug(fmt.tprint("Debug mode: ", state.debug))
+        dbug.Debug(fmt.tprint("Debug mode:", state.debug))
     }
 }
