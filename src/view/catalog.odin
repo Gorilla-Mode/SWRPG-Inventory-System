@@ -163,7 +163,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         x = layout.left.origin_x + app.PADDING,
         y = posY,
         width = layout.left.width - app.PADDING,
-        height = app.PADDING + 2 * paddingElement,
+        height = paddingElement,
     }
 
     rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
@@ -207,13 +207,13 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         }
 
         posY += entryHeight + paddingElement
-        bounds.height += entryHeight - paddingElement
+        bounds.height += entryHeight + paddingElement
     }
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
         state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
         if state.catalog.scroll_offset > 0 do state.catalog.scroll_offset = 0
-        if (-1 * state.catalog.scroll_offset + 10) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - 10)
+        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
     }
 
     rl.EndScissorMode()
