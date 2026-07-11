@@ -76,7 +76,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     WeaponSubCategory.Rifle)
 
     knifeBase, _ := MakeItemBase("KNIFE",
-    "Vibroknife",
+    "Vibro Knife",
     "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks.",
     3,
     1,
