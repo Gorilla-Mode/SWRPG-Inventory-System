@@ -4,6 +4,8 @@ import ui "../ui"
 import app "../core/app"
 import rl "vendor:raylib"
 import comp "../ui/component"
+import inv "../core/inventory"
+
 
 CatalogButton :: struct {
     button: comp.Button,
@@ -162,6 +164,28 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 
     rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
     for item in state.ItemDefinitionRegistry.items {
+        if state.ItemDefinitionRegistry.items[item].category != state.catalog.category{
+            continue
+        }
+
+        if state.catalog.sub_category != st.NoSubCategory.None {
+            switch data in state.ItemDefinitionRegistry.items[item].data {
+                case inv.WeaponData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+                case inv.ContainerData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+                case inv.GearData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+
+            }
+        }
+
         if comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, entryHeight, rl.Vector2{app.PADDING + paddingElement, posY}, mousePos, state.catalog.selected_item == &state.ItemDefinitionRegistry.items[item]) {
             state.catalog.selected_item = &state.ItemDefinitionRegistry.items[item]
         }
