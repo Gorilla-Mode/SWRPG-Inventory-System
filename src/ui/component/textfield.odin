@@ -86,7 +86,7 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     outlineCol := field.state.is_active ? style.colors.success : style.colors.surface
     textPos := rl.Vector2{field.rect.x + field.rect_image.width + iconPadding, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
     textCol := style.colors.text
-    text := field.state.buffer_length > 0 ? TextFieldText(field) : temp
+    text := field.state.buffer_length > 0 ? TextFieldToCString(field) : temp
 
     iconSearchPos := ui.IconGetCenterPos(field.rect_image, field.rect_image.height - iconPadding / 2)
     iconClearPos := ui.IconGetCenterPos(field.rect_clear, field.rect_clear.height - iconPadding / 2)
@@ -147,8 +147,20 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     }
 }
 
-TextFieldText :: proc(field: ^TextField) -> cstring {
+TextFieldToCString :: proc(field: ^TextField) -> cstring {
     return str.clone_to_cstring(string(field.state.buffer[:]), context.temp_allocator)
+}
+
+TextFieldToString :: proc(field: ^TextField) -> string {
+    return string(field.state.buffer[:])
+}
+
+TextBufferToString :: proc(buffer: [dynamic]u8) -> string {
+    return string(buffer[:])
+}
+
+TextBufferToCString :: proc(buffer: [dynamic]u8) -> cstring {
+    return str.clone_to_cstring(string(buffer[:]), context.temp_allocator)
 }
 
 TextFieldClear :: proc(field: ^TextField){

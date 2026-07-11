@@ -334,6 +334,7 @@ DrawCatalogButtons :: proc(
             state.catalog.category = category
             state.catalog.sub_category = st.NoSubCategory.None
             state.catalog.scroll_offset = 0
+            state.catalog.selected_item = nil
         }
     }
     subButtons: [dynamic]CatalogButton
@@ -366,10 +367,10 @@ DrawCatalogButtons :: proc(
         ) {
             if state.catalog.sub_category == subButtons[i].value {
                 state.catalog.sub_category = st.NoSubCategory.None
-                state.catalog.scroll_offset = 0
             } else {
                 state.catalog.sub_category = subButtons[i].value
                 state.catalog.scroll_offset = 0
+                state.catalog.selected_item = nil
             }
         }
     }

@@ -23,6 +23,7 @@ main :: proc()
     state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
     state.ItemInstanceRegistry = inv.MakeItemInstanceRegistry()
     state.debug = true
+    state.catalog.sub_category = st.NoSubCategory.None
 
     inv.TestRegistry(&state.ItemDefinitionRegistry, state.debug)
     items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)

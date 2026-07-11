@@ -1,9 +1,13 @@
 ﻿package view
+
 import st "../core/state"
 import ui "../ui"
 import app "../core/app"
 import rl "vendor:raylib"
 import comp "../ui/component"
+import inv "../core/inventory"
+import str "core:strings"
+
 
 CatalogButton :: struct {
     button: comp.Button,
@@ -152,25 +156,64 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
     entryHeight: f32 = 100
+    queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
+    queryString = str.to_lower(queryString)
 
     bounds := rl.Rectangle{
         x = layout.left.origin_x + app.PADDING,
         y = posY,
         width = layout.left.width - app.PADDING,
-        height = app.PADDING + 2 * paddingElement,
+        height = paddingElement,
     }
 
     rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
     for item in state.ItemDefinitionRegistry.items {
-        comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, entryHeight, rl.Vector2{app.PADDING + paddingElement, posY}, mousePos)
+        itemName := str.to_lower(state.ItemDefinitionRegistry.items[item].name)
+
+        if state.ItemDefinitionRegistry.items[item].category != state.catalog.category{
+            continue
+        }
+
+        if state.catalog.sub_category != st.NoSubCategory.None {
+            switch data in state.ItemDefinitionRegistry.items[item].data {
+                case inv.WeaponData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+                case inv.ContainerData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+                case inv.GearData:
+                    if state.catalog.sub_category != data.sub_category {
+                        continue
+                    }
+
+            }
+        }
+
+        if !str.contains(itemName, queryString) && queryString != "" {
+            continue
+        }
+
+        if comp.DrawItemList(&state.ItemDefinitionRegistry.items[item],
+        style,
+        layout.left.width - app.PADDING - paddingElement * 2,
+        entryHeight,
+        rl.Vector2{app.PADDING + paddingElement,
+        posY}, mousePos,
+        state.catalog.selected_item == &state.ItemDefinitionRegistry.items[item]) {
+            state.catalog.selected_item = &state.ItemDefinitionRegistry.items[item]
+        }
+
         posY += entryHeight + paddingElement
-        bounds.height += entryHeight - paddingElement
+        bounds.height += entryHeight + paddingElement
     }
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
-        state.catalog.scroll_offset -= rl.GetMouseWheelMove() * 15
+        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
         if state.catalog.scroll_offset > 0 do state.catalog.scroll_offset = 0
-        if (-1 * state.catalog.scroll_offset + 10) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - 10)
+        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
     }
 
     rl.EndScissorMode()
