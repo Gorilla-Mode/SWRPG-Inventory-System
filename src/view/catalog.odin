@@ -162,13 +162,16 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 
     rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
     for item in state.ItemDefinitionRegistry.items {
-        comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, entryHeight, rl.Vector2{app.PADDING + paddingElement, posY}, mousePos)
+        if comp.DrawItemList(&state.ItemDefinitionRegistry.items[item], style, layout.left.width - app.PADDING - paddingElement * 2, entryHeight, rl.Vector2{app.PADDING + paddingElement, posY}, mousePos, state.catalog.selected_item == &state.ItemDefinitionRegistry.items[item]) {
+            state.catalog.selected_item = &state.ItemDefinitionRegistry.items[item]
+        }
+
         posY += entryHeight + paddingElement
         bounds.height += entryHeight - paddingElement
     }
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
-        state.catalog.scroll_offset -= rl.GetMouseWheelMove() * 15
+        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
         if state.catalog.scroll_offset > 0 do state.catalog.scroll_offset = 0
         if (-1 * state.catalog.scroll_offset + 10) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - 10)
     }

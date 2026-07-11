@@ -334,6 +334,7 @@ DrawCatalogButtons :: proc(
             state.catalog.category = category
             state.catalog.sub_category = st.NoSubCategory.None
             state.catalog.scroll_offset = 0
+            state.catalog.selected_item = nil
         }
     }
     subButtons: [dynamic]CatalogButton

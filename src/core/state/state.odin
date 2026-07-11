@@ -54,6 +54,7 @@ textFieldState :: struct{
 catalogState :: struct{
     category: inv.ItemCategory,
     sub_category: subCategory,
+    selected_item: ^inv.Item,
 
     scroll_offset: f32,
 }
