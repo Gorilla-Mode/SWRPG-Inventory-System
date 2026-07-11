@@ -155,6 +155,14 @@ TextFieldToString :: proc(field: ^TextField) -> string {
     return string(field.state.buffer[:])
 }
 
+TextBufferToString :: proc(buffer: [dynamic]u8) -> string {
+    return string(buffer[:])
+}
+
+TextBufferToCString :: proc(buffer: [dynamic]u8) -> cstring {
+    return str.clone_to_cstring(string(buffer[:]), context.temp_allocator)
+}
+
 TextFieldClear :: proc(field: ^TextField){
     resize(&field.state.buffer, 0)
     field.state.buffer_length = 0
