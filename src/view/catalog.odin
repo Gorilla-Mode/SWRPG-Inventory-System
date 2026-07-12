@@ -156,7 +156,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
     entryHeight: f32 = 100
-    keys := CatalogQueryRegistry(state)
+    keys := GetQueryRegistryKeys(state)
 
     if len(keys) == 0 do return
 
@@ -193,7 +193,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 
 }
 
-CatalogQueryRegistry :: proc(state: ^st.state) -> [dynamic]string{
+GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
     queryString = str.to_lower(queryString)
     keys: [dynamic]string = {}
