@@ -156,8 +156,9 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
     entryHeight: f32 = 100
-    queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
-    queryString = str.to_lower(queryString)
+    keys := CatalogQueryRegistry(state)
+
+    if len(keys) == 0 do return
 
     bounds := rl.Rectangle{
         x = layout.left.origin_x + app.PADDING,
@@ -167,6 +168,36 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     }
 
     rl.BeginScissorMode(i32(leftRect.x),i32(filterBounds.y + filterBounds.height + paddingElement), i32(bounds.width), i32(state.window.height))
+    defer rl.EndScissorMode()
+
+    for key in keys {
+        if comp.DrawItemList(&state.ItemDefinitionRegistry.items[key],
+        style,
+        layout.left.width - app.PADDING - paddingElement * 2,
+        entryHeight,
+        rl.Vector2{app.PADDING + paddingElement,
+        posY}, mousePos,
+        state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key]) {
+            state.catalog.selected_item = &state.ItemDefinitionRegistry.items[key]
+        }
+
+        posY += entryHeight + paddingElement
+        bounds.height += entryHeight + paddingElement
+    }
+
+    if rl.CheckCollisionPointRec(mousePos, leftRect) {
+        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
+        if state.catalog.scroll_offset >= 0 do state.catalog.scroll_offset = 0
+        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
+    }
+
+}
+
+CatalogQueryRegistry :: proc(state: ^st.state) -> [dynamic]string{
+    queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
+    queryString = str.to_lower(queryString)
+    keys: [dynamic]string = {}
+
     for item in state.ItemDefinitionRegistry.items {
         itemName := str.to_lower(state.ItemDefinitionRegistry.items[item].name)
 
@@ -176,19 +207,18 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 
         if state.catalog.sub_category != st.NoSubCategory.None {
             switch data in state.ItemDefinitionRegistry.items[item].data {
-                case inv.WeaponData:
-                    if state.catalog.sub_category != data.sub_category {
-                        continue
-                    }
-                case inv.ContainerData:
-                    if state.catalog.sub_category != data.sub_category {
-                        continue
-                    }
-                case inv.GearData:
-                    if state.catalog.sub_category != data.sub_category {
-                        continue
-                    }
-
+            case inv.WeaponData:
+                if state.catalog.sub_category != data.sub_category {
+                    continue
+                }
+            case inv.ContainerData:
+                if state.catalog.sub_category != data.sub_category {
+                    continue
+                }
+            case inv.GearData:
+                if state.catalog.sub_category != data.sub_category {
+                    continue
+                }
             }
         }
 
@@ -196,25 +226,8 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
             continue
         }
 
-        if comp.DrawItemList(&state.ItemDefinitionRegistry.items[item],
-        style,
-        layout.left.width - app.PADDING - paddingElement * 2,
-        entryHeight,
-        rl.Vector2{app.PADDING + paddingElement,
-        posY}, mousePos,
-        state.catalog.selected_item == &state.ItemDefinitionRegistry.items[item]) {
-            state.catalog.selected_item = &state.ItemDefinitionRegistry.items[item]
-        }
-
-        posY += entryHeight + paddingElement
-        bounds.height += entryHeight + paddingElement
+        append_elem(&keys, item)
     }
 
-    if rl.CheckCollisionPointRec(mousePos, leftRect) {
-        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
-        if state.catalog.scroll_offset > 0 do state.catalog.scroll_offset = 0
-        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
-    }
-
-    rl.EndScissorMode()
+    return keys
 }
