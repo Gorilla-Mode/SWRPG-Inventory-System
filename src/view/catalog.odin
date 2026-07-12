@@ -155,7 +155,7 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
-    entryHeight: f32 = 64
+    entryHeight: f32 = 68
     keys := GetQueryRegistryKeys(state)
     defer delete(keys)
 
@@ -178,7 +178,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         entryHeight,
         rl.Vector2{app.PADDING + paddingElement,
         posY}, mousePos,
-    style.icons[.economy_credit],
+    style.icons[.item_weapon_type_rifle],
         state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key]) {
             if state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key] do state.catalog.selected_item = nil
             else do state.catalog.selected_item = &state.ItemDefinitionRegistry.items[key]
