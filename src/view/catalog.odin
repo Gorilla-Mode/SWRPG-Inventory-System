@@ -190,7 +190,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
-        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
+        state.catalog.scroll_offset += rl.GetMouseWheelMove() * 30
         if state.catalog.scroll_offset >= 0 do state.catalog.scroll_offset = 0
         if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
     }
