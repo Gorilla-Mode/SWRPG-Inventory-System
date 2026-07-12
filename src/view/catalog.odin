@@ -143,7 +143,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
 }
 
 DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
-    rl.DrawRectangleRec(rect_right, style.colors.secondary_active)
+    rl.DrawRectangleRec(rect_right, style.colors.surface)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
     "Statisitcs",
     ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
@@ -155,8 +155,9 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.Cata
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
-    entryHeight: f32 = 100
+    entryHeight: f32 = 64
     keys := GetQueryRegistryKeys(state)
+    defer delete(keys)
 
     if len(keys) == 0 do return
 
@@ -177,13 +178,16 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         entryHeight,
         rl.Vector2{app.PADDING + paddingElement,
         posY}, mousePos,
+    style.icons[.economy_credit],
         state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key]) {
-            state.catalog.selected_item = &state.ItemDefinitionRegistry.items[key]
+            if state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key] do state.catalog.selected_item = nil
+            else do state.catalog.selected_item = &state.ItemDefinitionRegistry.items[key]
         }
 
         posY += entryHeight + paddingElement
         bounds.height += entryHeight + paddingElement
     }
+
 
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
         state.catalog.scroll_offset += rl.GetMouseWheelMove() * 15
@@ -196,10 +200,10 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
 GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
     queryString = str.to_lower(queryString)
-    keys: [dynamic]string = {}
+    keys: [dynamic]string
 
     for item in state.ItemDefinitionRegistry.items {
-        itemName := str.to_lower(state.ItemDefinitionRegistry.items[item].name)
+        itemName := str.to_lower(state.ItemDefinitionRegistry.items[item].name, context.temp_allocator)
 
         if state.ItemDefinitionRegistry.items[item].category != state.catalog.category{
             continue
