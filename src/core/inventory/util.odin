@@ -75,6 +75,259 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     WeaponScale.Personal,
     WeaponSubCategory.Rifle)
 
+    lancerPistolBase, _ := MakeItemBase("LANCER_PISTOL",
+    "X-30 Lancer",
+    "A compact blaster pistol with a high rate\nof fire, designed for close-quarters combat.",
+    4,
+    2,
+    5,
+    3,
+    false,
+    1000,
+    { "Pierce 2", "Accurate 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    lancerPistol, _ := MakeItemWeapons(
+    lancerPistolBase,
+    5,
+    100,
+    4,
+    WeaponRangebands.Long,
+    WeaponSkill.Light,
+    WeaponScale.Personal,
+    WeaponSubCategory.Pistol)
+
+    dl44HeavyPistolBase, _ := MakeItemBase("DL44_HEAVY_PISTOL",
+    "DL-44 Heavy Blaster Pistol",
+    "A powerful blaster pistol with a high\nstopping power, favored by smugglers and bounty hunters.",
+    7,
+    3,
+    6,
+    3,
+    false,
+    700,
+    {  },
+    { "May run out of ammo with 2 threat or one despair" },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    dl44HeavyPistol, _ := MakeItemWeapons(
+    dl44HeavyPistolBase,
+    6,
+    150,
+    4,
+    WeaponRangebands.Medium,
+    WeaponSkill.Light,
+    WeaponScale.Personal,
+    WeaponSubCategory.Pistol)
+
+    m300HuntingBlasterBase, _ := MakeItemBase("M300_HUNTING_BLASTER",
+    "M-300 Hunting Blaster",
+    "A hunting blaster with a high rate of fire,\ndesigned for taking down large game.",
+    5,
+    2,
+    6,
+    1,
+    false,
+    1600,
+    { "Pierce 2", "Accurate 1", "Cumbersome 2", "Stun Setting" },
+    { "May reduce difficulty of combat checks at extreme or long range" },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    m300HuntingBlaster, _ := MakeItemWeapons(
+    m300HuntingBlasterBase,
+    8,
+    200,
+    3,
+    WeaponRangebands.Long,
+    WeaponSkill.Heavy,
+    WeaponScale.Personal,
+    WeaponSubCategory.Rifle)
+
+    heavyRepeaterBase, _ := MakeItemBase("HEAVY_REPEATER",
+    "E-Web Heavy Repeater",
+    "A heavy repeating blaster with a high rate\nof fire, designed for sustained combat.",
+    10,
+    5,
+    8,
+    4,
+    true,
+    6000,
+    { "Pierce 2", "Full-Auto", "Cumbersome 5", "Vicious 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged })
+    heavyRepeater, _ := MakeItemWeapons(
+    heavyRepeaterBase,
+    15,
+    200,
+    2,
+    WeaponRangebands.Long,
+    WeaponSkill.Gunnery,
+    WeaponScale.Personal,
+    WeaponSubCategory.Gunnery)
+
+    missileTube, _ := MakeItemBase("MISSILE_TUBE",
+    "PLX-2M Missile Tube",
+    "A missile tube for launching guided missiles.",
+    8,
+    4,
+    9,
+    4,
+    true,
+    7500,
+    { "Breach 1", "Blast 10", "Cumbersome 3", "Guided 3", "Limited Ammo 6", "Prepare 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Ranged })
+    missileLauncher, _ := MakeItemWeapons(
+    missileTube,
+    20,
+    100,
+    2,
+    WeaponRangebands.Extreme,
+    WeaponSkill.Gunnery,
+    WeaponScale.Personal,
+    WeaponSubCategory.Gunnery)
+
+    shapedChargeBase, _ := MakeItemBase("SHAPED_CHARGE",
+    "Shaped Charge",
+    "A shaped charge explosive device, designed\nfor breaching armored targets.",
+    2,
+    2,
+    4,
+    0,
+    false,
+    500,
+    { "Breach 1", "Vicious 1" },
+    { "+5 Damage and +1 Breach and Vicious per additional charge" },
+    ItemCategory.Weapon,
+    {  })
+    shapedCharge, _ := MakeItemWeapons(
+    shapedChargeBase,
+    15,
+    5,
+    4,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Mechanics,
+    WeaponScale.Personal,
+    WeaponSubCategory.Explosive)
+
+    antiVehicleMineBase, _ := MakeItemBase("ANTI_VEHICLE_MINE",
+    "Anti-Vehicle Mine",
+    "A mine designed to disable or destroy\narmored vehicles.",
+    3,
+    3,
+    6,
+    0,
+    true,
+    1400,
+    { "Breach 4", "Blast 2" },
+    {  },
+    ItemCategory.Weapon,
+    {  })
+    antiVehicleMine, _ := MakeItemWeapons(
+    antiVehicleMineBase,
+    25,
+    15,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Mechanics,
+    WeaponScale.Personal,
+    WeaponSubCategory.Explosive)
+
+    truncheonBase, _ := MakeItemBase("TRUNCHEON",
+    "Truncheon",
+    "A short, heavy club",
+    4,
+    1,
+    1,
+    0,
+    false,
+    15,
+    { "Disorient 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    truncheon, _ := MakeItemWeapons(
+    truncheonBase,
+    2,
+    1,
+    5,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blunt)
+
+    gaffiStick, _ := MakeItemBase("GAFFI_STICK",
+    "Gaffi Stick",
+    "A traditional melee weapon used by the Tusken Raiders of Tatooine.",
+    6,
+    2,
+    2,
+    0,
+    false,
+    100,
+    { "Defensive 1", "Disorient 3" },
+    { "Two Handed" },
+    ItemCategory.Weapon,
+    { .Melee })
+    gaffiStickInstance, _ := MakeItemWeapons(
+    gaffiStick,
+    2,
+    2,
+    3,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blunt)
+
+    lightsaberBase, _ := MakeItemBase("CROSSGUARD_LIGHTSABER",
+    "Lightsaber",
+    "A lightsaber with a crossguard hilt, designed for both offense and defense.",
+    3,
+    1,
+    5,
+    10,
+    true,
+    10000,
+    { "Breach 1", "Sunder", "Vicious 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    Lightsaber, _ := MakeItemWeapons(
+    lightsaberBase,
+    10,
+    1,
+    1,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Lightsaber)
+
+    shotoLightsaberBase, _ := MakeItemBase("SHOTO_LIGHTSABER",
+    "Shoto Lightsaber",
+    "A shorter variant of the traditional lightsaber, designed for quick and agile combat.",
+    2,
+    1,
+    10,
+    8,
+    true,
+    9300,
+    { "Breach 1", "Sunder", "Accurate 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee })
+    ShotoLightsaber, _ := MakeItemWeapons(
+    shotoLightsaberBase,
+    4,
+    1,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Lightsaber)
+
     knifeBase, _ := MakeItemBase("KNIFE",
     "Vibro Knife",
     "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks.",
@@ -159,6 +412,17 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     AddItemRegistry(registry, canteen, debug)
     AddItemRegistry(registry, spacerDuffel, debug)
     AddItemRegistry(registry, utilityBelt, debug)
+    AddItemRegistry(registry, lancerPistol, debug)
+    AddItemRegistry(registry, dl44HeavyPistol, debug)
+    AddItemRegistry(registry, m300HuntingBlaster, debug)
+    AddItemRegistry(registry, heavyRepeater, debug)
+    AddItemRegistry(registry, missileLauncher, debug)
+    AddItemRegistry(registry, shapedCharge, debug)
+    AddItemRegistry(registry, antiVehicleMine, debug)
+    AddItemRegistry(registry, truncheon, debug)
+    AddItemRegistry(registry, gaffiStickInstance, debug)
+    AddItemRegistry(registry, Lightsaber, debug)
+    AddItemRegistry(registry, ShotoLightsaber, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {

@@ -7,11 +7,15 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 import st "core/state"
+import t "core:time"
+import dbug "core/debug"
+import fmt "core:fmt"
 
 main :: proc()
 {
     defer rl.CloseWindow()
     defer free_all(context.allocator)
+    start := t.now()
 
     style := ui.style{
         grid = {
@@ -52,6 +56,8 @@ main :: proc()
     style.fonts = ui.LoadFont()
     defer ui.FreeFont(style.fonts)
     defer ui.FreeImages(style.icons)
+
+    dbug.Debug(fmt.tprint("Loaded in:", t.duration_milliseconds(t.since(start)), "Ms"))
 
     for !rl.WindowShouldClose()
     {
