@@ -9,6 +9,10 @@ ItemDefinitionRegistry :: struct{
     items: map[string]Item
 }
 
+ItemCstringRegistry :: struct{
+    items: map[string]ItemCstring
+}
+
 ItemInstanceRegistry :: struct{
     items: map[u64]^ItemInstance
 }
@@ -33,7 +37,15 @@ MakeItemDefinitionRegistry :: proc() -> ItemDefinitionRegistry {
     return reg
 }
 
-AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, item: Item, debug: bool) -> RegistryError {
+MakeCstringRegistry :: proc() -> ItemCstringRegistry {
+    reg := ItemCstringRegistry{
+        items = make(map[string]ItemCstring)
+    }
+
+    return reg
+}
+
+AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, item: Item, debug: bool) -> RegistryError {
     ok := CheckBaseItemItem(item)
     if !ok.success {
         if debug do dbug.Warn(fmt.tprint("Failed to add item to registry:", item.id,
@@ -81,6 +93,14 @@ AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, item: Item, debug: bool) -
     if debug do dbug.Debug(fmt.tprint("Added item to registry:", item.id))
 
     return RegistryError{ true, .Success, "Success" }
+}
+
+GenerateItemCstringRegistry :: proc(reg: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, debug: bool) {
+    for key in reg.items {
+        item := reg.items[key]
+        strItem := CreateItemCstring(&item, debug)
+        strReg.items[key] = strItem
+    }
 }
 
 MakeItemInstanceRegistry :: proc() -> ItemInstanceRegistry {

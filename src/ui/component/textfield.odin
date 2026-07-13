@@ -93,28 +93,21 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     IconClearCol := rl.CheckCollisionPointRec(mousePos, field.rect_clear) && field.state.buffer_length != 0 ? style.colors.error : style.colors.text
     iconClearPos.y -= 2 // Offset, looks goofy when properly aligned
 
-    boxRectCollison := rl.CheckCollisionPointRec(mousePos, field.rect)
+    boxRectCollision := rl.CheckCollisionPointRec(mousePos, field.rect)
     clearRectCollision := rl.CheckCollisionPointRec(mousePos, {field.rect_clear.x - 2, field.rect_clear.y - 2, field.rect_clear.width + 4, field.rect_clear.height + 4})
 
-    if (boxRectCollison &&
+    if (boxRectCollision &&
     !field.state.is_active &&
     !clearRectCollision) {
         outlineCol = style.colors.secondary_hover
     }
 
-    if field.state.is_active && field.state.buffer_length == 0 {
-        text = ""
-    }
+    if field.state.is_active && field.state.buffer_length == 0 do text = ""
 
-    if field.state.buffer_length == 0 {
-        textCol.a = 128
-    }
+    if field.state.buffer_length == 0 do textCol.a = 128
 
-    if boxRectCollison && !clearRectCollision {
-        rl.SetMouseCursor(.IBEAM)
-    } else {
-        rl.SetMouseCursor(.DEFAULT)
-    }
+    if boxRectCollision && !clearRectCollision do rl.SetMouseCursor(.IBEAM)
+    else do rl.SetMouseCursor(.DEFAULT)
 
     rl.DrawRectangleRec(field.rect, style.colors.surface)
     rl.DrawRectangleLinesEx(field.rect, 2, outlineCol)

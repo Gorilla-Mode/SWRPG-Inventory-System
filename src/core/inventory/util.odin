@@ -27,7 +27,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
     }
 }
 
-TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, debug: bool){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -41,7 +41,10 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 5", "Knockdown" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_blade
+    )
     rapier, _ := MakeItemWeapons(
     rapierBase,
     2,
@@ -64,7 +67,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 1", "Full-Auto" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug,
+    .item_weapon_type_rifle)
     rifle, _ := MakeItemWeapons(
     rifleBase,
     7,
@@ -87,7 +92,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Accurate 1" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug,
+    .item_weapon_type_pistol)
     lancerPistol, _ := MakeItemWeapons(
     lancerPistolBase,
     5,
@@ -110,7 +117,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     { "May run out of ammo with 2 threat or one despair" },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug,
+    .item_weapon_type_pistol)
     dl44HeavyPistol, _ := MakeItemWeapons(
     dl44HeavyPistolBase,
     6,
@@ -133,7 +142,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Accurate 1", "Cumbersome 2", "Stun Setting" },
     { "May reduce difficulty of combat checks at extreme or long range" },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug,
+    .item_weapon_type_rifle)
     m300HuntingBlaster, _ := MakeItemWeapons(
     m300HuntingBlasterBase,
     8,
@@ -156,7 +167,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Full-Auto", "Cumbersome 5", "Vicious 1" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug,
+    .item_weapon_type_gunnery)
     heavyRepeater, _ := MakeItemWeapons(
     heavyRepeaterBase,
     15,
@@ -179,7 +192,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Blast 10", "Cumbersome 3", "Guided 3", "Limited Ammo 6", "Prepare 1" },
     {  },
     ItemCategory.Weapon,
-    { .Ranged })
+    { .Ranged },
+    debug,
+    .item_weapon_type_explosive)
     missileLauncher, _ := MakeItemWeapons(
     missileTube,
     20,
@@ -202,7 +217,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Vicious 1" },
     { "+5 Damage and +1 Breach and Vicious per additional charge" },
     ItemCategory.Weapon,
-    {  })
+    {  },
+    debug,
+    .item_weapon_type_explosive)
     shapedCharge, _ := MakeItemWeapons(
     shapedChargeBase,
     15,
@@ -225,7 +242,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 4", "Blast 2" },
     {  },
     ItemCategory.Weapon,
-    {  })
+    {  },
+    debug,
+    .item_weapon_type_explosive)
     antiVehicleMine, _ := MakeItemWeapons(
     antiVehicleMineBase,
     25,
@@ -248,7 +267,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Disorient 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_blunt)
     truncheon, _ := MakeItemWeapons(
     truncheonBase,
     2,
@@ -271,7 +292,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Defensive 1", "Disorient 3" },
     { "Two Handed" },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_blunt)
     gaffiStickInstance, _ := MakeItemWeapons(
     gaffiStick,
     2,
@@ -294,7 +317,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Sunder", "Vicious 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_lightsaber)
     Lightsaber, _ := MakeItemWeapons(
     lightsaberBase,
     10,
@@ -317,7 +342,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Sunder", "Accurate 1" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_lightsaber)
     ShotoLightsaber, _ := MakeItemWeapons(
     shotoLightsaberBase,
     4,
@@ -340,7 +367,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug,
+    .item_weapon_type_blade)
     knife, _ := MakeItemWeapons(
     knifeBase,
     2,
@@ -363,10 +392,12 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 10" },
     { "Stores 1L of liquid" },
     ItemCategory.Gear,
-    {  })
+    {  },
+    debug,
+    .category_gear)
     canteen, _ := MakeItemGear(
     canteenBase,
-    GearSubCategory.Survival)
+    GearSubCategory.Survival,)
 
     spacerDuffelBase, _ := MakeItemBase("SPACER_DUFFEL",
     "Spacer's Duffel",
@@ -380,7 +411,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     {  },
     ItemCategory.Container,
-    {  })
+    {  },
+    debug,
+    .category_storage)
     spacerDuffel, _ := MakeItemContainerGrid(
     spacerDuffelBase,
     8,
@@ -399,30 +432,32 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     {  },
     ItemCategory.Container,
-    {  })
+    {  },
+    debug,
+    .category_belt)
     utilityBelt, _ := MakeItemContainerGrid(
     beltBase,
     4,
     1,
     ContainerSubCategory.Belt)
 
-    AddItemRegistry(registry, rapier, debug)
-    AddItemRegistry(registry, rifle, debug)
-    AddItemRegistry(registry, knife, debug)
-    AddItemRegistry(registry, canteen, debug)
-    AddItemRegistry(registry, spacerDuffel, debug)
-    AddItemRegistry(registry, utilityBelt, debug)
-    AddItemRegistry(registry, lancerPistol, debug)
-    AddItemRegistry(registry, dl44HeavyPistol, debug)
-    AddItemRegistry(registry, m300HuntingBlaster, debug)
-    AddItemRegistry(registry, heavyRepeater, debug)
-    AddItemRegistry(registry, missileLauncher, debug)
-    AddItemRegistry(registry, shapedCharge, debug)
-    AddItemRegistry(registry, antiVehicleMine, debug)
-    AddItemRegistry(registry, truncheon, debug)
-    AddItemRegistry(registry, gaffiStickInstance, debug)
-    AddItemRegistry(registry, Lightsaber, debug)
-    AddItemRegistry(registry, ShotoLightsaber, debug)
+    AddItemRegistry(registry, strReg, rapier, debug)
+    AddItemRegistry(registry, strReg, rifle, debug)
+    AddItemRegistry(registry, strReg, knife, debug)
+    AddItemRegistry(registry, strReg, canteen, debug)
+    AddItemRegistry(registry, strReg, spacerDuffel, debug)
+    AddItemRegistry(registry, strReg, utilityBelt, debug)
+    AddItemRegistry(registry, strReg, lancerPistol, debug)
+    AddItemRegistry(registry, strReg, dl44HeavyPistol, debug)
+    AddItemRegistry(registry, strReg, m300HuntingBlaster, debug)
+    AddItemRegistry(registry, strReg, heavyRepeater, debug)
+    AddItemRegistry(registry, strReg, missileLauncher, debug)
+    AddItemRegistry(registry, strReg, shapedCharge, debug)
+    AddItemRegistry(registry, strReg, antiVehicleMine, debug)
+    AddItemRegistry(registry, strReg, truncheon, debug)
+    AddItemRegistry(registry, strReg, gaffiStickInstance, debug)
+    AddItemRegistry(registry, strReg, Lightsaber, debug)
+    AddItemRegistry(registry, strReg, ShotoLightsaber, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {

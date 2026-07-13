@@ -5,6 +5,7 @@ import inv "../core/inventory"
 import ui "../ui"
 import rl "vendor:raylib"
 import st "../core/state"
+import comp "../ui/component"
 
 DrawGrid :: proc(item: ^inv.ItemInstance, state: ^st.state, style: ^ui.style){
     container, ok := item.definition.data.(inv.ContainerData)
@@ -73,13 +74,15 @@ DrawItemCard :: proc(container: ^inv.ItemInstance, origin_x, origin_y: f32, stat
     }
 
     if is_in_container {
-        inv.DrawItemCard(state.grab.selected_item,
+        comp.DrawItemCard(state.grab.selected_item,
         f32(state.grab.selected_item.pos_x),
         f32(state.grab.selected_item.pos_y),
         origin_x,
         origin_y,
         style.grid.cell_size,
-        style)
+        style,
+        &state.CStringRegistry
+        )
     }
 }
 
