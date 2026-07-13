@@ -26,15 +26,17 @@ main :: proc()
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
     state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
     state.ItemInstanceRegistry = inv.MakeItemInstanceRegistry()
+    state.CStringRegistry = inv.MakeCstringRegistry()
     state.debug = true
     state.catalog.sub_category = st.NoSubCategory.None
 
-    inv.TestRegistry(&state.ItemDefinitionRegistry, state.debug)
+    inv.TestRegistry(&state.ItemDefinitionRegistry, &state.CStringRegistry, state.debug)
     items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
     state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
     defer delete(state.textFields)
     defer delete(state.ItemDefinitionRegistry.items)
     defer inv.DeleteItemInstanceRegistry(&state.ItemInstanceRegistry)
+    defer delete(state.CStringRegistry.items)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE

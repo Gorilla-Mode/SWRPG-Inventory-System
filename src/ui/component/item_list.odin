@@ -2,15 +2,16 @@
 
 import rl "vendor:raylib"
 import inv "../../core/inventory"
-import str "core:strings"
 import ui ".."
-import fmt "core:fmt"
+import st "../../core/state"
 
-DrawItemList :: proc(definition: ^inv.Item, style: ^ui.style, width, height: f32, pos: rl.Vector2, mousePos: rl.Vector2, icon: rl.Texture2D, active: bool = false) -> bool {
+DrawItemList :: proc(definition: ^inv.Item, style: ^ui.style, state: ^st.state, width, height: f32, pos: rl.Vector2, mousePos: rl.Vector2, icon: rl.Texture2D, active: bool = false) -> bool {
     itemRect := rl.Rectangle{pos.x, pos.y, width, height}
     padding: f32 = 2
     fontSize := f32(ui.font_size.label)
     font := style.fonts.regular[.label]
+    strReg := state.CStringRegistry.items
+    defKey := definition.id
 
     iconScale := ui.IconScale(height - padding * 2)
     iconRect := rl.Rectangle{
@@ -20,9 +21,9 @@ DrawItemList :: proc(definition: ^inv.Item, style: ^ui.style, width, height: f32
         height = height - padding * 2,
     }
 
-    name := str.clone_to_cstring(definition.name, context.temp_allocator)
-    price:= str.clone_to_cstring(fmt.tprint(definition.base_price), context.temp_allocator)
-    rarity := str.clone_to_cstring(fmt.tprint(args = {definition.base_rarity}, sep = ""), context.temp_allocator)
+    name := strReg[defKey].name
+    price:= strReg[defKey].base_price
+    rarity := strReg[defKey].base_rarity
     seperator: cstring = "//"
 
     infoTextSize := rl.MeasureTextEx(font, price, fontSize, 2)

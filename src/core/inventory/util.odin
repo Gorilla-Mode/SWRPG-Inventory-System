@@ -27,7 +27,7 @@ TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceR
     }
 }
 
-TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, debug: bool){
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
@@ -441,23 +441,23 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     1,
     ContainerSubCategory.Belt)
 
-    AddItemRegistry(registry, rapier, debug)
-    AddItemRegistry(registry, rifle, debug)
-    AddItemRegistry(registry, knife, debug)
-    AddItemRegistry(registry, canteen, debug)
-    AddItemRegistry(registry, spacerDuffel, debug)
-    AddItemRegistry(registry, utilityBelt, debug)
-    AddItemRegistry(registry, lancerPistol, debug)
-    AddItemRegistry(registry, dl44HeavyPistol, debug)
-    AddItemRegistry(registry, m300HuntingBlaster, debug)
-    AddItemRegistry(registry, heavyRepeater, debug)
-    AddItemRegistry(registry, missileLauncher, debug)
-    AddItemRegistry(registry, shapedCharge, debug)
-    AddItemRegistry(registry, antiVehicleMine, debug)
-    AddItemRegistry(registry, truncheon, debug)
-    AddItemRegistry(registry, gaffiStickInstance, debug)
-    AddItemRegistry(registry, Lightsaber, debug)
-    AddItemRegistry(registry, ShotoLightsaber, debug)
+    AddItemRegistry(registry, strReg, rapier, debug)
+    AddItemRegistry(registry, strReg, rifle, debug)
+    AddItemRegistry(registry, strReg, knife, debug)
+    AddItemRegistry(registry, strReg, canteen, debug)
+    AddItemRegistry(registry, strReg, spacerDuffel, debug)
+    AddItemRegistry(registry, strReg, utilityBelt, debug)
+    AddItemRegistry(registry, strReg, lancerPistol, debug)
+    AddItemRegistry(registry, strReg, dl44HeavyPistol, debug)
+    AddItemRegistry(registry, strReg, m300HuntingBlaster, debug)
+    AddItemRegistry(registry, strReg, heavyRepeater, debug)
+    AddItemRegistry(registry, strReg, missileLauncher, debug)
+    AddItemRegistry(registry, strReg, shapedCharge, debug)
+    AddItemRegistry(registry, strReg, antiVehicleMine, debug)
+    AddItemRegistry(registry, strReg, truncheon, debug)
+    AddItemRegistry(registry, strReg, gaffiStickInstance, debug)
+    AddItemRegistry(registry, strReg, Lightsaber, debug)
+    AddItemRegistry(registry, strReg, ShotoLightsaber, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {

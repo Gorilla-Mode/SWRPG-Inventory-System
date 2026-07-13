@@ -1,6 +1,8 @@
 ﻿package inventory
 
 import str "core:strings"
+import fmt "core:fmt"
+import dbug "../debug"
 
 //Calculate the area of an item
 ItemArea :: proc(item: ^Item) -> i32
@@ -100,4 +102,48 @@ GetItemGearString :: proc(item: ^Item) -> string {
     str.write_string(&b, "\n")
 
     return str.to_string(b)
+}
+
+CreateItemCstring :: proc(item: Item, debug: bool) -> ItemCstring {
+    strings := ItemCstring{}
+
+    strings.icon_enum   = str.clone_to_cstring(fmt.tprint(item.icon_enum), context.allocator)
+    strings.base_rarity = str.clone_to_cstring(fmt.tprint(item.base_rarity), context.allocator)
+    strings.base_price  = str.clone_to_cstring(fmt.tprint(item.base_price), context.allocator)
+    strings.hardpoints  = str.clone_to_cstring(fmt.tprint(item.hardpoints), context.allocator)
+    strings.width       = str.clone_to_cstring(fmt.tprint(item.width), context.allocator)
+    strings.height      = str.clone_to_cstring(fmt.tprint(item.height), context.allocator)
+    strings.id          = str.clone_to_cstring(item.id, context.allocator)
+    strings.name        = str.clone_to_cstring(item.name, context.allocator)
+    strings.description = str.clone_to_cstring(item.description, context.allocator)
+
+    if item.restricted do strings.restricted = "Restricted"
+    else do strings.restricted = "Unrestricted"
+
+
+    qualites_dyn, quality_err := make([dynamic]cstring)
+    if quality_err != nil do panic("Failed to create qualities array")
+    for q in item.qualities {
+        append(&qualites_dyn, str.clone_to_cstring(q, context.allocator))
+    }
+
+    tags_dyn, tag_err := make([dynamic]cstring)
+    if tag_err != nil do panic("Failed to create tags array")
+    for t in item.tags {
+        append(&tags_dyn, str.clone_to_cstring(fmt.tprint(t), context.allocator))
+    }
+
+    features_dyn, feature_err := make([dynamic]cstring)
+    if feature_err != nil do panic("Failed to create features array")
+    for f in item.features {
+        append(&features_dyn, str.clone_to_cstring(f, context.allocator))
+    }
+
+    strings.qualities = qualites_dyn
+    strings.tags = tags_dyn
+    strings.features = features_dyn
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+
+    return strings
 }

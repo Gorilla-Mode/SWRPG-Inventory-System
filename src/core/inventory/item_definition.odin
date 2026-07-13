@@ -1,7 +1,6 @@
 ﻿package inventory
 import ui "../../ui"
 
-//Item model, as it exists in database
 Item :: struct{
     id:            string,
     name:          string,
@@ -21,7 +20,6 @@ Item :: struct{
     data:          ItemData
 }
 
-//Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
     ContainerData,
@@ -47,4 +45,21 @@ ContainerData :: struct{
 
 GearData :: struct{
     sub_category: GearSubCategory
+}
+
+ItemCstring :: struct{
+    id,
+    name,
+    description,
+    width,
+    height,
+    base_rarity,
+    hardpoints,
+    restricted,
+    base_price,
+    icon_enum: cstring,
+
+    features,
+    tags,
+    qualities: [dynamic]cstring
 }

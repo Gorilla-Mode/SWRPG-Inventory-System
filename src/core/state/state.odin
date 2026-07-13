@@ -18,6 +18,7 @@ state :: struct{
     character:               ^inv.Character,
     ItemDefinitionRegistry:  inv.ItemDefinitionRegistry,
     ItemInstanceRegistry:    inv.ItemInstanceRegistry,
+    CStringRegistry:         inv.ItemCstringRegistry,
 }
 
 grab :: struct{

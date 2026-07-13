@@ -175,6 +175,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         definition := &state.ItemDefinitionRegistry.items[key]
         if comp.DrawItemList(definition,
         style,
+        state,
         layout.left.width - app.PADDING - paddingElement * 2,
         entryHeight,
         rl.Vector2{app.PADDING + paddingElement,
