@@ -80,7 +80,9 @@ DrawItemCard :: proc(container: ^inv.ItemInstance, origin_x, origin_y: f32, stat
         origin_x,
         origin_y,
         style.grid.cell_size,
-        style)
+        style,
+        &state.CStringRegistry
+        )
     }
 }
 
