@@ -1,4 +1,5 @@
 ﻿package inventory
+import ui "../../ui"
 
 //Item model, as it exists in database
 Item :: struct{
@@ -15,6 +16,7 @@ Item :: struct{
 
     category:      ItemCategory,
     tags:          [dynamic]ItemTag,
+    icon_enum:     ui.Icons,
 
     data:          ItemData
 }

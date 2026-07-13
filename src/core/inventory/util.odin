@@ -41,7 +41,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 5", "Knockdown" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     rapier, _ := MakeItemWeapons(
     rapierBase,
     2,
@@ -64,7 +65,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 1", "Full-Auto" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug)
     rifle, _ := MakeItemWeapons(
     rifleBase,
     7,
@@ -87,7 +89,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Accurate 1" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug)
     lancerPistol, _ := MakeItemWeapons(
     lancerPistolBase,
     5,
@@ -110,7 +113,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     { "May run out of ammo with 2 threat or one despair" },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug)
     dl44HeavyPistol, _ := MakeItemWeapons(
     dl44HeavyPistolBase,
     6,
@@ -133,7 +137,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Accurate 1", "Cumbersome 2", "Stun Setting" },
     { "May reduce difficulty of combat checks at extreme or long range" },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug)
     m300HuntingBlaster, _ := MakeItemWeapons(
     m300HuntingBlasterBase,
     8,
@@ -156,7 +161,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2", "Full-Auto", "Cumbersome 5", "Vicious 1" },
     {  },
     ItemCategory.Weapon,
-    { .Blaster, .Ranged })
+    { .Blaster, .Ranged },
+    debug)
     heavyRepeater, _ := MakeItemWeapons(
     heavyRepeaterBase,
     15,
@@ -179,7 +185,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Blast 10", "Cumbersome 3", "Guided 3", "Limited Ammo 6", "Prepare 1" },
     {  },
     ItemCategory.Weapon,
-    { .Ranged })
+    { .Ranged },
+    debug)
     missileLauncher, _ := MakeItemWeapons(
     missileTube,
     20,
@@ -202,7 +209,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Vicious 1" },
     { "+5 Damage and +1 Breach and Vicious per additional charge" },
     ItemCategory.Weapon,
-    {  })
+    {  },
+    debug)
     shapedCharge, _ := MakeItemWeapons(
     shapedChargeBase,
     15,
@@ -225,7 +233,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 4", "Blast 2" },
     {  },
     ItemCategory.Weapon,
-    {  })
+    {  },
+    debug)
     antiVehicleMine, _ := MakeItemWeapons(
     antiVehicleMineBase,
     25,
@@ -248,7 +257,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Disorient 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     truncheon, _ := MakeItemWeapons(
     truncheonBase,
     2,
@@ -271,7 +281,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Defensive 1", "Disorient 3" },
     { "Two Handed" },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     gaffiStickInstance, _ := MakeItemWeapons(
     gaffiStick,
     2,
@@ -294,7 +305,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Sunder", "Vicious 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     Lightsaber, _ := MakeItemWeapons(
     lightsaberBase,
     10,
@@ -317,7 +329,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 1", "Sunder", "Accurate 1" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     ShotoLightsaber, _ := MakeItemWeapons(
     shotoLightsaberBase,
     4,
@@ -340,7 +353,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Pierce 2" },
     {  },
     ItemCategory.Weapon,
-    { .Melee })
+    { .Melee },
+    debug)
     knife, _ := MakeItemWeapons(
     knifeBase,
     2,
@@ -363,7 +377,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     { "Breach 10" },
     { "Stores 1L of liquid" },
     ItemCategory.Gear,
-    {  })
+    {  },
+    debug)
     canteen, _ := MakeItemGear(
     canteenBase,
     GearSubCategory.Survival)
@@ -380,7 +395,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     {  },
     ItemCategory.Container,
-    {  })
+    {  },
+    debug)
     spacerDuffel, _ := MakeItemContainerGrid(
     spacerDuffelBase,
     8,
@@ -399,7 +415,8 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, debug: bool){
     {  },
     {  },
     ItemCategory.Container,
-    {  })
+    {  },
+    debug)
     utilityBelt, _ := MakeItemContainerGrid(
     beltBase,
     4,

@@ -1,5 +1,9 @@
 ﻿package inventory
 
+import ui "../../ui"
+import dbug "../../core/debug"
+import fmt "core:fmt"
+
 MakeItemBase :: proc(
     id: string,
     name: string,
@@ -14,7 +18,14 @@ MakeItemBase :: proc(
     features: []string,
     category: ItemCategory,
     tags: []ItemTag,
+    debug: bool,
+    icon_enum: ui.Icons = nil,
 ) -> (Item, ItemError) {
+   icon := icon_enum
+   if icon == nil {
+       if debug do dbug.Warn(fmt.tprint(args = {"Item ", dbug.HIGHLIGHT_WARN, id, dbug.HIGHLIGHT_WARN_END, " has no icon_enum set, defaulting to gui_square" }, sep = ""))
+       icon = ui.Icons.gui_square
+   }
 
     ok := CheckBaseItem(base_rarity, hardpoints, base_price, width, height)
     if !ok.success {
@@ -50,6 +61,7 @@ MakeItemBase :: proc(
         features = features_dyn,
         category = category,
         tags = tags_dyn,
+        icon_enum = icon,
     }, ok
 }
 

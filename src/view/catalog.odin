@@ -172,16 +172,17 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     defer rl.EndScissorMode()
 
     for key in keys {
-        if comp.DrawItemList(&state.ItemDefinitionRegistry.items[key],
+        definition := &state.ItemDefinitionRegistry.items[key]
+        if comp.DrawItemList(definition,
         style,
         layout.left.width - app.PADDING - paddingElement * 2,
         entryHeight,
         rl.Vector2{app.PADDING + paddingElement,
         posY}, mousePos,
-    style.icons[.item_weapon_type_rifle],
-        state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key]) {
-            if state.catalog.selected_item == &state.ItemDefinitionRegistry.items[key] do state.catalog.selected_item = nil
-            else do state.catalog.selected_item = &state.ItemDefinitionRegistry.items[key]
+    style.icons[definition.icon_enum],
+        state.catalog.selected_item == definition) {
+            if state.catalog.selected_item == definition do state.catalog.selected_item = nil
+            else do state.catalog.selected_item = definition
         }
 
         posY += entryHeight + paddingElement
