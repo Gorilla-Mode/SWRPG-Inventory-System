@@ -90,10 +90,17 @@ AddItemRegistry :: proc(reg: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegist
     }
 
     reg.items[item.id] = item
-    strReg.items[item.id] = CreateItemCstring(item, debug)
     if debug do dbug.Debug(fmt.tprint("Added item to registry:", item.id))
 
     return RegistryError{ true, .Success, "Success" }
+}
+
+GenerateItemCstringRegistry :: proc(reg: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, debug: bool) {
+    for key in reg.items {
+        item := reg.items[key]
+        strItem := CreateItemCstring(&item, debug)
+        strReg.items[key] = strItem
+    }
 }
 
 MakeItemInstanceRegistry :: proc() -> ItemInstanceRegistry {

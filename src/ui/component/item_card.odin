@@ -3,8 +3,8 @@
 import rl "vendor:raylib"
 import ui "../../ui"
 import inv "../../core/inventory"
-import str "core:strings"
 
+//TODO: Redo this whole shit
 DrawItemCard :: proc(
     item: ^inv.ItemInstance,
     x, y: f32,
@@ -27,7 +27,6 @@ DrawItemCard :: proc(
     regularSize := f32(ui.font_size.default)
     defID := item.definition.id
     itemStrings := strReg.items[defID]
-    dataStr := inv.GetItemDataString(item.definition)
     descriptionSize := rl.MeasureTextEx(regular, itemStrings.description, regularSize, 0)
 
     rect := rl.Rectangle{x = posX, y =  posY, width = width, height = height}
@@ -40,5 +39,11 @@ DrawItemCard :: proc(
     rl.DrawTextEx(regular, itemStrings.base_rarity, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + section_padding * 2}), regularSize, 0, style.colors.text)
     rl.DrawTextEx(regular, itemStrings.base_price, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize + section_padding * 2}), regularSize, 0, style.colors.text)
     rl.DrawTextEx(regular, itemStrings.restricted, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize * 2 + section_padding * 2}), regularSize, 0, style.colors.text)
-    rl.DrawTextEx(regular, str.clone_to_cstring(dataStr), ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize * 3 + section_padding * 3}), regularSize, 0, style.colors.text)
+    #partial switch data in itemStrings.data {
+        case inv.WeaponDataCstring:
+            rl.DrawTextEx(regular, data.damage, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize * 3 + section_padding * 2}), regularSize, 0, style.colors.text)
+            rl.DrawTextEx(regular, data.range, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize * 4 + section_padding * 2}), regularSize, 0, style.colors.text)
+            rl.DrawTextEx(regular, data.crit, ui.SnapVector2({posX + margin_left, posY + headerSize + descriptionSize.y + regularSize * 5 + section_padding * 2}), regularSize, 0, style.colors.text)
+
+    }
 }

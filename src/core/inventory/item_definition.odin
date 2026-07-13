@@ -56,10 +56,39 @@ ItemCstring :: struct{
     base_rarity,
     hardpoints,
     restricted,
-    base_price,
-    icon_enum: cstring,
+    base_price: cstring,
 
     features,
     tags,
-    qualities: [dynamic]cstring
+    qualities: [dynamic]cstring,
+
+    data: ItemCstringData
+}
+
+ItemCstringData :: union{
+    WeaponDataCstring,
+    ContainerDataCstring,
+    GearDataCstring
+}
+
+WeaponDataCstring :: struct{
+    damage,
+    range,
+    rangeband,
+    crit,
+    skill,
+    scale: cstring,
+
+    sub_category: cstring
+}
+
+ContainerDataCstring :: struct{
+    width,
+    height: cstring,
+
+    sub_category: cstring
+}
+
+GearDataCstring :: struct{
+    sub_category: cstring
 }

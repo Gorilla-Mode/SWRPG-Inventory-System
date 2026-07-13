@@ -1,5 +1,9 @@
 ﻿package inventory
 
+import str "core:strings"
+import fmt "core:fmt"
+import dbug "../debug"
+
 WeaponSkillString :: proc(skill: WeaponSkill) -> string {
     return WeaponSkillStrings[skill]
 }
@@ -72,4 +76,120 @@ WeaponSkillStrings := [WeaponSkill]string{
 WeaponScaleStrings := [WeaponScale]string{
     WeaponScale.Personal = "Personal",
     WeaponScale.Planetary = "Planetary",
+}
+
+
+CreateItemCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
+    base := CreateItemBaseCstring(item, debug)
+    switch _ in item.data{
+    case WeaponData:
+        return CreateItemWeaponCstring(item, base, debug)
+    case ContainerData:
+        return CreateItemContainerCstring(item, base, debug)
+    case GearData:
+        return CreateItemGearCstring(item, base, debug)
+    }
+
+    dbug.Debug(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+    return {}
+}
+
+CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
+    strings := ItemCstring{}
+
+    strings.base_rarity = str.clone_to_cstring(fmt.tprint(item.base_rarity), context.allocator)
+    strings.base_price  = str.clone_to_cstring(fmt.tprint(item.base_price), context.allocator)
+    strings.hardpoints  = str.clone_to_cstring(fmt.tprint(item.hardpoints), context.allocator)
+    strings.width       = str.clone_to_cstring(fmt.tprint(item.width), context.allocator)
+    strings.height      = str.clone_to_cstring(fmt.tprint(item.height), context.allocator)
+    strings.id          = str.clone_to_cstring(item.id, context.allocator)
+    strings.name        = str.clone_to_cstring(item.name, context.allocator)
+    strings.description = str.clone_to_cstring(item.description, context.allocator)
+
+    if item.restricted do strings.restricted = "Restricted"
+    else do strings.restricted = "Unrestricted"
+
+    qualites_dyn, quality_err := make([dynamic]cstring)
+    if quality_err != nil do panic("Failed to create qualities array")
+    for q in item.qualities {
+        append(&qualites_dyn, str.clone_to_cstring(q, context.allocator))
+    }
+
+    tags_dyn, tag_err := make([dynamic]cstring)
+    if tag_err != nil do panic("Failed to create tags array")
+    for t in item.tags {
+        append(&tags_dyn, str.clone_to_cstring(fmt.tprint(t), context.allocator))
+    }
+
+    features_dyn, feature_err := make([dynamic]cstring)
+    if feature_err != nil do panic("Failed to create features array")
+    for f in item.features {
+        append(&features_dyn, str.clone_to_cstring(f, context.allocator))
+    }
+
+    strings.qualities = qualites_dyn
+    strings.tags = tags_dyn
+    strings.features = features_dyn
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+
+    return strings
+}
+
+CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> ItemCstring {
+    weapon := base
+
+    itemData, ok := item.data.(WeaponData)
+    if !ok {
+        dbug.Warn(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+        return base
+    }
+
+    weapon.data = WeaponDataCstring{
+        damage = str.clone_to_cstring(fmt.tprint(itemData.damage), context.allocator),
+        range = str.clone_to_cstring(fmt.tprint(itemData.range), context.allocator),
+        rangeband = str.clone_to_cstring(fmt.tprint(itemData.rangeband), context.allocator),
+        crit = str.clone_to_cstring(fmt.tprint(itemData.crit), context.allocator),
+        skill = str.clone_to_cstring(fmt.tprint(itemData.skill), context.allocator),
+        scale = str.clone_to_cstring(fmt.tprint(itemData.scale), context.allocator),
+        sub_category = str.clone_to_cstring(WeaponSubCategoryString(itemData.sub_category), context.allocator),
+    }
+
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created Weapon ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+    return weapon
+}
+
+CreateItemContainerCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> ItemCstring {
+    Container := base
+    itemData, ok := item.data.(ContainerData)
+    if !ok {
+        dbug.Warn(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+        return base
+    }
+
+    Container.data = ContainerDataCstring{
+        width = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).width), context.allocator),
+        height = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).height), context.allocator),
+        sub_category = str.clone_to_cstring(ContainerSubCategoryString(itemData.sub_category), context.allocator),
+    }
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created Container ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+    return Container
+}
+
+CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> ItemCstring {
+    Gear := base
+    itemData, ok := item.data.(GearData)
+    if !ok {
+        dbug.Warn(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+        return base
+    }
+
+    Gear.data = GearDataCstring{
+        sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator),
+    }
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+    return Gear
 }
