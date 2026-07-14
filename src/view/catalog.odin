@@ -305,19 +305,29 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     2,
     style.colors.primary)
 
-    economyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), 128, 72}
-    economyTextPos := ui.SnapVector2({economyRect.x + (padding * 2), economyRect.y + padding + defaultFontSize})
+    baseItemDataHeight: f32 = 72
+    baseItemDataWidth: f32 = 156
+    itemEconomyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
     price := itemStr.base_price
     priceSize := rl.MeasureTextEx(defaultFont, price, defaultFontSize, 0)
 
-    if (priceSize.x + padding * 4) > economyRect.width do economyRect.width = priceSize.x + padding * 4
+    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
 
-    rl.DrawRectangleLinesEx(economyRect, 2, style.colors.primary)
-    rl.DrawTextEx(captionFont, "Economy", {economyRect.x + (padding * 2), economyRect.y + padding }, captionFontSize, 2, textCol)
-
+    rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont,  itemStr.base_price, economyTextPos, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  itemStr.base_rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  itemStr.restricted, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2) + padding}, defaultFontSize, 0, textCol)
+
+    rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
+
+    rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Metadata", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
+
 //    rl.DrawTextEx(defaultFont,  itemStr.hardpoints, {textPos.x, textPos.y + (descriptionTextSize.y * 4) + (padding * 2)}, defaultFontSize, 0, textCol)
 //    rl.DrawTextEx(defaultFont,  itemStr.width, {textPos.x, textPos.y + (descriptionTextSize.y * 5) + (padding * 2)}, defaultFontSize, 0, textCol)
 //    rl.DrawTextEx(defaultFont,  itemStr.height, {textPos.x, textPos.y + (descriptionTextSize.y * 6) + (padding * 2)}, defaultFontSize, 0, textCol)
