@@ -31,7 +31,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
     rapierBase, _ := MakeItemBase("RAPIER",
     "Vibro Rapier",
-    "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes.",
+    "A lightweight sword with a vibrating edge, designed for quick and precise strikes.",
     5,
     1,
     6,
@@ -57,7 +57,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     rifleBase, _ := MakeItemBase("RIFLE",
     "A280C Blaster Rifle",
-    "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops",
+    "Carbine variant of the A280 blaster rifle, used by mostly by rebel troops",
     6,
     2,
     4,
@@ -82,7 +82,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     lancerPistolBase, _ := MakeItemBase("LANCER_PISTOL",
     "X-30 Lancer",
-    "A compact blaster pistol with a high rate\nof fire, designed for close-quarters combat.",
+    "A compact blaster pistol with a high rate of fire, designed for close-quarters combat.",
     4,
     2,
     5,
@@ -107,7 +107,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     dl44HeavyPistolBase, _ := MakeItemBase("DL44_HEAVY_PISTOL",
     "DL-44 Heavy Blaster Pistol",
-    "A powerful blaster pistol with a high\nstopping power, favored by smugglers and bounty hunters.",
+    "A powerful blaster pistol with a high stopping power, favored by smugglers and bounty hunters.",
     7,
     3,
     6,
@@ -132,7 +132,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     m300HuntingBlasterBase, _ := MakeItemBase("M300_HUNTING_BLASTER",
     "M-300 Hunting Blaster",
-    "A hunting blaster with a high rate of fire,\ndesigned for taking down large game.",
+    "A hunting blaster with a high rate of fire, designed for taking down large game.",
     5,
     2,
     6,
@@ -157,7 +157,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     heavyRepeaterBase, _ := MakeItemBase("HEAVY_REPEATER",
     "E-Web Heavy Repeater",
-    "A heavy repeating blaster with a high rate\nof fire, designed for sustained combat.",
+    "A heavy repeating blaster with a high rate of fire, designed for sustained combat.",
     10,
     5,
     8,
@@ -207,7 +207,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     shapedChargeBase, _ := MakeItemBase("SHAPED_CHARGE",
     "Shaped Charge",
-    "A shaped charge explosive device, designed\nfor breaching armored targets.",
+    "A shaped charge explosive device, designed for breaching armored targets.",
     2,
     2,
     4,
@@ -232,7 +232,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     antiVehicleMineBase, _ := MakeItemBase("ANTI_VEHICLE_MINE",
     "Anti-Vehicle Mine",
-    "A mine designed to disable or destroy\narmored vehicles.",
+    "A mine designed to disable or destroy armored vehicles.",
     3,
     3,
     6,
@@ -357,7 +357,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     knifeBase, _ := MakeItemBase("KNIFE",
     "Vibro Knife",
-    "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks.",
+    "A small, concealable knife with a vibrating edge, designed for stealthy attacks.",
     3,
     1,
     2,
@@ -382,7 +382,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     canteenBase, _ := MakeItemBase("CANTEEN",
     "Canteen",
-    "A small container for carrying water or\nother liquids.",
+    "A small container for carrying water or other liquids.",
     2,
     2,
     1,
