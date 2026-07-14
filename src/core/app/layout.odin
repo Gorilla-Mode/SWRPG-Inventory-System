@@ -47,10 +47,9 @@ CatalogPageLayout :: struct {
 GetCatalogPageLayoutInfo :: proc(state: ^st.state, cellSize: f32) -> CatalogPageLayout {
     w := f32(state.window.width)
 
-    left_width  := w / 3
-    right_width := (w * 2) / 3
+    left_width  :f32 = 650
+    right_width :f32 = w - left_width
 
-    // LEFT SECTION
     left := PageSection{
         origin_x = 0,
         width = left_width,
@@ -60,7 +59,6 @@ GetCatalogPageLayoutInfo :: proc(state: ^st.state, cellSize: f32) -> CatalogPage
     grid_width := GetMaxGridWidth(state.character, cellSize)
     left.start_x = left.center_x - grid_width / 2
 
-    // RIGHT SECTION
     right := PageSection{
         origin_x = left_width,
         width = right_width,
