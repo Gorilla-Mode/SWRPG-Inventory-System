@@ -39,7 +39,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         height = f32(state.window.height) - layout.top_y
     }
 
-    DrawCatalogItemStat(state, style, rect_right)
+    DrawCatalogItemStat(state, style, rect_right, layout)
     explorerBounds := DrawCatalogExplorer(state, style, layout, paddingElement, rect_left)
     DrawCatalogItemResults(state, style, layout, paddingElement, explorerBounds, rect_left)
 }
@@ -228,14 +228,14 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     return keys
 }
 
-DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle){
+DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout){
     padding: f32 = 2
     headerText := style.fonts.semibold[ui.font_size.header]
     headerTextSize := f32(ui.font_size.header)
     bounds := rl.Rectangle{
-        x = rect_right.x + padding,
+        x = rect_right.x + app.PADDING,
         y = rect_right.y,
-        width = rect_right.width - padding,
+        width = rect_right.width - app.PADDING,
         height = rect_right.height,
     }
 
@@ -246,12 +246,11 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     2,
     style.colors.text)
 
-    DrawCatalogBaseItemStat(state, style, bounds)
-
+    DrawCatalogBaseItemStat(state, style, bounds, layout)
 
 }
 
-DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle) -> rl.Rectangle{
+DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
     bounds          := rect
     item            := state.catalog.selected_item
     headerFont      := style.fonts.semibold[ui.font_size.header]
@@ -260,14 +259,20 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     textCol         := style.colors.text
     secondaryCol    := style.colors.secondary
     nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, 32}
-    //defaultFont     := style.fonts.regular[ui.font_size.default]
-    //defaultFontSize := f32(defaultFont.baseSize)
+    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
 
     rl.DrawLineEx({nameRect.x, nameRect.y + (padding / 2)}, {nameRect.x + nameRect.width, nameRect.y + (padding / 2)}, 2, style.colors.secondary)
     if item == nil{
         errorText: cstring = "No item selected"
         errorTextSize := rl.MeasureTextEx(style.fonts.semibold[ui.font_size.default], errorText, f32(ui.font_size.default), 2)
-        rl.DrawTextEx(headerFont, errorText, ui.SnapVector2({bounds.width - (errorTextSize.x / 2), bounds.height / 2}), headerFontSize, 2, { textCol.r, textCol.g, textCol.b, 100 })
+        rl.DrawTextEx(headerFont,
+        errorText,
+        ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), bounds.height / 2}),
+        headerFontSize,
+        2,
+        { textCol.r, textCol.g, textCol.b, 100 })
 
         return bounds
     }
@@ -284,7 +289,26 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     {nameRect.x + nameRect.width, nameRect.y + nameRect.height + padding + (padding / 2)},
     2,
     { secondaryCol.r, secondaryCol.g, secondaryCol.b, 128 })
-    //rl.DrawRectangleRec(nameRect, { textCol.r, textCol.g, textCol.b, 128 })
+
+    rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
+    rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
+
+    descriptionText := itemStr.description
+    descriptionTextSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
+    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding, itemViewRect.y})
+
+    rl.DrawTextEx(defaultFont, descriptionText, textPos, defaultFontSize, 0, textCol)
+    rl.DrawLineEx({textPos.x, textPos.y + descriptionTextSize.y + padding},
+    {bounds.x + bounds.width, textPos.y + descriptionTextSize.y + padding},
+    2,
+    style.colors.primary)
+
+    rl.DrawTextEx(defaultFont,  itemStr.base_price, {textPos.x, textPos.y + descriptionTextSize.y + (padding * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.base_rarity, {textPos.x, textPos.y + (descriptionTextSize.y * 2) + (padding * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.restricted, {textPos.x, textPos.y + (descriptionTextSize.y * 3) + (padding * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.hardpoints, {textPos.x, textPos.y + (descriptionTextSize.y * 4) + (padding * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.width, {textPos.x, textPos.y + (descriptionTextSize.y * 5) + (padding * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.height, {textPos.x, textPos.y + (descriptionTextSize.y * 6) + (padding * 2)}, defaultFontSize, 0, textCol)
 
     return bounds
 }
