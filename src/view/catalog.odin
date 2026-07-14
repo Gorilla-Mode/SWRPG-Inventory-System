@@ -39,17 +39,17 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
         height = f32(state.window.height) - layout.top_y
     }
 
-    DrawCatalogItemStat(state, style, layout, rect_right)
+    DrawCatalogItemStat(state, style, rect_right, layout)
     explorerBounds := DrawCatalogExplorer(state, style, layout, paddingElement, rect_left)
     DrawCatalogItemResults(state, style, layout, paddingElement, explorerBounds, rect_left)
 }
 
 DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) -> rl.Rectangle {
-    f_bg_color      := style.colors.surface
-    f_hover_color   := style.colors.secondary_hover
-    f_active_color  := style.colors.success
-    f_icon_color    := style.colors.text
-    f_icon_bg_color := style.colors.secondary
+    bg_color      := style.colors.surface
+    hover_color   := style.colors.secondary_hover
+    active_color  := style.colors.success
+    icon_color    := style.colors.text
+    icon_bg_color := style.colors.secondary
 
     buttonWidthBase: f32 = (layout.left.width - app.PADDING )
     buttonHeight:    f32 = 32
@@ -130,7 +130,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     rl.DrawTextureEx(style.icons[ui.Icons.gui_filter], iconSubCategoryPos, 0, ui.IconScale(textCategorySize.y), style.colors.text)
     rl.DrawTextEx(style.fonts.semibold[ui.font_size.label], textSubCategory, { iconSubCategoryPos.x + textCategorySize.y + paddingElement, iconSubCategoryPos.y }, f32(ui.font_size.label), 2, style.colors.text)
 
-    DrawCatalogButtons(state, style, &buttons, f_bg_color, f_icon_color, f_icon_bg_color, f_hover_color, f_active_color)
+    DrawCatalogButtons(state, style, &buttons, bg_color, icon_color, icon_bg_color, hover_color, active_color)
 
     bounds := rl.Rectangle{
         x = layout.left.origin_x + app.PADDING,
@@ -140,16 +140,6 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     }
 
     return bounds
-}
-
-DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, rect_right: rl.Rectangle){
-    rl.DrawRectangleRec(rect_right, style.colors.surface)
-    rl.DrawTextEx(style.fonts.semibold[ui.font_size.header],
-    "Statisitcs",
-    ui.SnapVector2({layout.right.origin_x, layout.top_y - f32(ui.font_size.header) - 2}),
-    f32(ui.font_size.header),
-    2,
-    style.colors.text)
 }
 
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
@@ -236,4 +226,111 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     }
 
     return keys
+}
+
+DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout){
+    padding: f32 = 2
+    headerText := style.fonts.semibold[ui.font_size.header]
+    headerTextSize := f32(ui.font_size.header)
+    bounds := rl.Rectangle{
+        x = rect_right.x + app.PADDING,
+        y = rect_right.y,
+        width = rect_right.width - app.PADDING,
+        height = rect_right.height,
+    }
+
+    rl.DrawTextEx(headerText,
+    "Statisitcs",
+    ui.SnapVector2({bounds.x + padding, bounds.y - headerTextSize - 2}),
+    headerTextSize,
+    2,
+    style.colors.text)
+
+    DrawCatalogBaseItemStat(state, style, bounds, layout)
+
+}
+
+DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
+    bounds          := rect
+    item            := state.catalog.selected_item
+    headerFont      := style.fonts.semibold[ui.font_size.header]
+    headerFontSize  := f32(headerFont.baseSize)
+    padding         : f32 = 2
+    textCol         := style.colors.text
+    secondaryCol    := style.colors.secondary
+    nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, 32}
+    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
+    captionFont     := style.fonts.regular[ui.font_size.caption]
+    captionFontSize := f32(captionFont.baseSize)
+
+    rl.DrawLineEx({nameRect.x, nameRect.y + (padding / 2)}, {nameRect.x + nameRect.width, nameRect.y + (padding / 2)}, 2, style.colors.secondary)
+    if item == nil{
+        errorText: cstring = "No item selected"
+        errorTextSize := rl.MeasureTextEx(style.fonts.semibold[ui.font_size.default], errorText, f32(ui.font_size.default), 2)
+        rl.DrawTextEx(headerFont,
+        errorText,
+        ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), bounds.height / 2}),
+        headerFontSize,
+        2,
+        { textCol.r, textCol.g, textCol.b, 100 })
+
+        return bounds
+    }
+
+    itemStr := state.CStringRegistry.items[item.id]
+
+    rl.DrawTextEx(headerFont,
+    itemStr.name,
+    ui.SnapVector2({nameRect.x, nameRect.y - (headerFontSize / 2) + (nameRect.height / 2)}),
+    headerFontSize,
+    4,
+    style.colors.text)
+    rl.DrawLineEx({nameRect.x, nameRect.y + nameRect.height + padding + (padding / 2)},
+    {nameRect.x + nameRect.width, nameRect.y + nameRect.height + padding + (padding / 2)},
+    2,
+    { secondaryCol.r, secondaryCol.g, secondaryCol.b, 128 })
+
+    rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
+    rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
+
+    descriptionText := itemStr.description
+    descriptionTextSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
+    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding, itemViewRect.y})
+
+    rl.DrawTextEx(defaultFont, descriptionText, textPos, defaultFontSize, 0, textCol)
+    rl.DrawLineEx({textPos.x, textPos.y + descriptionTextSize.y + padding},
+    {bounds.x + bounds.width, textPos.y + descriptionTextSize.y + padding},
+    2,
+    style.colors.primary)
+
+    baseItemDataHeight: f32 = 72
+    baseItemDataWidth: f32 = 156
+    itemEconomyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
+    price := itemStr.base_price
+    priceSize := rl.MeasureTextEx(defaultFont, price, defaultFontSize, 0)
+
+    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
+
+    rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.base_price, economyTextPos, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.base_rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.restricted, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2) + padding}, defaultFontSize, 0, textCol)
+
+    rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
+
+    rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
+    rl.DrawTextEx(captionFont, "Metadata", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
+
+//    rl.DrawTextEx(defaultFont,  itemStr.hardpoints, {textPos.x, textPos.y + (descriptionTextSize.y * 4) + (padding * 2)}, defaultFontSize, 0, textCol)
+//    rl.DrawTextEx(defaultFont,  itemStr.width, {textPos.x, textPos.y + (descriptionTextSize.y * 5) + (padding * 2)}, defaultFontSize, 0, textCol)
+//    rl.DrawTextEx(defaultFont,  itemStr.height, {textPos.x, textPos.y + (descriptionTextSize.y * 6) + (padding * 2)}, defaultFontSize, 0, textCol)
+
+    return bounds
 }
