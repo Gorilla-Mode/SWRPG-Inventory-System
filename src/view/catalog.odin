@@ -309,6 +309,8 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     baseItemDataWidth: f32 = 156
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
     economyStrings := CatalogItemStatGetEconomyStrings(itemStr)
+    sizeStrings := CatalogItemStatGetSizeStrings(itemStr)
+    metaStrings := CatalogItemStatGetMetaStrings(itemStr)
     priceSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
     if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
 
@@ -324,13 +326,13 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.width, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.height, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  sizeStrings.width, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  sizeStrings.height, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Metadata", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
 //    rl.DrawTextEx(defaultFont,  itemStr.hardpoints, {textPos.x, textPos.y + (descriptionTextSize.y * 4) + (padding * 2)}, defaultFontSize, 0, textCol)
 //    rl.DrawTextEx(defaultFont,  itemStr.width, {textPos.x, textPos.y + (descriptionTextSize.y * 5) + (padding * 2)}, defaultFontSize, 0, textCol)
@@ -350,5 +352,25 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
         proj_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
         rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Legality: ", itemStr.restricted, context.temp_allocator)
+    }
+}
+
+CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring) -> struct{
+    width,
+    height: cstring
+}{
+    return {
+        width  = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
+        height = cstr.Concat("Height: ", itemStr.height, context.temp_allocator)
+    }
+}
+
+CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
+    category,
+    sub_category: cstring
+}{
+    return {
+        category     = cstr.Concat("Category: ", itemStr.category, context.temp_allocator),
+        sub_category = cstr.Concat("Sub-Category: ", itemStr.sub_category, context.temp_allocator),
     }
 }
