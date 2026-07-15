@@ -37,6 +37,7 @@ ItemErrors :: enum{
     InvalidWidth,
     InvalidHeight,
     InvalidHardpoints,
+    InvalidMass,
 }
 
 WeaponErrors :: enum{
@@ -62,7 +63,7 @@ InstanceErrors :: enum{
     InvalidData,
 }
 
-CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, height: i16) -> (ItemError) {
+CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price, mass: i32, width, height: i16) -> (ItemError) {
     if base_rarity < 1 || base_rarity > 10 {
         return ItemError{ false, .InvalidRarity, "Base rarity must be between 1 and 5" }
     }
@@ -81,6 +82,10 @@ CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, width, heigh
 
     if hardpoints < 0 {
         return ItemError{ false, .InvalidHardpoints, "Hardpoints must be greater than or equal to 0" }
+    }
+
+    if mass <= 0 {
+        return ItemError{ false, .InvalidMass, "Mass must be greater than 0" }
     }
 
     return ItemError{ true, .Success, "Success" }
@@ -120,7 +125,7 @@ CheckGearItem :: proc(item: Item) -> (GearError) {
 }
 
 CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
-    baseItem := CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.width, item.height)
+    baseItem := CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.mass_g, item.width, item.height)
     if baseItem.success != true {
         return ItemError{ false, .InvalidRarity, "Base item data is invalid" }
     }

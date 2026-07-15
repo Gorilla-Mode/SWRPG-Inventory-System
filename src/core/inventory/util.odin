@@ -42,6 +42,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Melee },
+    800,
     debug,
     .item_weapon_type_blade
     )
@@ -68,6 +69,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Blaster, .Ranged },
+    2500,
     debug,
     .item_weapon_type_rifle)
     rifle, _ := MakeItemWeapons(
@@ -93,6 +95,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Blaster, .Ranged },
+    1200,
     debug,
     .item_weapon_type_pistol)
     lancerPistol, _ := MakeItemWeapons(
@@ -118,6 +121,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     { "May run out of ammo with 2 threat or one despair" },
     ItemCategory.Weapon,
     { .Blaster, .Ranged },
+    1400,
     debug,
     .item_weapon_type_pistol)
     dl44HeavyPistol, _ := MakeItemWeapons(
@@ -143,6 +147,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     { "May reduce difficulty of combat checks at extreme or long range" },
     ItemCategory.Weapon,
     { .Blaster, .Ranged },
+    2800,
     debug,
     .item_weapon_type_rifle)
     m300HuntingBlaster, _ := MakeItemWeapons(
@@ -168,6 +173,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Blaster, .Ranged },
+    18000,
     debug,
     .item_weapon_type_gunnery)
     heavyRepeater, _ := MakeItemWeapons(
@@ -193,6 +199,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Ranged },
+    15000,
     debug,
     .item_weapon_type_explosive)
     missileLauncher, _ := MakeItemWeapons(
@@ -218,6 +225,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     { "+5 Damage and +1 Breach and Vicious per additional charge" },
     ItemCategory.Weapon,
     {  },
+    1500,
     debug,
     .item_weapon_type_explosive)
     shapedCharge, _ := MakeItemWeapons(
@@ -243,6 +251,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     {  },
+    5000,
     debug,
     .item_weapon_type_explosive)
     antiVehicleMine, _ := MakeItemWeapons(
@@ -268,6 +277,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Melee },
+    1200,
     debug,
     .item_weapon_type_blunt)
     truncheon, _ := MakeItemWeapons(
@@ -293,6 +303,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     { "Two Handed" },
     ItemCategory.Weapon,
     { .Melee },
+    2000,
     debug,
     .item_weapon_type_blunt)
     gaffiStickInstance, _ := MakeItemWeapons(
@@ -318,6 +329,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Melee },
+    500,
     debug,
     .item_weapon_type_lightsaber)
     Lightsaber, _ := MakeItemWeapons(
@@ -343,6 +355,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Melee },
+    400,
     debug,
     .item_weapon_type_lightsaber)
     ShotoLightsaber, _ := MakeItemWeapons(
@@ -368,6 +381,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Weapon,
     { .Melee },
+    400,
     debug,
     .item_weapon_type_blade)
     knife, _ := MakeItemWeapons(
@@ -393,6 +407,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     { "Stores 1L of liquid" },
     ItemCategory.Gear,
     {  },
+    1000,
     debug,
     .category_gear)
     canteen, _ := MakeItemGear(
@@ -412,6 +427,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Container,
     {  },
+    2500,
     debug,
     .category_storage)
     spacerDuffel, _ := MakeItemContainerGrid(
@@ -433,6 +449,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     ItemCategory.Container,
     {  },
+    800,
     debug,
     .category_belt)
     utilityBelt, _ := MakeItemContainerGrid(

@@ -98,16 +98,17 @@ CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     strings := ItemCstring{}
 
     strings.base_rarity = str.clone_to_cstring(fmt.tprint(item.base_rarity), context.allocator)
-    strings.base_price  = str.clone_to_cstring(fmt.tprint(item.base_price), context.allocator)
+    strings.base_price  = str.clone_to_cstring(fmt.tprint(args = { item.base_price, "cr" }, sep = ""), context.allocator)
     strings.hardpoints  = str.clone_to_cstring(fmt.tprint(item.hardpoints), context.allocator)
     strings.width       = str.clone_to_cstring(fmt.tprint(item.width), context.allocator)
     strings.height      = str.clone_to_cstring(fmt.tprint(item.height), context.allocator)
     strings.id          = str.clone_to_cstring(item.id, context.allocator)
     strings.name        = str.clone_to_cstring(item.name, context.allocator)
     strings.description = str.clone_to_cstring(item.description, context.allocator)
+    strings.mass_g      = str.clone_to_cstring(fmt.tprint(args = { item.mass_g, "g" }, sep = ""), context.allocator)
 
     if item.restricted do strings.restricted = "Restricted"
-    else do strings.restricted = "Unrestricted"
+    else do strings.restricted = "Legal"
 
     qualites_dyn, quality_err := make([dynamic]cstring)
     if quality_err != nil do panic("Failed to create qualities array")
@@ -145,6 +146,8 @@ CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> 
         return base
     }
 
+    weapon.category = "Weapon"
+    weapon.sub_category = str.clone_to_cstring(WeaponSubCategoryString(itemData.sub_category), context.allocator)
     weapon.data = WeaponDataCstring{
         damage = str.clone_to_cstring(fmt.tprint(itemData.damage), context.allocator),
         range = str.clone_to_cstring(fmt.tprint(itemData.range), context.allocator),
@@ -152,7 +155,6 @@ CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> 
         crit = str.clone_to_cstring(fmt.tprint(itemData.crit), context.allocator),
         skill = str.clone_to_cstring(fmt.tprint(itemData.skill), context.allocator),
         scale = str.clone_to_cstring(fmt.tprint(itemData.scale), context.allocator),
-        sub_category = str.clone_to_cstring(WeaponSubCategoryString(itemData.sub_category), context.allocator),
     }
 
 
@@ -168,10 +170,11 @@ CreateItemContainerCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) 
         return base
     }
 
+    Container.category = "Container"
+    Container.sub_category = str.clone_to_cstring(ContainerSubCategoryString(itemData.sub_category), context.allocator)
     Container.data = ContainerDataCstring{
         width = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).width), context.allocator),
         height = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).height), context.allocator),
-        sub_category = str.clone_to_cstring(ContainerSubCategoryString(itemData.sub_category), context.allocator),
     }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Container ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
@@ -186,8 +189,9 @@ CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> It
         return base
     }
 
+    Gear.category = "Gear"
+    Gear.sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator)
     Gear.data = GearDataCstring{
-        sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator),
     }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))

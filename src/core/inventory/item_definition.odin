@@ -12,6 +12,7 @@ Item :: struct{
     base_price:    i32,
     qualities:     [dynamic]string,
     features:      [dynamic]string,
+    mass_g:        i32,
 
     category:      ItemCategory,
     tags:          [dynamic]ItemTag,
@@ -56,13 +57,16 @@ ItemCstring :: struct{
     base_rarity,
     hardpoints,
     restricted,
-    base_price: cstring,
+    base_price,
+    mass_g: cstring,
 
     features,
     tags,
     qualities: [dynamic]cstring,
 
-    data: ItemCstringData
+    data: ItemCstringData,
+    category,
+    sub_category: cstring
 }
 
 ItemCstringData :: union{
@@ -78,17 +82,13 @@ WeaponDataCstring :: struct{
     crit,
     skill,
     scale: cstring,
-
-    sub_category: cstring
 }
 
 ContainerDataCstring :: struct{
     width,
     height: cstring,
-
-    sub_category: cstring
 }
 
 GearDataCstring :: struct{
-    sub_category: cstring
+    //Empty for now, kept for future expansion
 }
