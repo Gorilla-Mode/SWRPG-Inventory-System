@@ -18,6 +18,7 @@ MakeItemBase :: proc(
     features: []string,
     category: ItemCategory,
     tags: []ItemTag,
+    mass: i32,
     debug: bool,
     icon_enum: ui.Icons = nil,
 ) -> (Item, ItemError) {
@@ -27,7 +28,7 @@ MakeItemBase :: proc(
        icon = ui.Icons.gui_square
    }
 
-    ok := CheckBaseItem(base_rarity, hardpoints, base_price, width, height)
+    ok := CheckBaseItem(base_rarity, hardpoints, base_price, mass, width, height )
     if !ok.success {
         return Item{}, ok
     }
@@ -59,6 +60,7 @@ MakeItemBase :: proc(
         base_price = base_price,
         qualities = qualities_dyn,
         features = features_dyn,
+        mass = mass,
         category = category,
         tags = tags_dyn,
         icon_enum = icon,
@@ -116,7 +118,7 @@ MakeItemContainerGrid :: proc(baseItem: Item,
 ) -> (Item, ContainerError) {
     container := baseItem
 
-    baseItem := CheckBaseItem(container.base_rarity, container.hardpoints, container.base_price, width, height)
+    baseItem := CheckBaseItem(container.base_rarity, container.hardpoints, container.base_price, container.mass, width, height)
     if !baseItem.success {
         return Item{}, ContainerError{ false, .InvalidData, "Base item data is invalid" }
     }
