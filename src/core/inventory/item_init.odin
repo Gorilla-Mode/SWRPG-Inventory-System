@@ -60,7 +60,7 @@ MakeItemBase :: proc(
         base_price = base_price,
         qualities = qualities_dyn,
         features = features_dyn,
-        mass = mass,
+        mass_g = mass,
         category = category,
         tags = tags_dyn,
         icon_enum = icon,
@@ -118,7 +118,7 @@ MakeItemContainerGrid :: proc(baseItem: Item,
 ) -> (Item, ContainerError) {
     container := baseItem
 
-    baseItem := CheckBaseItem(container.base_rarity, container.hardpoints, container.base_price, container.mass, width, height)
+    baseItem := CheckBaseItem(container.base_rarity, container.hardpoints, container.base_price, container.mass_g, width, height)
     if !baseItem.success {
         return Item{}, ContainerError{ false, .InvalidData, "Base item data is invalid" }
     }

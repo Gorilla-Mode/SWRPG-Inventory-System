@@ -125,7 +125,7 @@ CheckGearItem :: proc(item: Item) -> (GearError) {
 }
 
 CheckBaseItemItem :: proc(item: Item) -> (ItemError) {
-    baseItem := CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.mass, item.width, item.height)
+    baseItem := CheckBaseItem(item.base_rarity, item.hardpoints, item.base_price, item.mass_g, item.width, item.height)
     if baseItem.success != true {
         return ItemError{ false, .InvalidRarity, "Base item data is invalid" }
     }
