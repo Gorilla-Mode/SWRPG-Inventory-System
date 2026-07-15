@@ -108,7 +108,7 @@ CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     strings.mass_g      = str.clone_to_cstring(fmt.tprint(args = { item.mass_g, "g" }, sep = ""), context.allocator)
 
     if item.restricted do strings.restricted = "Restricted"
-    else do strings.restricted = "Unrestricted"
+    else do strings.restricted = "Legal"
 
     qualites_dyn, quality_err := make([dynamic]cstring)
     if quality_err != nil do panic("Failed to create qualities array")
