@@ -62,7 +62,8 @@ ItemCstring :: struct{
     tags,
     qualities: [dynamic]cstring,
 
-    data: ItemCstringData
+    data: ItemCstringData,
+    category: cstring
 }
 
 ItemCstringData :: union{

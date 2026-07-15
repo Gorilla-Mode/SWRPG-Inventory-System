@@ -145,6 +145,7 @@ CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> 
         return base
     }
 
+    weapon.category = "Weapon"
     weapon.data = WeaponDataCstring{
         damage = str.clone_to_cstring(fmt.tprint(itemData.damage), context.allocator),
         range = str.clone_to_cstring(fmt.tprint(itemData.range), context.allocator),
@@ -168,6 +169,7 @@ CreateItemContainerCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) 
         return base
     }
 
+    Container.category = "Container"
     Container.data = ContainerDataCstring{
         width = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).width), context.allocator),
         height = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).height), context.allocator),
@@ -186,6 +188,7 @@ CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> It
         return base
     }
 
+    Gear.category = "Gear"
     Gear.data = GearDataCstring{
         sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator),
     }
