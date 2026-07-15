@@ -63,7 +63,7 @@ InstanceErrors :: enum{
     InvalidData,
 }
 
-CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price, mass: i32, width, height: i16) -> (ItemError) {
+CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, mass: f32, width, height: i16) -> (ItemError) {
     if base_rarity < 1 || base_rarity > 10 {
         return ItemError{ false, .InvalidRarity, "Base rarity must be between 1 and 5" }
     }

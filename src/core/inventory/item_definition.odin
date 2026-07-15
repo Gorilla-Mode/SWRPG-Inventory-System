@@ -12,7 +12,7 @@ Item :: struct{
     base_price:    i32,
     qualities:     [dynamic]string,
     features:      [dynamic]string,
-    mass_g:        i32,
+    mass_g:        f32,
 
     category:      ItemCategory,
     tags:          [dynamic]ItemTag,

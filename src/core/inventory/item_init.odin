@@ -18,7 +18,7 @@ MakeItemBase :: proc(
     features: []string,
     category: ItemCategory,
     tags: []ItemTag,
-    mass: i32,
+    mass: f32,
     debug: bool,
     icon_enum: ui.Icons = nil,
 ) -> (Item, ItemError) {
