@@ -146,6 +146,7 @@ CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> 
     }
 
     weapon.category = "Weapon"
+    weapon.sub_category = str.clone_to_cstring(WeaponSubCategoryString(itemData.sub_category), context.allocator)
     weapon.data = WeaponDataCstring{
         damage = str.clone_to_cstring(fmt.tprint(itemData.damage), context.allocator),
         range = str.clone_to_cstring(fmt.tprint(itemData.range), context.allocator),
@@ -153,7 +154,6 @@ CreateItemWeaponCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> 
         crit = str.clone_to_cstring(fmt.tprint(itemData.crit), context.allocator),
         skill = str.clone_to_cstring(fmt.tprint(itemData.skill), context.allocator),
         scale = str.clone_to_cstring(fmt.tprint(itemData.scale), context.allocator),
-        sub_category = str.clone_to_cstring(WeaponSubCategoryString(itemData.sub_category), context.allocator),
     }
 
 
@@ -170,10 +170,10 @@ CreateItemContainerCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) 
     }
 
     Container.category = "Container"
+    Container.sub_category = str.clone_to_cstring(ContainerSubCategoryString(itemData.sub_category), context.allocator)
     Container.data = ContainerDataCstring{
         width = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).width), context.allocator),
         height = str.clone_to_cstring(fmt.tprint(itemData.containerDef.storage.(ContainerGrid).height), context.allocator),
-        sub_category = str.clone_to_cstring(ContainerSubCategoryString(itemData.sub_category), context.allocator),
     }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Container ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
@@ -189,8 +189,8 @@ CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> It
     }
 
     Gear.category = "Gear"
+    Gear.sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator)
     Gear.data = GearDataCstring{
-        sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator),
     }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))

@@ -63,7 +63,8 @@ ItemCstring :: struct{
     qualities: [dynamic]cstring,
 
     data: ItemCstringData,
-    category: cstring
+    category,
+    sub_category: cstring
 }
 
 ItemCstringData :: union{
@@ -79,17 +80,13 @@ WeaponDataCstring :: struct{
     crit,
     skill,
     scale: cstring,
-
-    sub_category: cstring
 }
 
 ContainerDataCstring :: struct{
     width,
     height: cstring,
-
-    sub_category: cstring
 }
 
 GearDataCstring :: struct{
-    sub_category: cstring
+    //Empty for now, kept for future expansion
 }
