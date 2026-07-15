@@ -106,6 +106,7 @@ CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     strings.name        = str.clone_to_cstring(item.name, context.allocator)
     strings.description = str.clone_to_cstring(item.description, context.allocator)
     strings.mass_g      = str.clone_to_cstring(fmt.tprint(args = { item.mass_g, "g" }, sep = ""), context.allocator)
+    strings.mass_kg     = str.clone_to_cstring(fmt.tprint(args = { item.mass_g / 1000, "kg" }, sep = ""), context.allocator)
 
     if item.restricted do strings.restricted = "Restricted"
     else do strings.restricted = "Legal"
@@ -191,8 +192,7 @@ CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> It
 
     Gear.category = "Gear"
     Gear.sub_category = str.clone_to_cstring(GearSubCategoryString(itemData.sub_category), context.allocator)
-    Gear.data = GearDataCstring{
-    }
+    Gear.data = GearDataCstring{ }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
     return Gear

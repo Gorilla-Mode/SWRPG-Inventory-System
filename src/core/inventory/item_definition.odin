@@ -58,7 +58,8 @@ ItemCstring :: struct{
     hardpoints,
     restricted,
     base_price,
-    mass_g: cstring,
+    mass_g,
+    mass_kg: cstring,
 
     features,
     tags,

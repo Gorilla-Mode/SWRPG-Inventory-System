@@ -320,6 +320,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     if (subCatSize.x + padding * 4) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 4
 
     economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
+    massStr := item.mass_g <= 1000 ? sizeStrings.mass_g : sizeStrings.mass_kg
 
     rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
@@ -331,7 +332,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont,  sizeStrings.width, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  sizeStrings.height, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  sizeStrings.mass_g, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 3)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  massStr, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 3)}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
@@ -358,12 +359,14 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
 CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring) -> struct{
     width,
     height,
-    mass_g: cstring
+    mass_g,
+    mass_kg: cstring
 }{
     return {
         width  = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
         height = cstr.Concat("Height: ", itemStr.height, context.temp_allocator),
-        mass_g = cstr.Concat("Mass: ", itemStr.mass_g, context.temp_allocator)
+        mass_g = cstr.Concat("Mass: ", itemStr.mass_g, context.temp_allocator),
+        mass_kg = cstr.Concat("Mass: ", itemStr.mass_kg, context.temp_allocator)
     }
 }
 
