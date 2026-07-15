@@ -334,7 +334,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(defaultFont,  sizeStrings.mass_g, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 3)}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
-    rl.DrawTextEx(captionFont, "Metadata", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
+    rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
