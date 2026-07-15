@@ -12,7 +12,7 @@ Item :: struct{
     base_price:    i32,
     qualities:     [dynamic]string,
     features:      [dynamic]string,
-    mass_g:        i32,
+    mass_g:        f32,
 
     category:      ItemCategory,
     tags:          [dynamic]ItemTag,
@@ -58,7 +58,8 @@ ItemCstring :: struct{
     hardpoints,
     restricted,
     base_price,
-    mass_g: cstring,
+    mass_g,
+    mass_kg: cstring,
 
     features,
     tags,
