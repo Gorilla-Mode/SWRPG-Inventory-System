@@ -7,7 +7,7 @@ import rl "vendor:raylib"
 import comp "../ui/component"
 import inv "../core/inventory"
 import str "core:strings"
-
+import cstr "../utils/cstrings"
 
 CatalogButton :: struct {
     button: comp.Button,
@@ -308,29 +308,47 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     baseItemDataHeight: f32 = 72
     baseItemDataWidth: f32 = 156
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    economyStrings := CatalogItemStatGetEconomyStrings(itemStr)
+    priceSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
+    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
+
     itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
     itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
     economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
-    price := itemStr.base_price
-    priceSize := rl.MeasureTextEx(defaultFont, price, defaultFontSize, 0)
-
-    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
 
     rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.base_price, economyTextPos, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.base_rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  itemStr.restricted, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2) + padding}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  economyStrings.base_price, economyTextPos, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  economyStrings.rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  economyStrings.restricted, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2) + padding}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.width, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.height, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Metadata", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  itemStr.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
 //    rl.DrawTextEx(defaultFont,  itemStr.hardpoints, {textPos.x, textPos.y + (descriptionTextSize.y * 4) + (padding * 2)}, defaultFontSize, 0, textCol)
 //    rl.DrawTextEx(defaultFont,  itemStr.width, {textPos.x, textPos.y + (descriptionTextSize.y * 5) + (padding * 2)}, defaultFontSize, 0, textCol)
 //    rl.DrawTextEx(defaultFont,  itemStr.height, {textPos.x, textPos.y + (descriptionTextSize.y * 6) + (padding * 2)}, defaultFontSize, 0, textCol)
 
     return bounds
+}
+
+CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
+    base_price,
+    proj_price,
+    rarity,
+    restricted: cstring
+}{
+    return {
+        base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
+        proj_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
+        rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
+        restricted = cstr.Concat("Legality: ", itemStr.restricted, context.temp_allocator)
+    }
 }
