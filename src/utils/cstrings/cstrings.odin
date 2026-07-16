@@ -15,23 +15,60 @@ Concat :: proc(a, b: cstring, allocator := context.allocator) -> (cstring) {
     return cstring(&buf[0])
 }
 
-Wrap :: proc(text: cstring, max_width: f32, font: rl.Font, spacing: f32, allocator := context.allocator) -> (cstring) {
+Wrap :: proc(
+    text: cstring,
+    max_width: f32,
+    font: rl.Font,
+    spacing: f32,
+    allocator := context.allocator,
+) -> cstring {
+
     if text == nil do return nil
 
-    wrapped := make([dynamic]u8, 0, len(text), allocator)
     p := ([^]u8)(text)
-    line_num := 0
+
+    wrapped := make([dynamic]u8, 0, len(text)+1, allocator)
+
+    line_start := 0
+    last_space := -1
 
     for i := 0; p[i] != 0; i += 1 {
-        _ = append(&wrapped, p[i])
+
+        append(&wrapped, p[i])
+
         if p[i] == ' ' {
-            line_width := rl.MeasureTextEx(font, cstring(&wrapped[line_num]), f32(font.baseSize), spacing).x
-            if line_width > max_width {
-                wrapped[len(wrapped) - 1] = '\n'
-                line_num = i
+            last_space = len(wrapped) - 1
+        }
+
+        append(&wrapped, 0)
+
+        width := rl.MeasureTextEx(font, cstring(&wrapped[line_start]), f32(font.baseSize), spacing, ).x
+
+        _ = pop(&wrapped)
+
+        if width > max_width {
+
+            if last_space >= line_start {
+                wrapped[last_space] = '\n'
+                line_start = last_space + 1
+                last_space = -1
+            } else {
+                append(&wrapped, 0)
+
+                for j := len(wrapped)-1; j > line_start; j -= 1 {
+                    wrapped[j] = wrapped[j-1]
+                }
+
+                wrapped[line_start] = '\n'
+
+                _ = pop(&wrapped)
+
+                line_start += 1
             }
         }
     }
-    
+
+    append(&wrapped, 0)
+
     return cstring(&wrapped[0])
 }
