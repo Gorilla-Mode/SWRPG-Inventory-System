@@ -297,7 +297,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
 
     textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
 
-    baseItemDataHeight: f32 = 72
+    baseItemDataHeight: f32 = 86
     baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
     maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
     if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
@@ -318,9 +318,12 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
 
     rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  economyStrings.base_price, economyTextPos, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  economyStrings.restricted, economyTextPos, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  economyStrings.rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  economyStrings.restricted, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont,  economyStrings.base_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+    projPriceSeperatorLine := rl.Vector2{itemEconomyRect.x + (padding * 2),  itemEconomyRect.y + padding + (defaultFontSize * 4)}
+    rl.DrawLineEx(projPriceSeperatorLine, {projPriceSeperatorLine.x + itemEconomyRect.width - (padding * 4), projPriceSeperatorLine.y}, 2, style.colors.primary)
+    rl.DrawTextEx(defaultFont,  economyStrings.proj_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 3) + padding}, defaultFontSize, 0, textCol)
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
@@ -367,7 +370,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
 }{
     return {
         base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
+        proj_price = cstr.Concat("Projected: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
         rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Legality: ", itemStr.restricted, context.temp_allocator)
     }
