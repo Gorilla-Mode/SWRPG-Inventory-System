@@ -294,10 +294,8 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
 
     rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
     rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
-    textBounds := rl.Rectangle{itemViewRect.x + itemViewRect.width + (padding * 2), itemViewRect.y, bounds.width - itemViewRect.width - (padding * 4), itemViewRect.height}
-    rl.DrawRectangleRec(textBounds, {secondaryCol.r, secondaryCol.g, secondaryCol.b, 32})
 
-    descriptionText := cstr.Wrap(itemStr.description, textBounds.width, defaultFont, 0, context.temp_allocator)
+    descriptionText := cstr.WrapMono(itemStr.description, bounds.width - itemViewRect.width - app.PADDING, defaultFont, 0, context.temp_allocator)
     descriptionTextSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
     textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding, itemViewRect.y})
 

@@ -15,60 +15,41 @@ Concat :: proc(a, b: cstring, allocator := context.allocator) -> (cstring) {
     return cstring(&buf[0])
 }
 
-Wrap :: proc(
-    text: cstring,
-    max_width: f32,
-    font: rl.Font,
-    spacing: f32,
-    allocator := context.allocator,
-) -> cstring {
-
+WrapMono :: proc(text: cstring, max_width: f32, font: rl.Font, spacing: f32, allocator := context.allocator) -> cstring {
     if text == nil do return nil
 
+    char_width := rl.MeasureTextEx(font, "M", f32(font.baseSize), spacing, ).x
+    chars_per_line := int(max_width / char_width)
+
+    if chars_per_line <= 0 do return text
+
+    length := len(text)
+    wrapped := make([dynamic]u8, 0, length + length / chars_per_line + 1, allocator)
     p := ([^]u8)(text)
-
-    wrapped := make([dynamic]u8, 0, len(text)+1, allocator)
-
     line_start := 0
-    last_space := -1
 
-    for i := 0; p[i] != 0; i += 1 {
-
+    for i in 0..<length {
         append(&wrapped, p[i])
+    }
 
-        if p[i] == ' ' {
-            last_space = len(wrapped) - 1
+    for line_start + chars_per_line < len(wrapped) {
+
+        break_pos := line_start + chars_per_line
+
+        space := break_pos
+        for space > line_start && wrapped[space] != ' ' {
+            space -= 1
         }
 
-        append(&wrapped, 0)
-
-        width := rl.MeasureTextEx(font, cstring(&wrapped[line_start]), f32(font.baseSize), spacing, ).x
-
-        _ = pop(&wrapped)
-
-        if width > max_width {
-
-            if last_space >= line_start {
-                wrapped[last_space] = '\n'
-                line_start = last_space + 1
-                last_space = -1
-            } else {
-                append(&wrapped, 0)
-
-                for j := len(wrapped)-1; j > line_start; j -= 1 {
-                    wrapped[j] = wrapped[j-1]
-                }
-
-                wrapped[line_start] = '\n'
-
-                _ = pop(&wrapped)
-
-                line_start += 1
-            }
+        if space == line_start {
+            space = break_pos
         }
+
+        wrapped[space] = '\n'
+
+        line_start = space + 1
     }
 
     append(&wrapped, 0)
-
     return cstring(&wrapped[0])
 }
