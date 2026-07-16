@@ -58,16 +58,30 @@ WrapMono :: proc(text: cstring, max_width: f32, font: rl.Font, spacing: f32, all
             line_start = space + 1
             continue
         }
-        
+
         if space == line_start {
             space = break_pos
         }
 
         wrapped[space] = '\n'
-
         line_start = space + 1
     }
 
     append(&wrapped, 0)
     return cstring(&wrapped[0])
+}
+
+FormatArray :: proc(arr: [dynamic]cstring, prefix: cstring = "", separator: cstring = "", allocator := context.allocator) -> cstring {
+    if len(arr) == 0 do return nil
+
+    buf: cstring
+    for str in arr {
+        if str == nil do continue
+        entry: cstring = (Concat(prefix, str, allocator)) //
+        entry = (Concat(entry, separator, allocator))
+
+        buf = (Concat(buf, entry, allocator))
+    }
+
+    return buf
 }

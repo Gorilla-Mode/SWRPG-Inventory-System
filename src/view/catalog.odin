@@ -339,6 +339,11 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
+    featuresTextPos := ui.SnapVector2({itemEconomyRect.x, itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
+    featuresText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
+    rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x, featuresTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+
     return bounds
 }
 
