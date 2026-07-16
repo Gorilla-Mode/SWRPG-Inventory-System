@@ -36,11 +36,29 @@ WrapMono :: proc(text: cstring, max_width: f32, font: rl.Font, spacing: f32, all
 
         break_pos := line_start + chars_per_line
 
+        has_newline := false
+        for i := line_start; i < break_pos; i += 1 {
+            if wrapped[i] == '\n' {
+                line_start = i + 1
+                has_newline = true
+                break
+            }
+        }
+
+        if has_newline {
+            continue
+        }
+
         space := break_pos
-        for space > line_start && wrapped[space] != ' ' {
+        for space > line_start && wrapped[space] != ' ' && wrapped[space] != '\n' {
             space -= 1
         }
 
+        if wrapped[space] == '\n' {
+            line_start = space + 1
+            continue
+        }
+        
         if space == line_start {
             space = break_pos
         }
