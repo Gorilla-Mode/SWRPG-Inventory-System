@@ -298,7 +298,9 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
 
     baseItemDataHeight: f32 = 72
-    baseItemDataWidth: f32 = 156
+    baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
+    maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
+    if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y, baseItemDataWidth, baseItemDataHeight}
     economyStrings := CatalogItemStatGetEconomyStrings(itemStr)
     sizeStrings := CatalogItemStatGetSizeStrings(itemStr)
@@ -349,7 +351,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding
     rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
 
-    descriptionText := cstr.WrapMono(itemStr.description, bounds.width - itemViewRect.width - app.PADDING, defaultFont, 0, context.temp_allocator)
+    descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
     descriptionTextY := separatorY + padding
     rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont, descriptionText, {textPos.x + padding * 2, descriptionTextY + captionFontSize}, defaultFontSize, 0, textCol)
