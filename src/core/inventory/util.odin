@@ -222,7 +222,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     false,
     500,
     { "Breach 1", "Vicious 1" },
-    { "+5 Damage and +1 Breach and Vicious per additional charge" },
+    { "+5 Damage and +1 Breach and Vicious per additional charge", "Damage range cone is in direction of metal jet" },
     ItemCategory.Weapon,
     {  },
     1500,

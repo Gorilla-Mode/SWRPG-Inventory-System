@@ -339,10 +339,15 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
 
-    featuresTextPos := ui.SnapVector2({itemEconomyRect.x, itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
-    featuresText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
+    qualitesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
+    qualitesText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
+    rl.DrawTextEx(captionFont, "Qualities", {qualitesTextPos.x, qualitesTextPos.y + padding}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, qualitesText, {qualitesTextPos.x, qualitesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+
+    featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
+    featuresText := cstr.FormatArray(itemStr.features, "" , "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
     rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x, featuresTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
 
     return bounds
 }
