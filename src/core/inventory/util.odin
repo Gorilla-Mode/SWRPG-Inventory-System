@@ -58,7 +58,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
 
     rifleBase, _ := MakeItemBase("RIFLE",
     "A280C Blaster Rifle",
-    "Carbine variant of the A280 blaster rifle, used by mostly by rebel troops",
+    "For nearly a century, the A280C heavy blaster rifle has been one of BlasTech Industries' top-selling military blasters and one of the galaxy's most ubiquitous service rifles. Before the Clone Wars, when various Republic systems were responsible for defending their own territories, the A280C was the defacto official rifle used by planetary armies and private militias. While slightly bulky, it is praised for its incredible accuracy, range, penetrating power, and durability. Before the Clone Wars, most soldiers trained on the A280C. It wasn't until more modular platforms, such as the DC-15 blaster rifle, were adopted by the Republic that the A280C's popularity began to wane.\n\nAs the Empire absorbed or disbanded local defense forces, decommissioned A280C's found their way to the Rebel Alliance, where this weapon quickly became a favorite for standard infantry, snipers, and Special Forces alike. Today, these weapons are cherished by many of their users, who work hard to keep them in service even as replacements grow harder to acquire.\n\nReduce the difficulty of Mechanics checks to repair a BlasTech A280C heavy blaster rifle by 1 (to a minimum of Simple (-)).",
     6,
     2,
     4,
@@ -222,7 +222,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     false,
     500,
     { "Breach 1", "Vicious 1" },
-    { "+5 Damage and +1 Breach and Vicious per additional charge" },
+    { "+5 Damage and +1 Breach and Vicious per additional charge", "Damage range cone is in direction of metal jet" },
     ItemCategory.Weapon,
     {  },
     1500,

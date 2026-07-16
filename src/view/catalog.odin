@@ -295,19 +295,13 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
     rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
 
-    descriptionText := itemStr.description
-    descriptionTextSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
-    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding, itemViewRect.y})
-
-    rl.DrawTextEx(defaultFont, descriptionText, textPos, defaultFontSize, 0, textCol)
-    rl.DrawLineEx({textPos.x, textPos.y + descriptionTextSize.y + padding},
-    {bounds.x + bounds.width, textPos.y + descriptionTextSize.y + padding},
-    2,
-    style.colors.primary)
+    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
 
     baseItemDataHeight: f32 = 72
-    baseItemDataWidth: f32 = 156
-    itemEconomyRect := rl.Rectangle{textPos.x, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
+    maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
+    if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
+    itemEconomyRect := rl.Rectangle{textPos.x, textPos.y, baseItemDataWidth, baseItemDataHeight}
     economyStrings := CatalogItemStatGetEconomyStrings(itemStr)
     sizeStrings := CatalogItemStatGetSizeStrings(itemStr)
     metaStrings := CatalogItemStatGetMetaStrings(itemStr)
@@ -315,8 +309,8 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     subCatSize := rl.MeasureTextEx(defaultFont, metaStrings.sub_category, defaultFontSize, 0)
     if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
 
-    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
-    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y + descriptionTextSize.y + (padding * 2 + 1), baseItemDataWidth, baseItemDataHeight}
+    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth, baseItemDataHeight}
+    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
     if (subCatSize.x + padding * 4) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 4
 
     economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
@@ -338,6 +332,29 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
     rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+
+    qualitesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + padding })
+    qualitesText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
+    qualitesTextSize := rl.MeasureTextEx(defaultFont, qualitesText, defaultFontSize, 0)
+    rl.DrawTextEx(captionFont, "Qualities", {qualitesTextPos.x, qualitesTextPos.y + padding}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, qualitesText, {qualitesTextPos.x, qualitesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+
+    featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + padding })
+    featuresText := cstr.FormatArray(itemStr.features, "" , "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
+    featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
+    rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
+
+    sectionBottom : = qualitesTextSize.y > featuresTextSize.y ? qualitesTextSize.y : featuresTextSize.y
+    if sectionBottom == 0 do sectionBottom += captionFontSize + (padding * 2)
+
+    separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding
+    rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
+
+    descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
+    descriptionTextY := separatorY + padding
+    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, descriptionText, {textPos.x + padding * 2, descriptionTextY + captionFontSize}, defaultFontSize, 0, textCol)
 
     return bounds
 }
@@ -363,9 +380,9 @@ CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring) -> struct{
     mass_kg: cstring
 }{
     return {
-        width  = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
-        height = cstr.Concat("Height: ", itemStr.height, context.temp_allocator),
-        mass_g = cstr.Concat("Mass: ", itemStr.mass_g, context.temp_allocator),
+        width   = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
+        height  = cstr.Concat("Height: ", itemStr.height, context.temp_allocator),
+        mass_g  = cstr.Concat("Mass: ", itemStr.mass_g, context.temp_allocator),
         mass_kg = cstr.Concat("Mass: ", itemStr.mass_kg, context.temp_allocator)
     }
 }
