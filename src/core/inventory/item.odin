@@ -7,8 +7,8 @@ ItemArea :: proc(item: ^Item) -> i32
 }
 
 //Calculate the total price of an item, based on its base price, and restricted status
-ItemTotalPrice :: proc(item: ^Item, rarity: i8) -> i32
+ItemTotalPrice :: proc(item: ^Item, rarity: i8) -> i64
 {
-    legality_mod: i32 = item.restricted ? 2 : 4
-    return (item.base_price * i32(rarity)) / legality_mod
+    legality_mod: i64 = item.restricted ? 2 : 4
+    return (i64(item.base_price) * i64(rarity)) / legality_mod
 }
