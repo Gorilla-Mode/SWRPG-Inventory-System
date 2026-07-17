@@ -303,18 +303,28 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
     if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y, baseItemDataWidth, baseItemDataHeight}
+    itemSizeRect := rl.Rectangle{}
+    itemMetaRect := rl.Rectangle{}
 
     economyStrings := CatalogItemStatGetEconomyStrings(itemStr, state.catalog.selected_item)
     sizeStrings    := CatalogItemStatGetSizeStrings(itemStr, state.catalog.selected_item)
     metaStrings    := CatalogItemStatGetMetaStrings(itemStr)
 
-    priceSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
+    restrictedSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
+    prizeSize := rl.MeasureTextEx(defaultFont, economyStrings.proj_price, defaultFontSize, 0)
+    economySize := prizeSize.x > restrictedSize.x ? prizeSize.x : restrictedSize.x
     subCatSize := rl.MeasureTextEx(defaultFont, metaStrings.sub_category, defaultFontSize, 0)
-    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
 
-    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth, baseItemDataHeight}
-    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
-    if (subCatSize.x + padding * 4) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 4
+    if (restrictedSize.x + padding * 6 + defaultFontSize) > economySize{
+        itemEconomyRect.width = economySize + padding * 6 + defaultFontSize
+        diff := itemEconomyRect.width - baseItemDataWidth
+        itemSizeRect.width -= diff
+    }
+
+
+    itemSizeRect = rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth + itemSizeRect.width, baseItemDataHeight}
+    itemMetaRect = rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
+    if (subCatSize.x + padding * 6 + defaultFontSize) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 6 + defaultFontSize
 
     massStr := item.mass_g <= 1000 ? sizeStrings.mass_g : sizeStrings.mass_kg
 
