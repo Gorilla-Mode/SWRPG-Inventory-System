@@ -353,7 +353,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
         qualitiesTextSize := rl.MeasureTextEx(defaultFont, qualitiesText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Qualities", {qualitiesTextPos.x, qualitiesTextPos.y + padding}, captionFontSize, 2, textCol)
         rl.DrawTextEx(defaultFont, qualitiesText, {qualitiesTextPos.x, qualitiesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
-        sectionBottom = qualitiesTextSize.y + padding
+        sectionBottom = qualitiesTextSize.y + (padding * 2)
         hasSections = true
     }
 
@@ -363,7 +363,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
         featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
         rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
-        featuresSectionHeight := featuresTextSize.y + padding
+        featuresSectionHeight := featuresTextSize.y + (padding * 2)
         if featuresSectionHeight > sectionBottom do sectionBottom = featuresSectionHeight
         hasSections = true
     }
