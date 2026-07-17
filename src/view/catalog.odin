@@ -453,14 +453,14 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
     restricted: cstring
 }{
     return {
-        base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected: ",
+        base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
+        proj_price = cstr.Concat(cstr.Concat("Projected:",
         str.clone_to_cstring(fmt.tprint(inv.ItemTotalPrice(item, item.base_rarity)),
         context.temp_allocator), context.temp_allocator),
         "cr",
         context.temp_allocator), // Milde moses
-        rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
-        restricted = cstr.Concat("Status: ", itemStr.restricted, context.temp_allocator)
+        rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
+        restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
 }
 
@@ -472,11 +472,11 @@ CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item)
     area: cstring
 }{
     return {
-        width   = cstr.Concat("Width:  ", itemStr.width, context.temp_allocator),
-        height  = cstr.Concat("Height: ", itemStr.height, context.temp_allocator),
-        mass_g  = cstr.Concat("Mass:   ", itemStr.mass_g, context.temp_allocator),
-        mass_kg = cstr.Concat("Mass:   ", itemStr.mass_kg, context.temp_allocator),
-        area    = cstr.Concat("Area:   ", cstr.IntToCString(inv.ItemArea(item), context.temp_allocator), context.temp_allocator)
+        width   = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
+        height  = cstr.Concat("Height:", itemStr.height, context.temp_allocator),
+        mass_g  = cstr.Concat("Mass:  ", itemStr.mass_g, context.temp_allocator),
+        mass_kg = cstr.Concat("Mass:  ", itemStr.mass_kg, context.temp_allocator),
+        area    = cstr.Concat("Area:  ", cstr.IntToCString(inv.ItemArea(item), context.temp_allocator), context.temp_allocator)
     }
 }
 
@@ -485,7 +485,7 @@ CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
     sub_category: cstring
 }{
     return {
-        category     = cstr.Concat("Category: ", itemStr.category, context.temp_allocator),
+        category     = cstr.Concat("Category:", itemStr.category, context.temp_allocator),
         sub_category = cstr.Concat("Sub-Cat: ", itemStr.sub_category, context.temp_allocator),
     }
 }
