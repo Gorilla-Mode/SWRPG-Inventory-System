@@ -297,7 +297,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
 
     textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
 
-    baseItemDataHeight: f32 = 86
+    baseItemDataHeight: f32 = 92
     baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
     maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
     if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
@@ -313,45 +313,32 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
     if (subCatSize.x + padding * 4) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 4
 
-    economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + defaultFontSize})
     massStr := item.mass_g <= 1000 ? sizeStrings.mass_g : sizeStrings.mass_kg
 
     rl.DrawRectangleLinesEx(itemEconomyRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Economy", {itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  economyStrings.restricted, economyTextPos, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  economyStrings.rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  economyStrings.base_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
-    projPriceSeperatorLine := rl.Vector2{itemEconomyRect.x + (padding * 2),  itemEconomyRect.y + padding + (defaultFontSize * 4)}
+    economyTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + padding + captionFontSize + padding})
+    CatalogItemStatDrawField(style, ui.Icons.economy_restricted, defaultFont, economyStrings.restricted, economyTextPos, textCol, textCol)
+    CatalogItemStatDrawField(style, ui.Icons.economy_rarity, defaultFont,  economyStrings.rarity, {economyTextPos.x, economyTextPos.y + defaultFontSize + padding}, textCol, textCol)
+    CatalogItemStatDrawField(style, ui.Icons.economy_credit, defaultFont,  economyStrings.base_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
+    projPriceSeperatorLine := rl.Vector2{itemEconomyRect.x + (padding * 2),  itemEconomyRect.y + padding + captionFontSize + (padding * 3) + (defaultFontSize * 3) + padding}
     rl.DrawLineEx(projPriceSeperatorLine, {projPriceSeperatorLine.x + itemEconomyRect.width - (padding * 4), projPriceSeperatorLine.y}, 2, style.colors.primary)
-    rl.DrawTextEx(defaultFont,  economyStrings.proj_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize * 3) + padding}, defaultFontSize, 0, textCol)
+    CatalogItemStatDrawField(style, ui.Icons.economy_credit, defaultFont,  economyStrings.proj_price, {economyTextPos.x, economyTextPos.y + (defaultFontSize + padding) * 3 + padding}, textCol, textCol)
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  sizeStrings.width, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  sizeStrings.height, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  massStr, {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + (defaultFontSize * 3)}, defaultFontSize, 0, textCol)
+    sizeTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + captionFontSize + padding})
+    CatalogItemStatDrawField(style, ui.Icons.gui_square, defaultFont, sizeStrings.width, sizeTextPos, textCol, textCol)
+    CatalogItemStatDrawField(style, ui.Icons.gui_square, defaultFont, sizeStrings.height, {sizeTextPos.x, sizeTextPos.y + defaultFontSize + padding}, textCol, textCol)
+    CatalogItemStatDrawField(style, ui.Icons.gui_info, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont,  metaStrings.category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + defaultFontSize }, defaultFontSize, 0, textCol)
-    rl.DrawTextEx(defaultFont,  metaStrings.sub_category, {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + (defaultFontSize * 2)}, defaultFontSize, 0, textCol)
+    metaTextPos := ui.SnapVector2({itemMetaRect.x + (padding * 2), itemMetaRect.y + padding + captionFontSize + padding})
+    CatalogItemStatDrawField(style, CatalogItemStatGetCategoryIcon(item.category), defaultFont,  metaStrings.category, metaTextPos, textCol, textCol)
+    CatalogItemStatDrawField(style, CatalogItemStatGetSubCategoryIcon(item), defaultFont, metaStrings.sub_category, {metaTextPos.x, metaTextPos.y + defaultFontSize + padding}, textCol, textCol)
 
-    qualitesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + padding })
-    qualitesText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
-    qualitesTextSize := rl.MeasureTextEx(defaultFont, qualitesText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Qualities", {qualitesTextPos.x, qualitesTextPos.y + padding}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, qualitesText, {qualitesTextPos.x, qualitesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
-
-    featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + padding })
-    featuresText := cstr.FormatArray(itemStr.features, "" , "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
-    featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
-
-    sectionBottom : = qualitesTextSize.y > featuresTextSize.y ? qualitesTextSize.y : featuresTextSize.y
-    if sectionBottom == 0 do sectionBottom += captionFontSize + (padding * 2)
-
-    separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding
+    separatorY := itemEconomyRect.y + itemEconomyRect.height + padding
     rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
 
     descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
@@ -360,6 +347,67 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawTextEx(defaultFont, descriptionText, {textPos.x + padding * 2, descriptionTextY + captionFontSize}, defaultFontSize, 0, textCol)
 
     return bounds
+}
+
+CatalogItemStatDrawField :: proc(style: ^ui.style, icon: ui.Icons, font: rl.Font, text: cstring, pos: rl.Vector2, textCol: rl.Color, iconCol: rl.Color, gap: f32 = 2) {
+    iconSize := f32(font.baseSize)
+    iconPos := ui.SnapVector2(pos)
+    rl.DrawTextureEx(style.icons[icon], iconPos, 0, ui.IconScale(iconSize), iconCol)
+    rl.DrawTextEx(font, text, {iconPos.x + iconSize + gap, iconPos.y}, f32(font.baseSize), 0, textCol)
+}
+
+CatalogItemStatGetCategoryIcon :: proc(category: inv.ItemCategory) -> ui.Icons {
+    switch category {
+    case .Weapon:
+        return ui.Icons.category_weapons
+    case .Gear:
+        return ui.Icons.category_gear
+    case .Armor:
+        return ui.Icons.category_clothing
+    case .Container:
+        return ui.Icons.category_container
+    }
+    return ui.Icons.gui_info
+}
+
+CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
+    switch data in item.data {
+    case inv.WeaponData:
+        switch data.sub_category {
+        case .Pistol:
+            return ui.Icons.item_weapon_type_pistol
+        case .Rifle:
+            return ui.Icons.item_weapon_type_rifle
+        case .Gunnery:
+            return ui.Icons.item_weapon_type_gunnery
+        case .Explosive:
+            return ui.Icons.item_weapon_type_explosive
+        case .Blade:
+            return ui.Icons.item_weapon_type_blade
+        case .Blunt:
+            return ui.Icons.item_weapon_type_blunt
+        case .Lightsaber:
+            return ui.Icons.item_weapon_type_lightsaber
+        }
+    case inv.ContainerData:
+        switch data.sub_category {
+        case .Belt:
+            return ui.Icons.category_belt
+        case .Backpack:
+            return ui.Icons.category_storage
+        case .Holster:
+            return ui.Icons.category_holster
+        case .Bandolier:
+            return ui.Icons.category_bandolier
+        case .Container:
+            return ui.Icons.category_container
+        }
+    case inv.GearData:
+        return ui.Icons.category_gear
+    case:
+        return ui.Icons.category_clothing
+    }
+    return ui.Icons.gui_info
 }
 
 CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
