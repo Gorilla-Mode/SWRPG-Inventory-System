@@ -298,3 +298,7 @@ HideItemCard :: proc(container: ^inv.ItemInstance, origin_x, origin_y: f32, styl
 		return
 	}
 }
+
+HotKey :: proc(state: ^st.state){
+    if rl.IsKeyPressed(.END) do state.debug = !state.debug
+}
