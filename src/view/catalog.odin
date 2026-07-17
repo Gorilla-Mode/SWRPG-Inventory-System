@@ -289,18 +289,20 @@ DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.s
     headerFontSize,
     4,
     style.colors.text)
-    rl.DrawLineEx({nameRect.x, nameRect.y + nameRect.height + padding + (padding / 2)},
-    {nameRect.x + nameRect.width, nameRect.y + nameRect.height + padding + (padding / 2)},
+    rl.DrawLineEx({nameRect.x, nameRect.y + nameRect.height },
+    {nameRect.x + nameRect.width, nameRect.y + nameRect.height },
     2,
     { secondaryCol.r, secondaryCol.g, secondaryCol.b, 128 })
 
+
+    bounds.height += padding / 2
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds, true
 }
 
 DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, debug: bool = false) -> rl.Rectangle {
     padding : f32 = 2
-    bounds  := rl.Rectangle{rect.x, rect.y + rect.height + (padding * 3), 256, 512}
+    bounds  := rl.Rectangle{rect.x, rect.y + rect.height + padding, 256, 512}
     item    := state.catalog.selected_item
     textCol := style.colors.text
 
