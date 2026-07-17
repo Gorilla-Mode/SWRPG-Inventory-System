@@ -229,7 +229,7 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     return keys
 }
 
-DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout){
+DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout) {
     padding: f32 = 2
     headerText := style.fonts.semibold[ui.font_size.header]
     headerTextSize := f32(ui.font_size.header)
@@ -247,37 +247,37 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     2,
     style.colors.text)
 
-    DrawCatalogBaseItemStat(state, style, bounds, layout)
-
+    boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
+    if itemSelected {
+        DrawCatalogBaseItemStat(state, style, boundsHeader, layout)
+    }
 }
 
-DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
-    bounds          := rect
-    item            := state.catalog.selected_item
-    headerFont      := style.fonts.semibold[ui.font_size.header]
-    headerFontSize  := f32(headerFont.baseSize)
-    padding         : f32 = 2
-    textCol         := style.colors.text
+DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, layout: app.CatalogPageLayout, debug: bool = false) -> (rl.Rectangle, bool){
+    nameRect       := rl.Rectangle{rect.x, rect.y, rect.width, 32}
+    bounds         := nameRect
+    textCol        := style.colors.text
+    item           := state.catalog.selected_item
+    headerFont     := style.fonts.semibold[ui.font_size.header]
+    headerFontSize := f32(headerFont.baseSize)
+    padding        : f32 = 2
     secondaryCol    := style.colors.secondary
-    nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, 32}
-    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
-    defaultFont     := style.fonts.regular[ui.font_size.default]
-    defaultFontSize := f32(defaultFont.baseSize)
-    captionFont     := style.fonts.regular[ui.font_size.caption]
-    captionFontSize := f32(captionFont.baseSize)
 
     rl.DrawLineEx({nameRect.x, nameRect.y + (padding / 2)}, {nameRect.x + nameRect.width, nameRect.y + (padding / 2)}, 2, style.colors.secondary)
     if item == nil{
         errorText: cstring = "No item selected"
         errorTextSize := rl.MeasureTextEx(style.fonts.semibold[ui.font_size.default], errorText, f32(ui.font_size.default), 2)
+        errorPos := ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), rect.height / 2})
         rl.DrawTextEx(headerFont,
         errorText,
-        ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), bounds.height / 2}),
+        errorPos,
         headerFontSize,
         2,
         { textCol.r, textCol.g, textCol.b, 100 })
 
-        return bounds
+        bounds.height = rect.height / 2 - headerFontSize - nameRect.height
+        if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+        return bounds, false
     }
 
     itemStr := state.CStringRegistry.items[item.id]
@@ -292,6 +292,24 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     {nameRect.x + nameRect.width, nameRect.y + nameRect.height + padding + (padding / 2)},
     2,
     { secondaryCol.r, secondaryCol.g, secondaryCol.b, 128 })
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds, true
+}
+
+DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
+    bounds          := rect
+    item            := state.catalog.selected_item
+    padding         : f32 = 2
+    textCol         := style.colors.text
+    nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, bounds.height}
+    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
+    captionFont     := style.fonts.regular[ui.font_size.caption]
+    captionFontSize := f32(captionFont.baseSize)
+
+    itemStr := state.CStringRegistry.items[item.id]
 
     rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
     rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
@@ -320,7 +338,6 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
         diff := itemEconomyRect.width - baseItemDataWidth
         itemSizeRect.width -= diff
     }
-
 
     itemSizeRect = rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth + itemSizeRect.width, baseItemDataHeight}
     itemMetaRect = rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
