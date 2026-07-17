@@ -9,12 +9,15 @@ import inv "../core/inventory"
 import str "core:strings"
 import cstr "../utils/cstrings"
 import fmt "core:fmt"
+import m "core:math"
 
+@(private)
 CatalogButton :: struct {
     button: comp.Button,
     value:  st.subCategory,
 }
 
+@(private)
 CatalogButtons :: struct {
     category:   [dynamic]comp.Button,
     weapons:    [dynamic]CatalogButton,
@@ -45,6 +48,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     DrawCatalogItemResults(state, style, layout, paddingElement, explorerBounds, rect_left)
 }
 
+@(private="file")
 DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) -> rl.Rectangle {
     bg_color      := style.colors.surface
     hover_color   := style.colors.secondary_hover
@@ -143,6 +147,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     return bounds
 }
 
+@(private="file")
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
@@ -185,11 +190,12 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
         state.catalog.scroll_offset += rl.GetMouseWheelMove() * 30
         if state.catalog.scroll_offset >= 0 do state.catalog.scroll_offset = 0
-        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
+        if m.abs(state.catalog.scroll_offset) + 5 >= bounds.height do state.catalog.scroll_offset = -(bounds.height - paddingElement - 5)
     }
 
 }
 
+@(private="file")
 GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
     queryString = str.to_lower(queryString)
@@ -229,6 +235,7 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     return keys
 }
 
+@(private="file")
 DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout) {
     padding: f32 = 2
     headerText := style.fonts.semibold[ui.font_size.header]
@@ -254,6 +261,7 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     }
 }
 
+@(private="file")
 DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, layout: app.CatalogPageLayout, debug: bool = false) -> (rl.Rectangle, bool){
     nameRect       := rl.Rectangle{rect.x, rect.y, rect.width, 32}
     bounds         := nameRect
@@ -300,6 +308,7 @@ DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.s
     return bounds, true
 }
 
+@(private="file")
 DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, debug: bool = false) -> rl.Rectangle {
     padding : f32 = 2
     bounds  := rl.Rectangle{rect.x, rect.y + rect.height + padding, 256, 512}
@@ -313,6 +322,7 @@ DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.sta
     return bounds
 }
 
+@(private="file")
 DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle{
     item            := state.catalog.selected_item
     padding         : f32 = 2
@@ -437,6 +447,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     return bounds
 }
 
+@(private="file")
 CatalogItemStatDrawField :: proc(style: ^ui.style, icon: ui.Icons, font: rl.Font, text: cstring, pos: rl.Vector2, textCol: rl.Color, iconCol: rl.Color, gap: f32 = 2) {
     iconSize := f32(font.baseSize)
     iconPos := ui.SnapVector2(pos)
@@ -444,6 +455,7 @@ CatalogItemStatDrawField :: proc(style: ^ui.style, icon: ui.Icons, font: rl.Font
     rl.DrawTextEx(font, text, {iconPos.x + iconSize + gap, iconPos.y}, f32(font.baseSize), 0, textCol)
 }
 
+@(private="file")
 CatalogItemStatGetCategoryIcon :: proc(category: inv.ItemCategory) -> ui.Icons {
     switch category {
     case .Weapon:
@@ -458,6 +470,7 @@ CatalogItemStatGetCategoryIcon :: proc(category: inv.ItemCategory) -> ui.Icons {
     return ui.Icons.gui_info
 }
 
+@(private="file")
 CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
     switch data in item.data {
     case inv.WeaponData:
@@ -498,6 +511,7 @@ CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
     return ui.Icons.gui_info
 }
 
+@(private="file")
 CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item) -> struct{
     base_price,
     proj_price,
@@ -516,6 +530,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
     }
 }
 
+@(private="file")
 CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item) -> struct{
     width,
     height,
@@ -532,6 +547,7 @@ CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item)
     }
 }
 
+@(private="file")
 CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
     category,
     sub_category: cstring
