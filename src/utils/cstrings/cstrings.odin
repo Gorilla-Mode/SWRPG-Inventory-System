@@ -2,6 +2,8 @@
 
 import "core:mem"
 import rl "vendor:raylib"
+import str "core:strings"
+import fmt "core:fmt"
 
 Concat :: proc(a, b: cstring, allocator := context.allocator) -> (cstring) {
     len_a := len(a)
@@ -92,4 +94,8 @@ FormatArray :: proc(arr: [dynamic]cstring,
     }
 
     return buf
+}
+
+IntToCString :: proc(num: i32, allocator := context.allocator) -> cstring {
+    return str.clone_to_cstring(fmt.tprint(num), allocator)
 }

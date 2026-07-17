@@ -409,7 +409,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     {  },
     1000,
     debug,
-    .category_gear)
+    .category_survival)
     canteen, _ := MakeItemGear(
     canteenBase,
     GearSubCategory.Survival,)
