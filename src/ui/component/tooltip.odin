@@ -3,7 +3,7 @@
 import rl "vendor:raylib"
 import ui ".."
 
-ToolTip :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style: ^ui.style) {
+ToolTipVec2 :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style: ^ui.style) {
     messageSize := rl.MeasureTextEx(style.fonts.regular[.default], text, f32(ui.font_size.default), 0)
     rect := rl.Rectangle{
         x = pos.x,
@@ -23,5 +23,22 @@ ToolTip :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style: ^ui
         rl.DrawRectangleRec(backGroundRect, style.colors.surface)
         rl.DrawRectangleLinesEx(backGroundRect, 1, style.colors.primary)
         rl.DrawTextEx(style.fonts.regular[.default], text, {rect.x + 5, rect.y + 5}, f32(ui.font_size.default), 0, style.colors.text)
+    }
+}
+
+ToolTipRect :: proc(text: cstring, hitbox: rl.Rectangle, style: ^ui.style) {
+    messageSize := rl.MeasureTextEx(style.fonts.regular[.default], text, f32(ui.font_size.default), 0)
+    mousePos := rl.GetMousePosition()
+    backGroundRect := rl.Rectangle{
+        x = mousePos.x + 2,
+        y = mousePos.y + 2,
+        width = messageSize.x + 6,
+        height = messageSize.y + 6,
+    }
+
+    if rl.CheckCollisionPointRec(mousePos, hitbox) {
+        rl.DrawRectangleRec(backGroundRect, style.colors.surface)
+        rl.DrawRectangleLinesEx(backGroundRect, 1, style.colors.primary)
+        rl.DrawTextEx(style.fonts.regular[.default], text, {mousePos.x + 5, mousePos.y + 5}, f32(ui.font_size.default), 0, style.colors.text)
     }
 }
