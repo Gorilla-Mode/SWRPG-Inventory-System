@@ -420,7 +420,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
         base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
         proj_price = cstr.Concat("Projected: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
         rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
-        restricted = cstr.Concat("Legality: ", itemStr.restricted, context.temp_allocator)
+        restricted = cstr.Concat("Status: ", itemStr.restricted, context.temp_allocator)
     }
 }
 
@@ -444,6 +444,6 @@ CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
 }{
     return {
         category     = cstr.Concat("Category: ", itemStr.category, context.temp_allocator),
-        sub_category = cstr.Concat("Sub-Category: ", itemStr.sub_category, context.temp_allocator),
+        sub_category = cstr.Concat("Sub-Cat: ", itemStr.sub_category, context.temp_allocator),
     }
 }
