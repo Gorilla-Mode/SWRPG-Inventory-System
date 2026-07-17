@@ -249,7 +249,8 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
 
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
-        DrawCatalogBaseItemStat(state, style, boundsHeader, layout)
+        boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
+        DrawCatalogBaseItemStat(state, style, boundsView, layout)
     }
 }
 
@@ -261,7 +262,7 @@ DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.s
     headerFont     := style.fonts.semibold[ui.font_size.header]
     headerFontSize := f32(headerFont.baseSize)
     padding        : f32 = 2
-    secondaryCol    := style.colors.secondary
+    secondaryCol   := style.colors.secondary
 
     rl.DrawLineEx({nameRect.x, nameRect.y + (padding / 2)}, {nameRect.x + nameRect.width, nameRect.y + (padding / 2)}, 2, style.colors.secondary)
     if item == nil{
@@ -297,24 +298,31 @@ DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.s
     return bounds, true
 }
 
+DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, debug: bool = false) -> rl.Rectangle {
+    padding : f32 = 2
+    bounds  := rl.Rectangle{rect.x, rect.y + rect.height + (padding * 3), 256, 512}
+    item    := state.catalog.selected_item
+    textCol := style.colors.text
+
+    rl.DrawRectangleLinesEx(bounds, 2, style.colors.primary)
+    rl.DrawTextureEx(style.icons[item.icon_enum], {bounds.x + (padding * 2), bounds.y + (padding * 2)}, 0, ui.IconScale(bounds.width - (padding * 4)), textCol)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
 DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
     bounds          := rect
     item            := state.catalog.selected_item
     padding         : f32 = 2
     textCol         := style.colors.text
-    nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, bounds.height}
-    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
     defaultFont     := style.fonts.regular[ui.font_size.default]
     defaultFontSize := f32(defaultFont.baseSize)
     captionFont     := style.fonts.regular[ui.font_size.caption]
     captionFontSize := f32(captionFont.baseSize)
 
     itemStr := state.CStringRegistry.items[item.id]
-
-    rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
-    rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
-
-    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
+    textPos := ui.SnapVector2({rect.x + rect.width + padding * 2, rect.y})
 
     baseItemDataHeight: f32 = 92
     baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
