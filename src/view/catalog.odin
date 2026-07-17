@@ -315,7 +315,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     economySize := prizeSize.x > restrictedSize.x ? prizeSize.x : restrictedSize.x
     subCatSize := rl.MeasureTextEx(defaultFont, metaStrings.sub_category, defaultFontSize, 0)
 
-    if (restrictedSize.x + padding * 6 + defaultFontSize) > economySize{
+    if (economySize + padding * 6 + defaultFontSize) > baseItemDataWidth{
         itemEconomyRect.width = economySize + padding * 6 + defaultFontSize
         diff := itemEconomyRect.width - baseItemDataWidth
         itemSizeRect.width -= diff
