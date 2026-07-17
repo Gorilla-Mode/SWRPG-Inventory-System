@@ -353,7 +353,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     sectionBottom : = qualitesTextSize.y > featuresTextSize.y ? qualitesTextSize.y : featuresTextSize.y
     if sectionBottom == 0 do sectionBottom += captionFontSize + (padding * 2)
 
-    separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding
+    separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding * 2
     rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
 
     descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
