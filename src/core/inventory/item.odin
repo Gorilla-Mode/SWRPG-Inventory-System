@@ -6,9 +6,9 @@ ItemArea :: proc(item: ^Item) -> i32
     return i32(item.width) * i32(item.height)
 }
 
-//Todo: Update to actual rarity price calculaton
 //Calculate the total price of an item, based on its base price, and restricted status
-ItemTotalPrice :: proc(item: ^Item) -> i32
+ItemTotalPrice :: proc(item: ^Item, rarity: i8) -> i32
 {
-    return item.base_price * i32(item.base_rarity)
+    legality_mod: i32 = item.restricted ? 2 : 4
+    return (item.base_price * i32(rarity)) / legality_mod
 }

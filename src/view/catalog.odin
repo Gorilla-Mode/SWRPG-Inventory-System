@@ -8,6 +8,7 @@ import comp "../ui/component"
 import inv "../core/inventory"
 import str "core:strings"
 import cstr "../utils/cstrings"
+import fmt "core:fmt"
 
 CatalogButton :: struct {
     button: comp.Button,
@@ -302,7 +303,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
     if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y, baseItemDataWidth, baseItemDataHeight}
-    economyStrings := CatalogItemStatGetEconomyStrings(itemStr)
+    economyStrings := CatalogItemStatGetEconomyStrings(itemStr, state.catalog.selected_item)
     sizeStrings := CatalogItemStatGetSizeStrings(itemStr)
     metaStrings := CatalogItemStatGetMetaStrings(itemStr)
     priceSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
@@ -425,7 +426,7 @@ CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
     return ui.Icons.gui_info
 }
 
-CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
+CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item) -> struct{
     base_price,
     proj_price,
     rarity,
@@ -433,7 +434,11 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring) -> struct{
 }{
     return {
         base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat("Projected: ", itemStr.base_price, context.temp_allocator), //TODO: Implement projected price calculation
+        proj_price = cstr.Concat(cstr.Concat("Projected: ",
+        str.clone_to_cstring(fmt.tprint(inv.ItemTotalPrice(item, item.base_rarity)),
+        context.temp_allocator), context.temp_allocator),
+        "cr",
+        context.temp_allocator), // Milde moses
         rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Status: ", itemStr.restricted, context.temp_allocator)
     }
