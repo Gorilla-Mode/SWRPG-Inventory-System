@@ -250,7 +250,7 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
         boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
-        DrawCatalogBaseItemStat(state, style, boundsView, layout)
+        _ = DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
     }
 }
 
@@ -313,8 +313,7 @@ DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.sta
     return bounds
 }
 
-DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
-    bounds          := rect
+DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle{
     item            := state.catalog.selected_item
     padding         : f32 = 2
     textCol         := style.colors.text
@@ -383,6 +382,10 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     CatalogItemStatDrawField(style, CatalogItemStatGetCategoryIcon(item.category), defaultFont,  metaStrings.category, metaTextPos, textCol, textCol)
     CatalogItemStatDrawField(style, CatalogItemStatGetSubCategoryIcon(item), defaultFont, metaStrings.sub_category, {metaTextPos.x, metaTextPos.y + defaultFontSize + padding}, textCol, textCol)
 
+    contentRight := itemEconomyRect.x + itemEconomyRect.width
+    if (itemSizeRect.x + itemSizeRect.width) > contentRight do contentRight = itemSizeRect.x + itemSizeRect.width
+    if (itemMetaRect.x + itemMetaRect.width) > contentRight do contentRight = itemMetaRect.x + itemMetaRect.width
+
     sectionsY := itemEconomyRect.y + itemEconomyRect.height + (padding * 2)
     sectionBottom: f32 = 0
     hasSections := false
@@ -411,14 +414,26 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     separatorY := itemEconomyRect.y + itemEconomyRect.height
     if hasSections {
         separatorY += sectionBottom
-        rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
+        rl.DrawLineEx({textPos.x, separatorY}, {contentRight, separatorY}, 2, style.colors.primary)
     }
 
     descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
     descriptionTextY := separatorY + padding
+    descriptionPos := rl.Vector2{textPos.x + padding * 2, descriptionTextY + captionFontSize}
+    descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
     rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, descriptionText, {textPos.x + padding * 2, descriptionTextY + captionFontSize}, defaultFontSize, 0, textCol)
+    rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
 
+    if (descriptionPos.x + descriptionSize.x) > contentRight do contentRight = descriptionPos.x + descriptionSize.x
+
+    bounds := rl.Rectangle{
+        x = textPos.x,
+        y = textPos.y,
+        width = contentRight - textPos.x,
+        height = (descriptionPos.y + descriptionSize.y) - textPos.y,
+    }
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
 }
 
