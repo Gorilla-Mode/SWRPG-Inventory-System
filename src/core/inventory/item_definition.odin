@@ -1,6 +1,6 @@
 ﻿package inventory
+import ui "../../ui"
 
-//Item model, as it exists in database
 Item :: struct{
     id:            string,
     name:          string,
@@ -12,14 +12,15 @@ Item :: struct{
     base_price:    i32,
     qualities:     [dynamic]string,
     features:      [dynamic]string,
+    mass_g:        f32,
 
     category:      ItemCategory,
     tags:          [dynamic]ItemTag,
+    icon_enum:     ui.Icons,
 
     data:          ItemData
 }
 
-//Union of all possible item data types, to be used in the Item struct
 ItemData :: union{
     WeaponData,
     ContainerData,
@@ -38,11 +39,57 @@ WeaponData :: struct{
 }
 
 ContainerData :: struct{
-    storage: ^Container,
+    containerDef: ContainerDefinition,
 
     sub_category: ContainerSubCategory
 }
 
 GearData :: struct{
     sub_category: GearSubCategory
+}
+
+ItemCstring :: struct{
+    id,
+    name,
+    description,
+    width,
+    height,
+    base_rarity,
+    hardpoints,
+    restricted,
+    base_price,
+    mass_g,
+    mass_kg: cstring,
+
+    features,
+    tags,
+    qualities: [dynamic]cstring,
+
+    data: ItemCstringData,
+    category,
+    sub_category: cstring
+}
+
+ItemCstringData :: union{
+    WeaponDataCstring,
+    ContainerDataCstring,
+    GearDataCstring
+}
+
+WeaponDataCstring :: struct{
+    damage,
+    range,
+    rangeband,
+    crit,
+    skill,
+    scale: cstring,
+}
+
+ContainerDataCstring :: struct{
+    width,
+    height: cstring,
+}
+
+GearDataCstring :: struct{
+    //Empty for now, kept for future expansion
 }

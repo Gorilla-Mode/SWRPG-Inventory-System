@@ -3,10 +3,34 @@
 ItemInstance :: struct{
     id: u64,
     definition: ^Item,
+    data: InstanceData,
     rotated: bool,
     grabbed: bool,
 
     pos_x, pos_y: i16,
+}
+
+InstanceData :: union{
+    WeaponInstanceData,
+    ContainerInstanceData,
+    ArmorInstanceData,
+    GearInstanceData,
+}
+
+WeaponInstanceData :: struct{
+    attachments: [dynamic]^ItemInstance,
+}
+
+ContainerInstanceData :: struct{
+    items: [dynamic]^ItemInstance,
+}
+
+ArmorInstanceData :: struct{
+    attachments: [dynamic]^ItemInstance,
+}
+
+GearInstanceData :: struct{
+    attachments: [dynamic]^ItemInstance,
 }
 
 ItemGetWidth :: proc(instance: ^ItemInstance) -> i16 {

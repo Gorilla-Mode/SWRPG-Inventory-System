@@ -3,161 +3,481 @@
 import str "core:strings"
 import fmt "core:fmt"
 
-// Test function to create a backpack, and some items, and test the ContainerCanPlace function
-TestItem :: proc(cell_size: f32) -> struct{
-    backpack: ^Container,
-    sword: ^Item,
-    rifle: ^Item,
-    sword_instance: ^ItemInstance,
-    rifle_instance: ^ItemInstance,
-    backpackItem: ^Item,
-    backpackInstance: ^ItemInstance}
+TestItemInstance :: proc(cell_size: f32, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> struct{
+    backpackInstance: ^ItemInstance, }
 {
-    backpack := new(Container)
-    backpack.type = ContainerType.Backpack
-    backpack.storage = ContainerGrid{
-        width  = 8,
-        height = 10
-    }
+    backpackInstance, _ := MakeContainerInstance(&reg.items["SPACER_DUFFEL"], instanceReg, debug)
 
-    backpackItem := new(Item)
-    backpackItem.name = "Spacers duffel"
-    backpackItem.width = 8
-    backpackItem.height = 10
-    backpackItem.description = "A standard backpack for carrying items."
-    backpackItem.base_rarity = 1
-    backpackItem.base_price = 100
-    backpackItem.qualities = nil
-    backpackItem.category = ItemCategory.Container
-    backpackItem.data = ContainerData{
-        storage = backpack,
-        sub_category = ContainerSubCategory.Backpack
-    }
+    rifle_instance, _ := MakeWeaponInstance(&reg.items["RIFLE"], instanceReg, debug, 0, 1)
 
-    backpackInstance := new(ItemInstance)
-    backpackInstance.definition = backpackItem
-    backpackInstance.id = 100
+    sword_instance, _ := MakeWeaponInstance(&reg.items["RAPIER"], instanceReg, debug)
 
-    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
-    sword := new(Item)
-    sword.name = "Vibro Rapier"
-    sword.width = 5
-    sword.height = 1
-    sword.description = "A lightweight sword with a vibrating edge,\ndesigned for quick and precise strikes."
-    sword.base_rarity = 6
-    sword.base_price = 5000
-    sword.qualities = nil
-    sword.category = ItemCategory.Weapon
-    sword.data = WeaponData {
-        skill = WeaponSkill.Melee,
-        crit = 1,
-        damage = 2,
-        scale = WeaponScale.Personal,
-        rangeband = WeaponRangebands.Engaged,
-        sub_category = WeaponSubCategory.Blade
-    }
-    append_elem(&sword.qualities, "Pierce 5")
+    knife_instance, _ := MakeWeaponInstance(&reg.items["KNIFE"], instanceReg, debug, 5)
 
-    rifle := new(Item)
-    rifle.name = "A280C Blaster Rifle"
-    rifle.width = 6
-    rifle.height = 2
-    rifle.description = "Carbine variant of the A280 blaster rifle,\nused by mostly by rebel troops"
-    rifle.base_rarity = 4
-    rifle.base_price = 1200
-    rifle.qualities = nil
-    rifle.category = ItemCategory.Weapon
-    append_elems(&rifle.qualities, "Pirece 1", "Full-Auto")
-    rifle.hardpoints = 4
-    rifle.data = WeaponData {
-        skill = WeaponSkill.Heavy,
-        crit = 4,
-        damage = 7,
-        scale = WeaponScale.Personal,
-        range = 300,
-        rangeband = WeaponRangebands.Long,
-        sub_category = WeaponSubCategory.Rifle
-    }
+    canteen_instance, _ := MakeGearInstance(&reg.items["CANTEEN"], instanceReg, debug, 6, 1)
 
-    knife := new(Item)
-    knife.name = "Vibroknife"
-    knife.description = "A small, concealable knife with a\nvibrating edge, designed for stealthy\nattacks."
-    knife.width = 3
-    knife.height = 1
-    knife.base_price = 200
-    knife.base_rarity = 2
-    knife.qualities = nil
-    knife.category = ItemCategory.Weapon
-    append_elem(&knife.qualities, "Pierce 2")
-    knife.hardpoints = 1
-    knife.data = WeaponData {
-        skill = WeaponSkill.Melee,
-        crit = 2,
-        damage = 2,
-        scale = WeaponScale.Personal,
-        rangeband = WeaponRangebands.Engaged,
-        sub_category = WeaponSubCategory.Blade
-    }
 
-    canteen := new(Item)
-    canteen.name = "Canteen"
-    canteen.description = "A small container for carrying water or\nother liquids."
-    canteen.width = 2
-    canteen.height = 2
-    canteen.base_price = 50
-    canteen.base_rarity = 1
-    canteen.features = nil
-    canteen.category = ItemCategory.Gear
-    canteen.data = GearData {
-        sub_category = GearSubCategory.Survival
-    }
-    append_elem(&canteen.features, "Can contain 1L of liquid")
-
-    rifle_instance := new(ItemInstance)
-    rifle_instance.definition = rifle
-    rifle_instance.pos_x = 0
-    rifle_instance.pos_y = 1
-    rifle_instance.id = 1
-    rifle_instance.rotated = false
-
-    sword_instance := new(ItemInstance)
-    sword_instance.definition = sword
-    sword_instance.pos_x = 0
-    sword_instance.pos_y = 0
-    sword_instance.id = 2
-    sword_instance.rotated = false
-
-    knife_instance := new(ItemInstance)
-    knife_instance.definition = knife
-    knife_instance.pos_x = 5
-    knife_instance.pos_y = 0
-    knife_instance.id = 3
-    knife_instance.rotated = false
-
-    canteen_instance := new(ItemInstance)
-    canteen_instance.definition = canteen
-    canteen_instance.pos_x = 6
-    canteen_instance.pos_y = 1
-    canteen_instance.id = 4
-    canteen_instance.rotated = false
-
-    append_elem(&backpack.items, sword_instance)
-    append_elem(&backpack.items, rifle_instance)
-    append_elem(&backpack.items, knife_instance)
-    append_elem(&backpack.items, canteen_instance)
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[rifle_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[sword_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[knife_instance])
+    ContainerAddItem(instanceReg.items[backpackInstance], instanceReg.items[canteen_instance])
 
     return{
-        backpack,
-        sword,
-        rifle,
-        sword_instance,
-        rifle_instance,
-        backpackItem,
-        backpackInstance
+        backpackInstance = instanceReg.items[backpackInstance],
     }
 }
 
-TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
+TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegistry, debug: bool){
+    //TODO: detect where to place newlines, no hardcoding shit in this part of town (For now atleast we mus)
+    rapierBase, _ := MakeItemBase("RAPIER",
+    "Vibro Rapier",
+    "A lightweight sword with a vibrating edge, designed for quick and precise strikes.",
+    5,
+    1,
+    6,
+    1,
+    false,
+    5000,
+    { "Pierce 5", "Knockdown" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee },
+    800,
+    debug,
+    .item_weapon_type_blade
+    )
+    rapier, _ := MakeItemWeapons(
+    rapierBase,
+    2,
+    5,
+    1,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
+    rifleBase, _ := MakeItemBase("RIFLE",
+    "A280C Blaster Rifle",
+    "For nearly a century, the A280C heavy blaster rifle has been one of BlasTech Industries' top-selling military blasters and one of the galaxy's most ubiquitous service rifles. Before the Clone Wars, when various Republic systems were responsible for defending their own territories, the A280C was the defacto official rifle used by planetary armies and private militias. While slightly bulky, it is praised for its incredible accuracy, range, penetrating power, and durability. Before the Clone Wars, most soldiers trained on the A280C. It wasn't until more modular platforms, such as the DC-15 blaster rifle, were adopted by the Republic that the A280C's popularity began to wane.\n\nAs the Empire absorbed or disbanded local defense forces, decommissioned A280C's found their way to the Rebel Alliance, where this weapon quickly became a favorite for standard infantry, snipers, and Special Forces alike. Today, these weapons are cherished by many of their users, who work hard to keep them in service even as replacements grow harder to acquire.\n\nReduce the difficulty of Mechanics checks to repair a BlasTech A280C heavy blaster rifle by 1 (to a minimum of Simple (-)).",
+    6,
+    2,
+    4,
+    4,
+    false,
+    1200,
+    { "Pierce 1", "Full-Auto" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged },
+    2500,
+    debug,
+    .item_weapon_type_rifle)
+    rifle, _ := MakeItemWeapons(
+    rifleBase,
+    7,
+    300,
+    4,
+    WeaponRangebands.Long,
+    WeaponSkill.Heavy,
+    WeaponScale.Personal,
+    WeaponSubCategory.Rifle)
+
+    lancerPistolBase, _ := MakeItemBase("LANCER_PISTOL",
+    "X-30 Lancer",
+    "A compact blaster pistol with a high rate of fire, designed for close-quarters combat.",
+    4,
+    2,
+    5,
+    3,
+    false,
+    1000,
+    { "Pierce 2", "Accurate 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged },
+    1200,
+    debug,
+    .item_weapon_type_pistol)
+    lancerPistol, _ := MakeItemWeapons(
+    lancerPistolBase,
+    5,
+    100,
+    4,
+    WeaponRangebands.Long,
+    WeaponSkill.Light,
+    WeaponScale.Personal,
+    WeaponSubCategory.Pistol)
+
+    dl44HeavyPistolBase, _ := MakeItemBase("DL44_HEAVY_PISTOL",
+    "DL-44 Heavy Blaster Pistol",
+    "A powerful blaster pistol with a high stopping power, favored by smugglers and bounty hunters.",
+    7,
+    3,
+    6,
+    3,
+    false,
+    700,
+    {  },
+    { "May run out of ammo with 2 threat or one despair" },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged },
+    1400,
+    debug,
+    .item_weapon_type_pistol)
+    dl44HeavyPistol, _ := MakeItemWeapons(
+    dl44HeavyPistolBase,
+    6,
+    150,
+    4,
+    WeaponRangebands.Medium,
+    WeaponSkill.Light,
+    WeaponScale.Personal,
+    WeaponSubCategory.Pistol)
+
+    m300HuntingBlasterBase, _ := MakeItemBase("M300_HUNTING_BLASTER",
+    "M-300 Hunting Blaster",
+    "A hunting blaster with a high rate of fire, designed for taking down large game.",
+    5,
+    2,
+    6,
+    1,
+    false,
+    1600,
+    { "Pierce 2", "Accurate 1", "Cumbersome 2", "Stun Setting" },
+    { "May reduce difficulty of combat checks at extreme or long range" },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged },
+    2800,
+    debug,
+    .item_weapon_type_rifle)
+    m300HuntingBlaster, _ := MakeItemWeapons(
+    m300HuntingBlasterBase,
+    8,
+    200,
+    3,
+    WeaponRangebands.Long,
+    WeaponSkill.Heavy,
+    WeaponScale.Personal,
+    WeaponSubCategory.Rifle)
+
+    heavyRepeaterBase, _ := MakeItemBase("HEAVY_REPEATER",
+    "E-Web Heavy Repeater",
+    "A heavy repeating blaster with a high rate of fire, designed for sustained combat.",
+    10,
+    5,
+    8,
+    4,
+    true,
+    6000,
+    { "Pierce 2", "Full-Auto", "Cumbersome 5", "Vicious 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Blaster, .Ranged },
+    18000,
+    debug,
+    .item_weapon_type_gunnery)
+    heavyRepeater, _ := MakeItemWeapons(
+    heavyRepeaterBase,
+    15,
+    200,
+    2,
+    WeaponRangebands.Long,
+    WeaponSkill.Gunnery,
+    WeaponScale.Personal,
+    WeaponSubCategory.Gunnery)
+
+    missileTube, _ := MakeItemBase("MISSILE_TUBE",
+    "PLX-2M Missile Tube",
+    "A missile tube for launching guided missiles.",
+    8,
+    4,
+    9,
+    4,
+    true,
+    7500,
+    { "Breach 1", "Blast 10", "Cumbersome 3", "Guided 3", "Limited Ammo 6", "Prepare 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Ranged },
+    15000,
+    debug,
+    .item_weapon_type_explosive)
+    missileLauncher, _ := MakeItemWeapons(
+    missileTube,
+    20,
+    100,
+    2,
+    WeaponRangebands.Extreme,
+    WeaponSkill.Gunnery,
+    WeaponScale.Personal,
+    WeaponSubCategory.Gunnery)
+
+    shapedChargeBase, _ := MakeItemBase("SHAPED_CHARGE",
+    "Shaped Charge",
+    "A shaped charge explosive device, designed for breaching armored targets.",
+    2,
+    2,
+    4,
+    0,
+    false,
+    500,
+    { "Breach 1", "Vicious 1" },
+    { "+5 Damage and +1 Breach and Vicious per additional charge", "Damage range cone is in direction of metal jet" },
+    ItemCategory.Weapon,
+    {  },
+    1500,
+    debug,
+    .item_weapon_type_explosive)
+    shapedCharge, _ := MakeItemWeapons(
+    shapedChargeBase,
+    15,
+    5,
+    4,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Mechanics,
+    WeaponScale.Personal,
+    WeaponSubCategory.Explosive)
+
+    antiVehicleMineBase, _ := MakeItemBase("ANTI_VEHICLE_MINE",
+    "Anti-Vehicle Mine",
+    "A mine designed to disable or destroy armored vehicles.",
+    3,
+    3,
+    6,
+    0,
+    true,
+    1400,
+    { "Breach 4", "Blast 2" },
+    {  },
+    ItemCategory.Weapon,
+    {  },
+    5000,
+    debug,
+    .item_weapon_type_explosive)
+    antiVehicleMine, _ := MakeItemWeapons(
+    antiVehicleMineBase,
+    25,
+    15,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Mechanics,
+    WeaponScale.Personal,
+    WeaponSubCategory.Explosive)
+
+    truncheonBase, _ := MakeItemBase("TRUNCHEON",
+    "Truncheon",
+    "A short, heavy club",
+    4,
+    1,
+    1,
+    0,
+    false,
+    15,
+    { "Disorient 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee },
+    1200,
+    debug,
+    .item_weapon_type_blunt)
+    truncheon, _ := MakeItemWeapons(
+    truncheonBase,
+    2,
+    1,
+    5,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blunt)
+
+    gaffiStick, _ := MakeItemBase("GAFFI_STICK",
+    "Gaffi Stick",
+    "A traditional melee weapon used by the Tusken Raiders of Tatooine.",
+    6,
+    2,
+    2,
+    0,
+    false,
+    100,
+    { "Defensive 1", "Disorient 3" },
+    { "Two Handed" },
+    ItemCategory.Weapon,
+    { .Melee },
+    2000,
+    debug,
+    .item_weapon_type_blunt)
+    gaffiStickInstance, _ := MakeItemWeapons(
+    gaffiStick,
+    2,
+    2,
+    3,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blunt)
+
+    lightsaberBase, _ := MakeItemBase("CROSSGUARD_LIGHTSABER",
+    "Lightsaber",
+    "A lightsaber with a crossguard hilt, designed for both offense and defense.",
+    3,
+    1,
+    5,
+    10,
+    true,
+    10000,
+    { "Breach 1", "Sunder", "Vicious 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee },
+    500,
+    debug,
+    .item_weapon_type_lightsaber)
+    Lightsaber, _ := MakeItemWeapons(
+    lightsaberBase,
+    10,
+    1,
+    1,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Lightsaber)
+
+    shotoLightsaberBase, _ := MakeItemBase("SHOTO_LIGHTSABER",
+    "Shoto Lightsaber",
+    "A shorter variant of the traditional lightsaber, designed for quick and agile combat.",
+    2,
+    1,
+    10,
+    8,
+    true,
+    9300,
+    { "Breach 1", "Sunder", "Accurate 1" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee },
+    400,
+    debug,
+    .item_weapon_type_lightsaber)
+    ShotoLightsaber, _ := MakeItemWeapons(
+    shotoLightsaberBase,
+    4,
+    1,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Lightsaber)
+
+    knifeBase, _ := MakeItemBase("KNIFE",
+    "Vibro Knife",
+    "A small, concealable knife with a vibrating edge, designed for stealthy attacks.",
+    3,
+    1,
+    2,
+    1,
+    false,
+    200,
+    { "Pierce 2" },
+    {  },
+    ItemCategory.Weapon,
+    { .Melee },
+    400,
+    debug,
+    .item_weapon_type_blade)
+    knife, _ := MakeItemWeapons(
+    knifeBase,
+    2,
+    1,
+    2,
+    WeaponRangebands.Engaged,
+    WeaponSkill.Melee,
+    WeaponScale.Personal,
+    WeaponSubCategory.Blade)
+
+    canteenBase, _ := MakeItemBase("CANTEEN",
+    "Canteen",
+    "A small container for carrying water or other liquids.",
+    2,
+    2,
+    1,
+    1,
+    false,
+    50,
+    { "Breach 10" },
+    { "Stores 1L of liquid" },
+    ItemCategory.Gear,
+    {  },
+    1000,
+    debug,
+    .category_gear)
+    canteen, _ := MakeItemGear(
+    canteenBase,
+    GearSubCategory.Survival,)
+
+    spacerDuffelBase, _ := MakeItemBase("SPACER_DUFFEL",
+    "Spacer's Duffel",
+    "A standard backpack for carrying items.",
+    8,
+    10,
+    1,
+    1,
+    false,
+    100,
+    {  },
+    {  },
+    ItemCategory.Container,
+    {  },
+    2500,
+    debug,
+    .category_storage)
+    spacerDuffel, _ := MakeItemContainerGrid(
+    spacerDuffelBase,
+    8,
+    10,
+    ContainerSubCategory.Backpack)
+
+    beltBase, _ := MakeItemBase("UTILITY_BELT",
+    "Utility Belt",
+    "A utility belt with various pouches and compartments.",
+    4,
+    1,
+    1,
+    1,
+    false,
+    150,
+    {  },
+    {  },
+    ItemCategory.Container,
+    {  },
+    800,
+    debug,
+    .category_belt)
+    utilityBelt, _ := MakeItemContainerGrid(
+    beltBase,
+    4,
+    1,
+    ContainerSubCategory.Belt)
+
+    AddItemRegistry(registry, strReg, rapier, debug)
+    AddItemRegistry(registry, strReg, rifle, debug)
+    AddItemRegistry(registry, strReg, knife, debug)
+    AddItemRegistry(registry, strReg, canteen, debug)
+    AddItemRegistry(registry, strReg, spacerDuffel, debug)
+    AddItemRegistry(registry, strReg, utilityBelt, debug)
+    AddItemRegistry(registry, strReg, lancerPistol, debug)
+    AddItemRegistry(registry, strReg, dl44HeavyPistol, debug)
+    AddItemRegistry(registry, strReg, m300HuntingBlaster, debug)
+    AddItemRegistry(registry, strReg, heavyRepeater, debug)
+    AddItemRegistry(registry, strReg, missileLauncher, debug)
+    AddItemRegistry(registry, strReg, shapedCharge, debug)
+    AddItemRegistry(registry, strReg, antiVehicleMine, debug)
+    AddItemRegistry(registry, strReg, truncheon, debug)
+    AddItemRegistry(registry, strReg, gaffiStickInstance, debug)
+    AddItemRegistry(registry, strReg, Lightsaber, debug)
+    AddItemRegistry(registry, strReg, ShotoLightsaber, debug)
+}
+
+TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
@@ -165,35 +485,17 @@ TestCharacter :: proc(backpack: ^ItemInstance) -> ^Character {
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
     char.equipment.slots[.Backpack] = backpack
 
-    belt_container := new(Container)
-    belt_container.type = .Belt
-    belt_container.storage = ContainerGrid{
-        width = 4,
-        height = 1,
-    }
+    belt1ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
+    belt2ID, _ := MakeContainerInstance(&reg.items["UTILITY_BELT"], instanceReg, debug)
 
-    beltItem := new(Item)
-    beltItem.name = "Utility Belt"
-    beltItem.height = 1
-    beltItem.width = 4
-    beltItem.description = "A utility belt with various pouches and compartments."
-    beltItem.category = ItemCategory.Container
-    beltItem.data = ContainerData{
-        storage = belt_container,
-        sub_category = .Belt
-    }
-
-    beltInstance := new(ItemInstance)
-    beltInstance.definition = beltItem
-    beltInstance.id = 101
-
-    char.equipment.slots[.Belt] = beltInstance
+    char.equipment.slots[.Belt] = instanceReg.items[belt1ID]
+    char.equipment.slots[.Armor] = instanceReg.items[belt2ID]
 
     return char
 }
 
 //Test function to test the ContainerCanPlace function with various positions for the rifle item instance in the backpack container
-TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_instance: ^ItemInstance, rifle_instance: ^ItemInstance)
+TestInvGrid :: proc(backpack: ^ItemInstance, sword: ^Item, rifle: ^Item, sword_instance: ^ItemInstance, rifle_instance: ^ItemInstance)
 {
     fmt.println()
 
@@ -236,23 +538,27 @@ TestInvGrid :: proc(backpack: ^Container, sword: ^Item, rifle: ^Item, sword_inst
 }
 
 // Function to convert the container and its items into a string representation for debugging/ease of use purposes
-ContainerToString :: proc(container: ^Container) -> string {
+ContainerToString :: proc(container: ^ItemInstance) -> string {
     builder := str.Builder{}
     str.builder_init(&builder, context.temp_allocator)
 
-    grid := make([][]rune, container.storage.(ContainerGrid).height, context.temp_allocator)
+    container_data := container.definition.data.(ContainerData)
+    grid_storage := container_data.containerDef.storage.(ContainerGrid)
+    container_items := container.data.(ContainerInstanceData)
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        grid[y] = make([]rune, container.storage.(ContainerGrid).width, context.temp_allocator)
+    grid := make([][]rune, grid_storage.height, context.temp_allocator)
 
-        for x in 0..<container.storage.(ContainerGrid).width {
+    for y in 0..<grid_storage.height {
+        grid[y] = make([]rune, grid_storage.width, context.temp_allocator)
+
+        for x in 0..<grid_storage.width {
             grid[y][x] = '.'
         }
     }
 
     symbols := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    for item, i in container.items {
+    for item, i in container_items.items {
         symbol := rune(symbols[i % len(symbols)])
         b := GetBounds(item)
 
@@ -262,8 +568,8 @@ ContainerToString :: proc(container: ^Container) -> string {
                 gx := b.pos_x + x
                 gy := b.pos_y + y
 
-                if gx < 0 || gx >= container.storage.(ContainerGrid).width ||
-                gy < 0 || gy >= container.storage.(ContainerGrid).height {
+                if gx < 0 || gx >= grid_storage.width ||
+                gy < 0 || gy >= grid_storage.height {
                     continue
                 }
 
@@ -272,8 +578,8 @@ ContainerToString :: proc(container: ^Container) -> string {
         }
     }
 
-    for y in 0..<container.storage.(ContainerGrid).height {
-        for x in 0..<container.storage.(ContainerGrid).width {
+    for y in 0..<grid_storage.height {
+        for x in 0..<grid_storage.width {
             str.write_rune(&builder, grid[y][x])
         }
 

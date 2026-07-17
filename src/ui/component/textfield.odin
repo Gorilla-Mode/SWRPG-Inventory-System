@@ -15,7 +15,7 @@ TextField :: struct {
     max_length: i32
 }
 
-UpdateTextField :: proc(field: ^TextField){
+UpdateTextField :: proc(field: ^TextField) -> bool{
     mousePos := rl.GetMousePosition()
     dt := rl.GetFrameTime()
 
@@ -23,12 +23,12 @@ UpdateTextField :: proc(field: ^TextField){
     {
         if rl.CheckCollisionPointRec(mousePos, field.rect_clear) {
             TextFieldClear(field)
-            return
+            return true
         }
         field.state.is_active = rl.CheckCollisionPointRec(mousePos, field.rect)
     }
 
-    if !field.state.is_active do return
+    if !field.state.is_active do return false
 
     for {
         ch := rl.GetCharPressed()
@@ -46,6 +46,7 @@ UpdateTextField :: proc(field: ^TextField){
     }
 
     DeleteCharsTextField(field, dt)
+    return true
 }
 
 DeleteCharTextField :: proc(field: ^TextField){
@@ -85,35 +86,28 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     outlineCol := field.state.is_active ? style.colors.success : style.colors.surface
     textPos := rl.Vector2{field.rect.x + field.rect_image.width + iconPadding, field.rect.y + (field.rect.height - f32(ui.font_size.default)) / 2}
     textCol := style.colors.text
-    text := field.state.buffer_length > 0 ? TextFieldText(field) : temp
+    text := field.state.buffer_length > 0 ? TextFieldToCString(field) : temp
 
     iconSearchPos := ui.IconGetCenterPos(field.rect_image, field.rect_image.height - iconPadding / 2)
     iconClearPos := ui.IconGetCenterPos(field.rect_clear, field.rect_clear.height - iconPadding / 2)
     IconClearCol := rl.CheckCollisionPointRec(mousePos, field.rect_clear) && field.state.buffer_length != 0 ? style.colors.error : style.colors.text
     iconClearPos.y -= 2 // Offset, looks goofy when properly aligned
 
-    boxRectCollison := rl.CheckCollisionPointRec(mousePos, field.rect)
+    boxRectCollision := rl.CheckCollisionPointRec(mousePos, field.rect)
     clearRectCollision := rl.CheckCollisionPointRec(mousePos, {field.rect_clear.x - 2, field.rect_clear.y - 2, field.rect_clear.width + 4, field.rect_clear.height + 4})
 
-    if (boxRectCollison &&
+    if (boxRectCollision &&
     !field.state.is_active &&
     !clearRectCollision) {
         outlineCol = style.colors.secondary_hover
     }
 
-    if field.state.is_active && field.state.buffer_length == 0 {
-        text = ""
-    }
+    if field.state.is_active && field.state.buffer_length == 0 do text = ""
 
-    if field.state.buffer_length == 0 {
-        textCol.a = 128
-    }
+    if field.state.buffer_length == 0 do textCol.a = 128
 
-    if boxRectCollison && !clearRectCollision {
-        rl.SetMouseCursor(.IBEAM)
-    } else {
-        rl.SetMouseCursor(.DEFAULT)
-    }
+    if boxRectCollision && !clearRectCollision do rl.SetMouseCursor(.IBEAM)
+    else do rl.SetMouseCursor(.DEFAULT)
 
     rl.DrawRectangleRec(field.rect, style.colors.surface)
     rl.DrawRectangleLinesEx(field.rect, 2, outlineCol)
@@ -146,8 +140,20 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     }
 }
 
-TextFieldText :: proc(field: ^TextField) -> cstring {
+TextFieldToCString :: proc(field: ^TextField) -> cstring {
     return str.clone_to_cstring(string(field.state.buffer[:]), context.temp_allocator)
+}
+
+TextFieldToString :: proc(field: ^TextField) -> string {
+    return string(field.state.buffer[:])
+}
+
+TextBufferToString :: proc(buffer: [dynamic]u8) -> string {
+    return string(buffer[:])
+}
+
+TextBufferToCString :: proc(buffer: [dynamic]u8) -> cstring {
+    return str.clone_to_cstring(string(buffer[:]), context.temp_allocator)
 }
 
 TextFieldClear :: proc(field: ^TextField){

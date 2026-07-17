@@ -3,7 +3,6 @@
 import rl "vendor:raylib"
 import str "core:strings"
 import ui ".."
-import st "../../core/state"
 
 Button :: struct {
     text: string,
@@ -182,7 +181,6 @@ ButtonCreate :: proc(
     text: string,
     center: rl.Vector2,
     width, height: f32,
-    page: st.page,
     image: rl.Texture2D = rl.Texture2D{}
 ) -> Button {
     return Button{

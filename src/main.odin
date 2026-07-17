@@ -7,10 +7,15 @@ import inv "core/inventory"
 import app "core/app"
 import v "view"
 import st "core/state"
+import t "core:time"
+import dbug "core/debug"
+import fmt "core:fmt"
 
 main :: proc()
 {
     defer rl.CloseWindow()
+    defer free_all(context.allocator)
+    start := t.now()
 
     style := ui.style{
         grid = {
@@ -19,9 +24,20 @@ main :: proc()
     }
 
     state := st.state{textFields = make(map[st.textField]st.textFieldState)}
+    state.ItemDefinitionRegistry = inv.MakeItemDefinitionRegistry()
+    state.ItemInstanceRegistry = inv.MakeItemInstanceRegistry()
+    state.CStringRegistry = inv.MakeCstringRegistry()
+    state.debug = true
+    state.catalog.sub_category = st.NoSubCategory.None
+
+    inv.TestRegistry(&state.ItemDefinitionRegistry, &state.CStringRegistry, state.debug)
+    items := inv.TestItemInstance(style.grid.cell_size, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
+    state.character = inv.TestCharacter(items.backpackInstance, &state.ItemDefinitionRegistry, &state.ItemInstanceRegistry, state.debug)
+    inv.GenerateItemCstringRegistry(&state.ItemDefinitionRegistry, &state.CStringRegistry, state.debug)
     defer delete(state.textFields)
-    items := inv.TestItem(style.grid.cell_size)
-    state.character = inv.TestCharacter(items.backpackInstance)
+    defer delete(state.ItemDefinitionRegistry.items)
+    defer inv.DeleteItemInstanceRegistry(&state.ItemInstanceRegistry)
+    defer delete(state.CStringRegistry.items)
 
     window_flags := rl.ConfigFlags{
         .WINDOW_RESIZABLE
@@ -44,6 +60,8 @@ main :: proc()
     defer ui.FreeFont(style.fonts)
     defer ui.FreeImages(style.icons)
 
+    dbug.Debug(fmt.tprint("Loaded in:", t.duration_milliseconds(t.since(start)), "Ms"))
+
     for !rl.WindowShouldClose()
     {
         free_all(context.temp_allocator)
@@ -53,7 +71,7 @@ main :: proc()
         #partial switch state.page {
         case .Inventory:
             app.InputMoveItem(&state,
-            items.backpack,
+            items.backpackInstance,
             style.grid.origin_x,
             style.grid.origin_y,
             style.grid.cell_size)
@@ -65,7 +83,7 @@ main :: proc()
         rl.BeginDrawing()
         rl.ClearBackground(style.colors.surface)
 
-        v.DrawUI(&state, &style, items.backpackItem)
+        v.DrawUI(&state, &style, items.backpackInstance)
 
         rl.EndDrawing()
     }

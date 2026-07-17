@@ -11,26 +11,31 @@ state :: struct{
     ghost:         ghost,
     window:        windowState,
     page:          page,
-    character:     ^inv.Character,
-    textFields :   map[textField]textFieldState,
+    textFields:    map[textField]textFieldState,
     catalog:       catalogState,
+    debug:         bool,
+
+    character:               ^inv.Character,
+    ItemDefinitionRegistry:  inv.ItemDefinitionRegistry,
+    ItemInstanceRegistry:    inv.ItemInstanceRegistry,
+    CStringRegistry:         inv.ItemCstringRegistry,
 }
 
 grab :: struct{
-    is_dragging: bool,
-    dragged_item: ^inv.ItemInstance,
+    is_dragging:   bool,
+    dragged_item:  ^inv.ItemInstance,
     selected_item: ^inv.ItemInstance,
-    offset_x: f32,
-    offset_y: f32,
+    offset_x:      f32,
+    offset_y:      f32,
 }
 
 ghost :: struct{
-    pos_x: i16,
-    pos_y: i16,
+    pos_x:       i16,
+    pos_y:       i16,
     unsnapped_x: f32,
     unsnapped_y: f32,
-    rotated: bool,
-    valid: bool,
+    rotated:     bool,
+    valid:       bool,
 }
 
 windowState :: struct{
@@ -50,6 +55,9 @@ textFieldState :: struct{
 catalogState :: struct{
     category: inv.ItemCategory,
     sub_category: subCategory,
+    selected_item: ^inv.Item,
+
+    scroll_offset: f32,
 }
 
 NoSubCategory :: enum {

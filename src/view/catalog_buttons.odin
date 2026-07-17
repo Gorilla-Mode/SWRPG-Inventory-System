@@ -20,7 +20,6 @@ CreateCategoryButtons :: proc(
     layout.left.center_x,
     button_width,
     button_height,
-    st.page.Inventory,
     style.icons[ui.Icons.category_weapons]))
 
     append(&buttons, comp.ButtonCreate(
@@ -28,7 +27,6 @@ CreateCategoryButtons :: proc(
     layout.left.center_x,
     button_width,
     button_height,
-    st.page.Inventory,
     style.icons[ui.Icons.category_gear]))
 
     append(&buttons, comp.ButtonCreate(
@@ -36,7 +34,6 @@ CreateCategoryButtons :: proc(
     layout.left.center_x,
     button_width,
     button_height,
-    st.page.Inventory,
     style.icons[ui.Icons.category_clothing]))
 
     append(&buttons, comp.ButtonCreate(
@@ -44,7 +41,6 @@ CreateCategoryButtons :: proc(
     layout.left.center_x,
     button_width,
     button_height,
-    st.page.Inventory,
     style.icons[ui.Icons.category_storage]))
 
     return buttons
@@ -64,7 +60,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_pistol],
         ),
         value = inv.WeaponSubCategory.Pistol,
@@ -76,7 +71,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_rifle],
         ),
         value = inv.WeaponSubCategory.Rifle,
@@ -88,7 +82,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_gunnery],
         ),
         value = inv.WeaponSubCategory.Gunnery,
@@ -100,7 +93,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_explosive],
         ),
         value = inv.WeaponSubCategory.Explosive,
@@ -112,7 +104,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_blade],
         ),
         value = inv.WeaponSubCategory.Blade,
@@ -124,7 +115,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_blunt],
         ),
         value = inv.WeaponSubCategory.Blunt,
@@ -136,7 +126,6 @@ CreateWeaponButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.item_weapon_type_lightsaber],
         ),
         value = inv.WeaponSubCategory.Lightsaber
@@ -159,7 +148,6 @@ CreateContainerButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_belt],
         ),
         value = inv.ContainerSubCategory.Belt,
@@ -171,7 +159,6 @@ CreateContainerButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_storage],
         ),
         value = inv.ContainerSubCategory.Backpack,
@@ -183,7 +170,6 @@ CreateContainerButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_holster],
         ),
         value = inv.ContainerSubCategory.Holster,
@@ -195,7 +181,6 @@ CreateContainerButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_bandolier],
         ),
         value = inv.ContainerSubCategory.Bandolier,
@@ -207,7 +192,6 @@ CreateContainerButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_container],
         ),
         value = inv.ContainerSubCategory.Container,
@@ -230,7 +214,6 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_gear],
         ),
         value = inv.GearSubCategory.Tool,
@@ -242,7 +225,6 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_gear],
         ),
         value = inv.GearSubCategory.Electronics,
@@ -254,7 +236,6 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_gear],
         ),
         value = inv.GearSubCategory.Medical,
@@ -266,7 +247,6 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_gear],
         ),
         value = inv.GearSubCategory.Survival,
@@ -278,7 +258,6 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_gear],
         ),
         value = inv.GearSubCategory.Miscellaneous,
@@ -301,7 +280,6 @@ CreateClothingButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        st.page.Inventory,
         style.icons[ui.Icons.category_clothing],
         ),
         value = inv.GearSubCategory.Miscellaneous, //TODO: Add clothing subcategory
@@ -355,6 +333,8 @@ DrawCatalogButtons :: proc(
         ) {
             state.catalog.category = category
             state.catalog.sub_category = st.NoSubCategory.None
+            state.catalog.scroll_offset = 0
+            state.catalog.selected_item = nil
         }
     }
     subButtons: [dynamic]CatalogButton
@@ -389,6 +369,8 @@ DrawCatalogButtons :: proc(
                 state.catalog.sub_category = st.NoSubCategory.None
             } else {
                 state.catalog.sub_category = subButtons[i].value
+                state.catalog.scroll_offset = 0
+                state.catalog.selected_item = nil
             }
         }
     }

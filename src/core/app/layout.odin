@@ -47,10 +47,9 @@ CatalogPageLayout :: struct {
 GetCatalogPageLayoutInfo :: proc(state: ^st.state, cellSize: f32) -> CatalogPageLayout {
     w := f32(state.window.width)
 
-    left_width  := w / 3
-    right_width := (w * 2) / 3
+    left_width  :f32 = 650
+    right_width :f32 = w - left_width
 
-    // LEFT SECTION
     left := PageSection{
         origin_x = 0,
         width = left_width,
@@ -60,7 +59,6 @@ GetCatalogPageLayoutInfo :: proc(state: ^st.state, cellSize: f32) -> CatalogPage
     grid_width := GetMaxGridWidth(state.character, cellSize)
     left.start_x = left.center_x - grid_width / 2
 
-    // RIGHT SECTION
     right := PageSection{
         origin_x = left_width,
         width = right_width,
@@ -161,7 +159,7 @@ start_x: f32,
 GetItemGridHeight :: proc(item: ^inv.ItemInstance, cell_size: f32) -> f32 {
     container_data := item.definition.data.(inv.ContainerData)
 
-    storage, ok := container_data.storage.storage.(inv.ContainerGrid)
+    storage, ok := container_data.containerDef.storage.(inv.ContainerGrid)
     if !ok do return 0
 
     return f32(storage.height) * cell_size
@@ -229,7 +227,7 @@ GetMaxGridWidth :: proc(char: ^inv.Character, cell_size: f32) -> f32 {
         container_data, ok := item.definition.data.(inv.ContainerData)
         if !ok do continue
 
-        storage, is_grid := container_data.storage.storage.(inv.ContainerGrid)
+        storage, is_grid := container_data.containerDef.storage.(inv.ContainerGrid)
         if !is_grid do continue
 
         w := f32(storage.width) * cell_size
