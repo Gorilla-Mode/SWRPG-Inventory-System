@@ -258,9 +258,10 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     if itemSelected {
         boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
         boxesBounds := DrawCatalogStatBoxes(state, style, boundsView, layout, state.debug)
-        sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, boxesBounds, layout, state.debug)
-        descBounds := DrawCatalogDescription(state, style, sectionsBounds, layout, state.debug)
-        _ = DrawCatalogItemData(state, style, descBounds, layout, state.debug)
+        dataBounds := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
+        sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, state.debug)
+        _ = DrawCatalogDescription(state, style, sectionsBounds, layout, state.debug)
+
 
     }
 }
