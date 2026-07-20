@@ -440,7 +440,7 @@ DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect
 
     if len(itemStr.features) > 0 {
         featuresTextPos := ui.SnapVector2({rect.x + columnWidth + padding, sectionsY})
-        featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (columnWidth * 2), defaultFont, 2)
+        featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (columnWidth * 2 - padding * 2), defaultFont, 2)
         featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
         rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
