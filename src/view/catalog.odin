@@ -401,7 +401,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     hasSections := false
 
     if len(itemStr.qualities) > 0 {
-        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), sectionsY})
+        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + padding, sectionsY})
         qualitiesText := cstr.FormatArray(itemStr.qualities, "- ", "\n", context.temp_allocator)
         qualitiesTextSize := rl.MeasureTextEx(defaultFont, qualitiesText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Qualities", {qualitiesTextPos.x, qualitiesTextPos.y + padding}, captionFontSize, 2, textCol)
@@ -411,7 +411,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     }
 
     if len(itemStr.features) > 0 {
-        featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), sectionsY})
+        featuresTextPos := ui.SnapVector2({itemSizeRect.x + padding, sectionsY})
         featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
         featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
