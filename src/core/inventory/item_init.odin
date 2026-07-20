@@ -14,7 +14,7 @@ MakeItemBase :: proc(
     hardpoints: i8,
     restricted: bool,
     base_price: i32,
-    qualities: []string,
+    qualities: []Quality,
     features: []string,
     category: ItemCategory,
     tags: []ItemTag,
@@ -33,7 +33,7 @@ MakeItemBase :: proc(
         return Item{}, ok
     }
 
-    qualities_dyn := make([dynamic]string)
+    qualities_dyn := make([dynamic]Quality)
     for q in qualities {
         append(&qualities_dyn, q)
     }

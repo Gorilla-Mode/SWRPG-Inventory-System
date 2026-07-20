@@ -78,6 +78,47 @@ WeaponScaleStrings := [WeaponScale]string{
     WeaponScale.Planetary = "Planetary",
 }
 
+ItemQualityString :: proc(quality: Quality) -> string {
+    quality_name := ""
+    switch quality.type {
+    case .Pirece:
+        quality_name = "Pierce"
+    case .Stun_Setting:
+        quality_name = "Stun Setting"
+    case .Breach:
+        quality_name = "Breach"
+    case .Accurate:
+        quality_name = "Accurate"
+    case .Sunder:
+        quality_name = "Sunder"
+    case .Vicious:
+        quality_name = "Vicious"
+    case .Disorient:
+        quality_name = "Disorient"
+    case .Defensive:
+        quality_name = "Defensive"
+    case .Blast:
+        quality_name = "Blast"
+    case .Cumbersome:
+        quality_name = "Cumbersome"
+    case .Guided:
+        quality_name = "Guided"
+    case .Prepare:
+        quality_name = "Prepare"
+    case .Limited_Ammo:
+        quality_name = "Limited Ammo"
+    case .Full_Auto:
+        quality_name = "Full-Auto"
+    case .Knockdown:
+        quality_name = "Knockdown"
+    }
+
+    if quality.count == 0 {
+        return quality_name
+    }
+
+    return fmt.tprint(args = {quality_name, " ", quality.count}, sep = "")
+}
 
 CreateItemCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     base := CreateItemBaseCstring(item, debug)
@@ -114,7 +155,7 @@ CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     qualites_dyn, quality_err := make([dynamic]cstring)
     if quality_err != nil do panic("Failed to create qualities array")
     for q in item.qualities {
-        append(&qualites_dyn, str.clone_to_cstring(q, context.allocator))
+        append(&qualites_dyn, str.clone_to_cstring(ItemQualityString(q), context.allocator))
     }
 
     tags_dyn, tag_err := make([dynamic]cstring)
