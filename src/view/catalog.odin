@@ -569,6 +569,7 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
     bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 0}
 
     headerText: cstring= "Data"
+    boxSize: f32 = 68
     rl.DrawTextEx(style.fonts.semibold[.header], headerText, {bounds.x, bounds.y}, f32(ui.font_size.header), 2, style.colors.text)
     bounds.height += rl.MeasureTextEx(style.fonts.semibold[.header], headerText, f32(ui.font_size.header), 2).y
     rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
@@ -577,20 +578,35 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
 
     switch data in item.data {
     case inv.WeaponData:
-        return DrawCatalogWeaponData(state, style, bounds, layout, debug)
+        return DrawCatalogWeaponData(state, style, item, bounds, layout, boxSize, debug)
     case inv.ContainerData:
-        return DrawCatalogContainerData(state, style, bounds, layout, debug)
+        return DrawCatalogContainerData(state, style, item, bounds, layout, boxSize, debug)
     case inv.GearData:
-        return DrawCatalogGearData(state, style, bounds, layout, debug)
+        return DrawCatalogGearData(state, style, item, bounds, layout, boxSize, debug)
     case:
         return bounds
     }
 }
 
 @(private="file")
-DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
-    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    fontText := style.fonts.semibold[.default]
+    weaponDataStr := itemStrings.data.(inv.WeaponDataCstring)
+
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Damage", weaponDataStr.damage, debug)
+    bounds.width += padding
+
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Critical", weaponDataStr.crit, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Range", weaponDataStr.range, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Skill", weaponDataStr.skill, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Band", weaponDataStr.rangeband, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Scale", weaponDataStr.scale, debug).width
+
 
 
 
@@ -599,9 +615,9 @@ DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Recta
 }
 
 @(private="file")
-DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
-    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
 
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
@@ -609,9 +625,9 @@ DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Re
 }
 
 @(private="file")
-DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
-    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
 
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
