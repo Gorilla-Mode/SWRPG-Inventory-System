@@ -433,7 +433,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     descriptionTextY := separatorY + padding
     descriptionPos := rl.Vector2{textPos.x + padding * 2, descriptionTextY + captionFontSize}
     descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding, descriptionTextY}, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
 
     if (descriptionPos.x + descriptionSize.x) > contentRight do contentRight = descriptionPos.x + descriptionSize.x
@@ -568,10 +568,10 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
     padding: f32 = 2
     bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 0}
 
-    headerText: cstring= "Data"
+    headerText: cstring = "Data"
     boxSize: f32 = 68
-    rl.DrawTextEx(style.fonts.semibold[.header], headerText, {bounds.x, bounds.y}, f32(ui.font_size.header), 2, style.colors.text)
-    bounds.height += rl.MeasureTextEx(style.fonts.semibold[.header], headerText, f32(ui.font_size.header), 2).y
+    rl.DrawTextEx(style.fonts.semibold[.default], headerText, {bounds.x + padding, bounds.y}, f32(ui.font_size.default), 2, style.colors.text)
+    bounds.height += rl.MeasureTextEx(style.fonts.semibold[.default], headerText, f32(ui.font_size.default), 2).y + padding
     rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
