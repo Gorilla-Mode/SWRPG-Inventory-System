@@ -624,7 +624,7 @@ DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.
     bounds.width += padding
     bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Height", containerDataStr.height, debug).width + padding
     bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Area", cstr.IntToCString(i32(containerData.width * containerData.height), context.temp_allocator), debug).width + padding
-    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Harpoint", itemStrings.hardpoints, debug).width
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
@@ -634,7 +634,11 @@ DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.
 DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
     bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+//    gearDataStr := itemStrings.data.(inv.ContainerDataCstring)
 
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug)
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
