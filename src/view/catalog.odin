@@ -257,7 +257,9 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
         boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
-        _ = DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
+        baseBounds := DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
+        _ = DrawCatalogItemData(state, style, baseBounds, layout, state.debug)
+
     }
 }
 
@@ -556,4 +558,62 @@ CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
         category     = cstr.Concat("Category:", itemStr.category, context.temp_allocator),
         sub_category = cstr.Concat("Sub-Cat: ", itemStr.sub_category, context.temp_allocator),
     }
+}
+
+@(private="file")
+DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    item := state.catalog.selected_item
+    if item == nil do return rl.Rectangle{}
+
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 0}
+
+    headerText: cstring= "Data"
+    rl.DrawTextEx(style.fonts.semibold[.header], headerText, {bounds.x, bounds.y}, f32(ui.font_size.header), 2, style.colors.text)
+    bounds.height += rl.MeasureTextEx(style.fonts.semibold[.header], headerText, f32(ui.font_size.header), 2).y
+    rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+
+    switch data in item.data {
+    case inv.WeaponData:
+        return DrawCatalogWeaponData(state, style, bounds, layout, debug)
+    case inv.ContainerData:
+        return DrawCatalogContainerData(state, style, bounds, layout, debug)
+    case inv.GearData:
+        return DrawCatalogGearData(state, style, bounds, layout, debug)
+    case:
+        return bounds
+    }
+}
+
+@(private="file")
+DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 20}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
 }
