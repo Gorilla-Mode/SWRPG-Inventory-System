@@ -14,6 +14,24 @@ ItemTag :: enum{
     Melee,
 }
 
+ItemQualities :: enum{
+    Pirece,
+    Stun_Setting,
+    Breach,
+    Accurate,
+    Sunder,
+    Vicious,
+    Disorient,
+    Defensive,
+    Blast,
+    Cumbersome,
+    Guided,
+    Prepare,
+    Limited_Ammo,
+    Full_Auto,
+    Knockdown,
+}
+
 WeaponSkill :: enum{
     Light,
     Heavy,

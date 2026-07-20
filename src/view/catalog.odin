@@ -257,7 +257,9 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
         boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
-        _ = DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
+        baseBounds := DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
+        _ = DrawCatalogItemData(state, style, baseBounds, layout, state.debug)
+
     }
 }
 
@@ -383,8 +385,8 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     sizeTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + captionFontSize + padding})
     CatalogItemStatDrawField(style, .item_generic_width, defaultFont, sizeStrings.width, sizeTextPos, textCol, textCol)
     CatalogItemStatDrawField(style, .item_generic_height, defaultFont, sizeStrings.height, {sizeTextPos.x, sizeTextPos.y + defaultFontSize + padding}, textCol, textCol)
-    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
-    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  sizeStrings.area, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 3}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_area, defaultFont,  sizeStrings.area, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 3}, textCol, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
@@ -401,7 +403,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     hasSections := false
 
     if len(itemStr.qualities) > 0 {
-        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), sectionsY})
+        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + padding, sectionsY})
         qualitiesText := cstr.FormatArray(itemStr.qualities, "- ", "\n", context.temp_allocator)
         qualitiesTextSize := rl.MeasureTextEx(defaultFont, qualitiesText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Qualities", {qualitiesTextPos.x, qualitiesTextPos.y + padding}, captionFontSize, 2, textCol)
@@ -411,7 +413,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     }
 
     if len(itemStr.features) > 0 {
-        featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), sectionsY})
+        featuresTextPos := ui.SnapVector2({itemSizeRect.x + padding, sectionsY})
         featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
         featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
@@ -431,7 +433,7 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     descriptionTextY := separatorY + padding
     descriptionPos := rl.Vector2{textPos.x + padding * 2, descriptionTextY + captionFontSize}
     descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding, descriptionTextY}, captionFontSize, 2, textCol)
     rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
 
     if (descriptionPos.x + descriptionSize.x) > contentRight do contentRight = descriptionPos.x + descriptionSize.x
@@ -556,4 +558,75 @@ CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
         category     = cstr.Concat("Category:", itemStr.category, context.temp_allocator),
         sub_category = cstr.Concat("Sub-Cat: ", itemStr.sub_category, context.temp_allocator),
     }
+}
+
+@(private="file")
+DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    item := state.catalog.selected_item
+    if item == nil do return rl.Rectangle{}
+
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 0}
+
+    headerText: cstring = "Data"
+    boxSize: f32 = 68
+    rl.DrawTextEx(style.fonts.semibold[.default], headerText, {bounds.x + padding, bounds.y}, f32(ui.font_size.default), 2, style.colors.text)
+    bounds.height += rl.MeasureTextEx(style.fonts.semibold[.default], headerText, f32(ui.font_size.default), 2).y + padding
+    rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+
+    switch data in item.data {
+    case inv.WeaponData:
+        return DrawCatalogWeaponData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.ContainerData:
+        return DrawCatalogContainerData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.GearData:
+        return DrawCatalogGearData(state, style, item, bounds, layout, boxSize, debug)
+    case:
+        return bounds
+    }
+}
+
+@(private="file")
+DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    fontText := style.fonts.semibold[.default]
+    weaponDataStr := itemStrings.data.(inv.WeaponDataCstring)
+
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Damage", weaponDataStr.damage, debug)
+    bounds.width += padding
+
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Critical", weaponDataStr.crit, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Range", weaponDataStr.range, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Skill", weaponDataStr.skill, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Band", weaponDataStr.rangeband, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Scale", weaponDataStr.scale, debug).width
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
 }
