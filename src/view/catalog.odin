@@ -9,12 +9,15 @@ import inv "../core/inventory"
 import str "core:strings"
 import cstr "../utils/cstrings"
 import fmt "core:fmt"
+import m "core:math"
 
+@(private)
 CatalogButton :: struct {
     button: comp.Button,
     value:  st.subCategory,
 }
 
+@(private)
 CatalogButtons :: struct {
     category:   [dynamic]comp.Button,
     weapons:    [dynamic]CatalogButton,
@@ -45,6 +48,7 @@ DrawCatalog :: proc(state: ^st.state, style: ^ui.style) {
     DrawCatalogItemResults(state, style, layout, paddingElement, explorerBounds, rect_left)
 }
 
+@(private="file")
 DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, rect_left: rl.Rectangle) -> rl.Rectangle {
     bg_color      := style.colors.surface
     hover_color   := style.colors.secondary_hover
@@ -143,6 +147,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     return bounds
 }
 
+@(private="file")
 DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.CatalogPageLayout, paddingElement: f32, filterBounds: rl.Rectangle, leftRect: rl.Rectangle) {
     posY: f32 = filterBounds.y + filterBounds.height + paddingElement + state.catalog.scroll_offset
     mousePos:= rl.GetMousePosition()
@@ -185,11 +190,12 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
     if rl.CheckCollisionPointRec(mousePos, leftRect) {
         state.catalog.scroll_offset += rl.GetMouseWheelMove() * 30
         if state.catalog.scroll_offset >= 0 do state.catalog.scroll_offset = 0
-        if (-1 * state.catalog.scroll_offset + 5) >= bounds.height do state.catalog.scroll_offset = -1 * (bounds.height - paddingElement - 5)
+        if m.abs(state.catalog.scroll_offset) + 5 >= bounds.height do state.catalog.scroll_offset = -(bounds.height - paddingElement - 5)
     }
 
 }
 
+@(private="file")
 GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     queryString := comp.TextBufferToString(state.textFields[.Catalog_Search].buffer)
     queryString = str.to_lower(queryString)
@@ -229,7 +235,8 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
     return keys
 }
 
-DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout){
+@(private="file")
+DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.Rectangle, layout: app.CatalogPageLayout) {
     padding: f32 = 2
     headerText := style.fonts.semibold[ui.font_size.header]
     headerTextSize := f32(ui.font_size.header)
@@ -247,37 +254,41 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
     2,
     style.colors.text)
 
-    DrawCatalogBaseItemStat(state, style, bounds, layout)
+    boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
+    if itemSelected {
+        boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
+        baseBounds := DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
+        _ = DrawCatalogItemData(state, style, baseBounds, layout, state.debug)
 
+    }
 }
 
-DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout) -> rl.Rectangle{
-    bounds          := rect
-    item            := state.catalog.selected_item
-    headerFont      := style.fonts.semibold[ui.font_size.header]
-    headerFontSize  := f32(headerFont.baseSize)
-    padding         : f32 = 2
-    textCol         := style.colors.text
-    secondaryCol    := style.colors.secondary
-    nameRect := rl.Rectangle{bounds.x, bounds.y, bounds.width, 32}
-    itemViewRect := rl.Rectangle{nameRect.x, nameRect.y + nameRect.height + (padding * 3), 256, 512}
-    defaultFont     := style.fonts.regular[ui.font_size.default]
-    defaultFontSize := f32(defaultFont.baseSize)
-    captionFont     := style.fonts.regular[ui.font_size.caption]
-    captionFontSize := f32(captionFont.baseSize)
+@(private="file")
+DrawItemCatalogHeader :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, layout: app.CatalogPageLayout, debug: bool = false) -> (rl.Rectangle, bool){
+    nameRect       := rl.Rectangle{rect.x, rect.y, rect.width, 32}
+    bounds         := nameRect
+    textCol        := style.colors.text
+    item           := state.catalog.selected_item
+    headerFont     := style.fonts.semibold[ui.font_size.header]
+    headerFontSize := f32(headerFont.baseSize)
+    padding        : f32 = 2
+    secondaryCol   := style.colors.secondary
 
     rl.DrawLineEx({nameRect.x, nameRect.y + (padding / 2)}, {nameRect.x + nameRect.width, nameRect.y + (padding / 2)}, 2, style.colors.secondary)
     if item == nil{
         errorText: cstring = "No item selected"
         errorTextSize := rl.MeasureTextEx(style.fonts.semibold[ui.font_size.default], errorText, f32(ui.font_size.default), 2)
+        errorPos := ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), rect.height / 2})
         rl.DrawTextEx(headerFont,
         errorText,
-        ui.SnapVector2({layout.right.center_x - (errorTextSize.x / 2), bounds.height / 2}),
+        errorPos,
         headerFontSize,
         2,
         { textCol.r, textCol.g, textCol.b, 100 })
 
-        return bounds
+        bounds.height = rect.height / 2 - headerFontSize - nameRect.height
+        if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+        return bounds, false
     }
 
     itemStr := state.CStringRegistry.items[item.id]
@@ -288,31 +299,70 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     headerFontSize,
     4,
     style.colors.text)
-    rl.DrawLineEx({nameRect.x, nameRect.y + nameRect.height + padding + (padding / 2)},
-    {nameRect.x + nameRect.width, nameRect.y + nameRect.height + padding + (padding / 2)},
+    rl.DrawLineEx({nameRect.x, nameRect.y + nameRect.height },
+    {nameRect.x + nameRect.width, nameRect.y + nameRect.height },
     2,
     { secondaryCol.r, secondaryCol.g, secondaryCol.b, 128 })
 
-    rl.DrawRectangleLinesEx(itemViewRect, 2, style.colors.primary)
-    rl.DrawTextureEx(style.icons[item.icon_enum], {itemViewRect.x + (padding * 2), itemViewRect.y + (padding * 2)}, 0, ui.IconScale(itemViewRect.width - (padding * 4)), textCol)
 
-    textPos := ui.SnapVector2({itemViewRect.x + itemViewRect.width + padding * 2, itemViewRect.y})
+    bounds.height += padding / 2
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds, true
+}
+
+@(private="file")
+DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.state, debug: bool = false) -> rl.Rectangle {
+    padding : f32 = 2
+    bounds  := rl.Rectangle{rect.x, rect.y + rect.height + padding, 256, 512}
+    item    := state.catalog.selected_item
+    textCol := style.colors.text
+
+    rl.DrawRectangleLinesEx(bounds, 2, style.colors.primary)
+    rl.DrawTextureEx(style.icons[item.icon_enum], {bounds.x + (padding * 2), bounds.y + (padding * 2)}, 0, ui.IconScale(bounds.width - (padding * 4)), textCol)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle{
+    item            := state.catalog.selected_item
+    padding         : f32 = 2
+    textCol         := style.colors.text
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
+    captionFont     := style.fonts.regular[ui.font_size.caption]
+    captionFontSize := f32(captionFont.baseSize)
+
+    itemStr := state.CStringRegistry.items[item.id]
+    textPos := ui.SnapVector2({rect.x + rect.width + padding * 2, rect.y})
 
     baseItemDataHeight: f32 = 92
     baseItemDataWidth: f32 = (state.window.width - textPos.x - app.PADDING - (padding * 2)) / 3
     maxItemDataWidth: f32 = (1920 - textPos.x - app.PADDING - (padding * 2)) / 3
     if baseItemDataWidth > maxItemDataWidth do baseItemDataWidth = maxItemDataWidth
     itemEconomyRect := rl.Rectangle{textPos.x, textPos.y, baseItemDataWidth, baseItemDataHeight}
-    economyStrings := CatalogItemStatGetEconomyStrings(itemStr, state.catalog.selected_item)
-    sizeStrings := CatalogItemStatGetSizeStrings(itemStr)
-    metaStrings := CatalogItemStatGetMetaStrings(itemStr)
-    priceSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
-    subCatSize := rl.MeasureTextEx(defaultFont, metaStrings.sub_category, defaultFontSize, 0)
-    if (priceSize.x + padding * 4) > itemEconomyRect.width do itemEconomyRect.width = priceSize.x + padding * 4
+    itemSizeRect := rl.Rectangle{}
+    itemMetaRect := rl.Rectangle{}
 
-    itemSizeRect := rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth, baseItemDataHeight}
-    itemMetaRect := rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
-    if (subCatSize.x + padding * 4) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 4
+    economyStrings := CatalogItemStatGetEconomyStrings(itemStr, state.catalog.selected_item)
+    sizeStrings    := CatalogItemStatGetSizeStrings(itemStr, state.catalog.selected_item)
+    metaStrings    := CatalogItemStatGetMetaStrings(itemStr)
+
+    restrictedSize := rl.MeasureTextEx(defaultFont, economyStrings.restricted, defaultFontSize, 0)
+    prizeSize := rl.MeasureTextEx(defaultFont, economyStrings.proj_price, defaultFontSize, 0)
+    economySize := prizeSize.x > restrictedSize.x ? prizeSize.x : restrictedSize.x
+    subCatSize := rl.MeasureTextEx(defaultFont, metaStrings.sub_category, defaultFontSize, 0)
+
+    if (economySize + padding * 6 + defaultFontSize) > baseItemDataWidth{
+        itemEconomyRect.width = economySize + padding * 6 + defaultFontSize
+        diff := itemEconomyRect.width - baseItemDataWidth
+        itemSizeRect.width -= diff
+    }
+
+    itemSizeRect = rl.Rectangle{textPos.x + itemEconomyRect.width + padding, textPos.y, baseItemDataWidth + itemSizeRect.width, baseItemDataHeight}
+    itemMetaRect = rl.Rectangle{textPos.x + itemEconomyRect.width + itemSizeRect.width + (padding * 2), textPos.y, baseItemDataWidth, baseItemDataHeight}
+    if (subCatSize.x + padding * 6 + defaultFontSize) > itemMetaRect.width do itemMetaRect.width = subCatSize.x + padding * 6 + defaultFontSize
 
     massStr := item.mass_g <= 1000 ? sizeStrings.mass_g : sizeStrings.mass_kg
 
@@ -333,9 +383,10 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
     sizeTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + captionFontSize + padding})
-    CatalogItemStatDrawField(style, ui.Icons.gui_square, defaultFont, sizeStrings.width, sizeTextPos, textCol, textCol)
-    CatalogItemStatDrawField(style, ui.Icons.gui_square, defaultFont, sizeStrings.height, {sizeTextPos.x, sizeTextPos.y + defaultFontSize + padding}, textCol, textCol)
-    CatalogItemStatDrawField(style, ui.Icons.gui_info, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_width, defaultFont, sizeStrings.width, sizeTextPos, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_height, defaultFont, sizeStrings.height, {sizeTextPos.x, sizeTextPos.y + defaultFontSize + padding}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  sizeStrings.area, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 3}, textCol, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
@@ -343,32 +394,62 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     CatalogItemStatDrawField(style, CatalogItemStatGetCategoryIcon(item.category), defaultFont,  metaStrings.category, metaTextPos, textCol, textCol)
     CatalogItemStatDrawField(style, CatalogItemStatGetSubCategoryIcon(item), defaultFont, metaStrings.sub_category, {metaTextPos.x, metaTextPos.y + defaultFontSize + padding}, textCol, textCol)
 
-    qualitesTextPos := ui.SnapVector2({itemEconomyRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
-    qualitesText := cstr.FormatArray(itemStr.qualities, "- " , "\n", context.temp_allocator)
-    qualitesTextSize := rl.MeasureTextEx(defaultFont, qualitesText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Qualities", {qualitesTextPos.x, qualitesTextPos.y + padding}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, qualitesText, {qualitesTextPos.x, qualitesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+    contentRight := itemEconomyRect.x + itemEconomyRect.width
+    if (itemSizeRect.x + itemSizeRect.width) > contentRight do contentRight = itemSizeRect.x + itemSizeRect.width
+    if (itemMetaRect.x + itemMetaRect.width) > contentRight do contentRight = itemMetaRect.x + itemMetaRect.width
 
-    featuresTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemEconomyRect.y + itemEconomyRect.height + (padding * 2)})
-    featuresText := cstr.FormatArray(itemStr.features, "" , "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
-    featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
+    sectionsY := itemEconomyRect.y + itemEconomyRect.height + (padding * 2)
+    sectionBottom: f32 = 0
+    hasSections := false
 
-    sectionBottom : = qualitesTextSize.y > featuresTextSize.y ? qualitesTextSize.y : featuresTextSize.y
-    if sectionBottom == 0 do sectionBottom += captionFontSize + (padding * 2)
+    if len(itemStr.qualities) > 0 {
+        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + padding, sectionsY})
+        qualitiesText := cstr.FormatArray(itemStr.qualities, "- ", "\n", context.temp_allocator)
+        qualitiesTextSize := rl.MeasureTextEx(defaultFont, qualitiesText, defaultFontSize, 0)
+        rl.DrawTextEx(captionFont, "Qualities", {qualitiesTextPos.x, qualitiesTextPos.y + padding}, captionFontSize, 2, textCol)
+        rl.DrawTextEx(defaultFont, qualitiesText, {qualitiesTextPos.x, qualitiesTextPos.y + captionFontSize + padding}, defaultFontSize, 0, textCol)
+        sectionBottom = qualitiesTextSize.y + (padding * 2)
+        hasSections = true
+    }
 
-    separatorY := itemEconomyRect.y + itemEconomyRect.height + sectionBottom + padding * 2
-    rl.DrawLineEx({textPos.x, separatorY}, {bounds.x + bounds.width, separatorY}, 2, style.colors.primary)
+    if len(itemStr.features) > 0 {
+        featuresTextPos := ui.SnapVector2({itemSizeRect.x + padding, sectionsY})
+        featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
+        featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
+        rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
+        rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
+        featuresSectionHeight := featuresTextSize.y + (padding * 2)
+        if featuresSectionHeight > sectionBottom do sectionBottom = featuresSectionHeight
+        hasSections = true
+    }
+
+    separatorY := itemEconomyRect.y + itemEconomyRect.height
+    if hasSections {
+        separatorY += sectionBottom
+        rl.DrawLineEx({textPos.x, separatorY}, {contentRight, separatorY}, 2, style.colors.primary)
+    }
 
     descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
     descriptionTextY := separatorY + padding
-    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding * 2, descriptionTextY}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, descriptionText, {textPos.x + padding * 2, descriptionTextY + captionFontSize}, defaultFontSize, 0, textCol)
+    descriptionPos := rl.Vector2{textPos.x + padding * 2, descriptionTextY + captionFontSize}
+    descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
+    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding, descriptionTextY}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
 
+    if (descriptionPos.x + descriptionSize.x) > contentRight do contentRight = descriptionPos.x + descriptionSize.x
+
+    bounds := rl.Rectangle{
+        x = textPos.x,
+        y = textPos.y,
+        width = contentRight - textPos.x,
+        height = (descriptionPos.y + descriptionSize.y) - textPos.y,
+    }
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
 }
 
+@(private="file")
 CatalogItemStatDrawField :: proc(style: ^ui.style, icon: ui.Icons, font: rl.Font, text: cstring, pos: rl.Vector2, textCol: rl.Color, iconCol: rl.Color, gap: f32 = 2) {
     iconSize := f32(font.baseSize)
     iconPos := ui.SnapVector2(pos)
@@ -376,6 +457,7 @@ CatalogItemStatDrawField :: proc(style: ^ui.style, icon: ui.Icons, font: rl.Font
     rl.DrawTextEx(font, text, {iconPos.x + iconSize + gap, iconPos.y}, f32(font.baseSize), 0, textCol)
 }
 
+@(private="file")
 CatalogItemStatGetCategoryIcon :: proc(category: inv.ItemCategory) -> ui.Icons {
     switch category {
     case .Weapon:
@@ -390,6 +472,7 @@ CatalogItemStatGetCategoryIcon :: proc(category: inv.ItemCategory) -> ui.Icons {
     return ui.Icons.gui_info
 }
 
+@(private="file")
 CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
     switch data in item.data {
     case inv.WeaponData:
@@ -430,6 +513,7 @@ CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
     return ui.Icons.gui_info
 }
 
+@(private="file")
 CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item) -> struct{
     base_price,
     proj_price,
@@ -437,37 +521,115 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
     restricted: cstring
 }{
     return {
-        base_price = cstr.Concat("Price: ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected: ",
+        base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
+        proj_price = cstr.Concat(cstr.Concat("Projected:",
         str.clone_to_cstring(fmt.tprint(inv.ItemTotalPrice(item, item.base_rarity)),
         context.temp_allocator), context.temp_allocator),
         "cr",
         context.temp_allocator), // Milde moses
-        rarity     = cstr.Concat("Rarity: ", itemStr.base_rarity, context.temp_allocator),
-        restricted = cstr.Concat("Status: ", itemStr.restricted, context.temp_allocator)
+        rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
+        restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
 }
 
-CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring) -> struct{
+@(private="file")
+CatalogItemStatGetSizeStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.Item) -> struct{
     width,
     height,
     mass_g,
-    mass_kg: cstring
+    mass_kg,
+    area: cstring
 }{
     return {
         width   = cstr.Concat("Width: ", itemStr.width, context.temp_allocator),
-        height  = cstr.Concat("Height: ", itemStr.height, context.temp_allocator),
-        mass_g  = cstr.Concat("Mass: ", itemStr.mass_g, context.temp_allocator),
-        mass_kg = cstr.Concat("Mass: ", itemStr.mass_kg, context.temp_allocator)
+        height  = cstr.Concat("Height:", itemStr.height, context.temp_allocator),
+        mass_g  = cstr.Concat("Mass:  ", itemStr.mass_g, context.temp_allocator),
+        mass_kg = cstr.Concat("Mass:  ", itemStr.mass_kg, context.temp_allocator),
+        area    = cstr.Concat("Area:  ", cstr.IntToCString(inv.ItemArea(item), context.temp_allocator), context.temp_allocator)
     }
 }
 
+@(private="file")
 CatalogItemStatGetMetaStrings :: proc(itemStr: inv.ItemCstring) -> struct{
     category,
     sub_category: cstring
 }{
     return {
-        category     = cstr.Concat("Category: ", itemStr.category, context.temp_allocator),
+        category     = cstr.Concat("Category:", itemStr.category, context.temp_allocator),
         sub_category = cstr.Concat("Sub-Cat: ", itemStr.sub_category, context.temp_allocator),
     }
+}
+
+@(private="file")
+DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+    item := state.catalog.selected_item
+    if item == nil do return rl.Rectangle{}
+
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, 0}
+
+    headerText: cstring = "Data"
+    boxSize: f32 = 68
+    rl.DrawTextEx(style.fonts.semibold[.default], headerText, {bounds.x + padding, bounds.y}, f32(ui.font_size.default), 2, style.colors.text)
+    bounds.height += rl.MeasureTextEx(style.fonts.semibold[.default], headerText, f32(ui.font_size.default), 2).y + padding
+    rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+
+    switch data in item.data {
+    case inv.WeaponData:
+        return DrawCatalogWeaponData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.ContainerData:
+        return DrawCatalogContainerData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.GearData:
+        return DrawCatalogGearData(state, style, item, bounds, layout, boxSize, debug)
+    case:
+        return bounds
+    }
+}
+
+@(private="file")
+DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    fontText := style.fonts.semibold[.default]
+    weaponDataStr := itemStrings.data.(inv.WeaponDataCstring)
+
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Damage", weaponDataStr.damage, debug)
+    bounds.width += padding
+
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Critical", weaponDataStr.crit, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Range", weaponDataStr.range, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Skill", weaponDataStr.skill, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Band", weaponDataStr.rangeband, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Scale", weaponDataStr.scale, debug).width
+
+
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
 }

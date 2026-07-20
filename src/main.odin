@@ -67,6 +67,7 @@ main :: proc()
         free_all(context.temp_allocator)
         //rl.SetTargetFPS(rl.GetMonitorRefreshRate(rl.GetCurrentMonitor()))
         st.UpdateWindowState(&state)
+        app.HotKey(&state)
         
         #partial switch state.page {
         case .Inventory:

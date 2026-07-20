@@ -236,7 +236,7 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        style.icons[ui.Icons.category_gear],
+        style.icons[ui.Icons.category_medical],
         ),
         value = inv.GearSubCategory.Medical,
     })
@@ -247,7 +247,7 @@ CreateGearButtons :: proc(
         layout.left.center_x,
         width,
         height,
-        style.icons[ui.Icons.category_gear],
+        style.icons[ui.Icons.category_survival],
         ),
         value = inv.GearSubCategory.Survival,
     })

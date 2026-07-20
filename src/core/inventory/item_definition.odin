@@ -10,7 +10,7 @@ Item :: struct{
     hardpoints:    i8,
     restricted:    bool,
     base_price:    i32,
-    qualities:     [dynamic]string,
+    qualities:     [dynamic]Quality,
     features:      [dynamic]string,
     mass_g:        f32,
 
