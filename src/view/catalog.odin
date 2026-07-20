@@ -380,7 +380,8 @@ DrawCatalogStatBoxes :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectan
     defer comp.ToolTipVec2("Projected price calculated from rarity, legality and base price\nPrice = (Base price * rarity) / 4 or 2 if restricted",
     {economyTextPos.x, economyTextPos.y + (defaultFontSize + padding) * 3 + padding},
     rl.MeasureTextEx(defaultFont, economyStrings.proj_price, defaultFontSize, 0) + defaultFontSize,
-    style)
+    style,
+    false)
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
