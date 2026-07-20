@@ -256,13 +256,11 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
 
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
-        boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
-        boxesBounds := DrawCatalogStatBoxes(state, style, boundsView, layout, state.debug)
-        dataBounds := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
-        sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, state.debug)
-        _ = DrawCatalogDescription(state, style, sectionsBounds, layout, state.debug)
-
-
+        boundsView     := DrawCatalogItemView(boundsHeader, style, state, state.debug)
+        boxesBounds    := DrawCatalogStatBoxes(state, style, boundsView, layout, state.debug)
+        dataBounds     := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
+        sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, boxesBounds.width, state.debug)
+        _ = DrawCatalogDescription(state, style, sectionsBounds, layout, boxesBounds.width, state.debug)
     }
 }
 
@@ -414,7 +412,7 @@ DrawCatalogStatBoxes :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectan
 }
 
 @(private="file")
-DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, max_width: f32, debug: bool = false) -> rl.Rectangle {
     item            := state.catalog.selected_item
     itemStr         := state.CStringRegistry.items[item.id]
     padding         : f32 = 2
@@ -428,7 +426,7 @@ DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect
     sectionBottom: f32 = 0
     hasSections := false
 
-    columnWidth := rect.width / 3
+    columnWidth := max_width / 3
 
     if len(itemStr.qualities) > 0 {
         qualitiesTextPos := ui.SnapVector2({rect.x + padding, sectionsY})
@@ -453,12 +451,12 @@ DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect
 
     if !hasSections do return rl.Rectangle{rect.x, rect.y + rect.height, rect.width, 0}
 
-    rl.DrawLineEx({rect.x, rect.y + rect.height + sectionBottom}, {rect.x + rect.width, rect.y + rect.height + sectionBottom}, 2, style.colors.primary)
+    rl.DrawLineEx({rect.x, rect.y + rect.height + sectionBottom}, {rect.x + max_width, rect.y + rect.height + sectionBottom}, 2, style.colors.primary)
 
     bounds := rl.Rectangle{
         x = rect.x,
         y = sectionsY,
-        width = rect.width,
+        width = max_width,
         height = sectionBottom,
     }
 
@@ -467,7 +465,7 @@ DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect
 }
 
 @(private="file")
-DrawCatalogDescription :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
+DrawCatalogDescription :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, max_width: f32, debug: bool = false) -> rl.Rectangle {
     item            := state.catalog.selected_item
     itemStr         := state.CStringRegistry.items[item.id]
     padding         : f32 = 2
@@ -477,7 +475,7 @@ DrawCatalogDescription :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rect
     captionFont     := style.fonts.regular[ui.font_size.caption]
     captionFontSize := f32(captionFont.baseSize)
 
-    descriptionText := cstr.WrapMono(itemStr.description, rect.width, defaultFont, 0, context.temp_allocator)
+    descriptionText := cstr.WrapMono(itemStr.description, max_width, defaultFont, 0, context.temp_allocator)
     descriptionTextY := rect.y + rect.height + padding
     descriptionPos := rl.Vector2{rect.x + padding * 2, descriptionTextY + captionFontSize}
     descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
@@ -487,7 +485,7 @@ DrawCatalogDescription :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rect
     bounds := rl.Rectangle{
         x = rect.x,
         y = descriptionTextY,
-        width = rect.width,
+        width = max_width,
         height = (descriptionPos.y + descriptionSize.y) - descriptionTextY,
     }
 
