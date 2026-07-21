@@ -3,6 +3,7 @@
 import str "core:strings"
 import fmt "core:fmt"
 import dbug "../debug"
+import cstr"../../utils/cstrings"
 
 WeaponSkillString :: proc(skill: WeaponSkill) -> string {
     return WeaponSkillStrings[skill]
@@ -139,7 +140,7 @@ CreateItemBaseCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
     strings := ItemCstring{}
 
     strings.base_rarity = str.clone_to_cstring(fmt.tprint(item.base_rarity), context.allocator)
-    strings.base_price  = str.clone_to_cstring(fmt.tprint(args = { item.base_price, "cr" }, sep = ""), context.allocator)
+    strings.base_price  = cstr.Concat(cstr.FormatCurrency(item.base_price), "cr")
     strings.hardpoints  = str.clone_to_cstring(fmt.tprint(item.hardpoints), context.allocator)
     strings.width       = str.clone_to_cstring(fmt.tprint(item.width), context.allocator)
     strings.height      = str.clone_to_cstring(fmt.tprint(item.height), context.allocator)
