@@ -8,7 +8,6 @@ import comp "../ui/component"
 import inv "../core/inventory"
 import str "core:strings"
 import cstr "../utils/cstrings"
-import fmt "core:fmt"
 import m "core:math"
 
 @(private)
@@ -566,11 +565,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
 }{
     return {
         base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected:",
-        str.clone_to_cstring(fmt.tprint(inv.ItemTotalPrice(item, item.base_rarity)),
-        context.temp_allocator), context.temp_allocator),
-        "cr",
-        context.temp_allocator), // Milde moses
+        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
         rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
