@@ -4,6 +4,8 @@ import ui "../ui"
 import rl "vendor:raylib"
 import st "../core/state"
 import co "../ui/component"
+import cstr "../utils/cstrings"
+import app "../core/app"
 
 DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     pos := rl.Vector2{5, 0}
@@ -11,6 +13,11 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     header_y := pos.y + fontSize + 2
     buttonHeight : f32 = 30
     buttonWidth : f32 = 110
+    credits: cstring = cstr.Concat(cstr.FormatCurrency(state.character.credits, context.temp_allocator), " Cr", context.temp_allocator)
+    creditsSize := rl.MeasureTextEx(style.fonts.semibold[ui.font_size.default], credits, f32(ui.font_size.default), 0)
+    creditsPos := ui.SnapVector2({state.window.width - creditsSize.x - app.PADDING,(header_y / 2) - (creditsSize.y / 2)})
+    creditsIconSize: f32 = 24
+    creditsScale := ui.IconScale(creditsIconSize)
 
     rl.DrawTextEx(style.fonts.bold[ui.font_size.title],
     "SWIS",
@@ -18,6 +25,13 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
     fontSize,
     0,
     style.colors.text)
+
+    rl.DrawTextEx(style.fonts.semibold[ui.font_size.default],
+    credits,
+    creditsPos,
+    f32(ui.font_size.default), 0, style.colors.text)
+
+    rl.DrawTextureEx(style.icons[.economy_credit], { creditsPos.x - creditsIconSize - 2, header_y / 2 - creditsIconSize / 2 }, 0,  creditsScale, style.colors.text)
 
     ButtonInv := co.ButtonCreate(
     "Inventory",

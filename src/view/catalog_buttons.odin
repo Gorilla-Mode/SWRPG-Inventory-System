@@ -30,7 +30,7 @@ CreateCategoryButtons :: proc(
     style.icons[ui.Icons.category_gear]))
 
     append(&buttons, comp.ButtonCreate(
-    "Clothing",
+    "Armor",
     layout.left.center_x,
     button_width,
     button_height,
@@ -282,7 +282,62 @@ CreateClothingButtons :: proc(
         height,
         style.icons[ui.Icons.category_clothing],
         ),
-        value = inv.GearSubCategory.Miscellaneous, //TODO: Add clothing subcategory
+        value = inv.ArmorSubCategory.Clothing,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Full-Body",
+        layout.left.center_x,
+        width,
+        height,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.ArmorSubCategory.Full_Body,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Half-Body",
+        layout.left.center_x,
+        width,
+        height,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.ArmorSubCategory.Half_Body,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Sealed",
+        layout.left.center_x,
+        width,
+        height,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.ArmorSubCategory.Sealed,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Powered",
+        layout.left.center_x,
+        width,
+        height,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.ArmorSubCategory.Powered,
+    })
+
+    append(&buttons, CatalogButton{
+        button = comp.ButtonCreate(
+        "Gear",
+        layout.left.center_x,
+        width,
+        height,
+        style.icons[ui.Icons.category_clothing],
+        ),
+        value = inv.ArmorSubCategory.Gear,
     })
 
     return buttons

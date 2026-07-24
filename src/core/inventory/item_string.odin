@@ -29,54 +29,67 @@ GearSubCategoryString :: proc(sub_category: GearSubCategory) -> string {
     return GearSubCategoryStrings[sub_category]
 }
 
+ArmorSubCategoryString :: proc(sub_category: ArmorSubCategory) -> string {
+    return ArmorSubCategoryStrings[sub_category]
+}
+
 GearSubCategoryStrings := [GearSubCategory]string{
-    GearSubCategory.Tool = "Tool",
-    GearSubCategory.Medical = "Medical",
-    GearSubCategory.Electronics = "Electronics",
-    GearSubCategory.Survival = "Survival",
+    GearSubCategory.Tool          = "Tool",
+    GearSubCategory.Medical       = "Medical",
+    GearSubCategory.Electronics   = "Electronics",
+    GearSubCategory.Survival      = "Survival",
     GearSubCategory.Miscellaneous = "Miscellaneous",
 }
 
 ContainerSubCategoryStrings := [ContainerSubCategory]string{
-    ContainerSubCategory.Backpack = "Backpack",
-    ContainerSubCategory.Belt = "Belt",
-    ContainerSubCategory.Holster = "Holster",
+    ContainerSubCategory.Backpack  = "Backpack",
+    ContainerSubCategory.Belt      = "Belt",
+    ContainerSubCategory.Holster   = "Holster",
     ContainerSubCategory.Container = "Container",
     ContainerSubCategory.Bandolier = "Bandolier",
 }
 
 WeaponSubCategoryStrings := [WeaponSubCategory]string{
-    WeaponSubCategory.Pistol = "Pistol",
-    WeaponSubCategory.Rifle = "Rifle",
-    WeaponSubCategory.Blade = "Blade",
-    WeaponSubCategory.Blunt = "Blunt",
-    WeaponSubCategory.Explosive = "Explosive",
-    WeaponSubCategory.Gunnery = "Gunnery",
+    WeaponSubCategory.Pistol     = "Pistol",
+    WeaponSubCategory.Rifle      = "Rifle",
+    WeaponSubCategory.Blade      = "Blade",
+    WeaponSubCategory.Blunt      = "Blunt",
+    WeaponSubCategory.Explosive  = "Explosive",
+    WeaponSubCategory.Gunnery    = "Gunnery",
     WeaponSubCategory.Lightsaber = "Lightsaber",
 }
 
 WeaponRangebandStrings := [WeaponRangebands]string{
-    WeaponRangebands.Engaged = "Engaged",
-    WeaponRangebands.Close = "Close",
-    WeaponRangebands.Short = "Short",
-    WeaponRangebands.Medium = "Medium",
-    WeaponRangebands.Long = "Long",
-    WeaponRangebands.Extreme = "Extreme",
+    WeaponRangebands.Engaged   = "Engaged",
+    WeaponRangebands.Close     = "Close",
+    WeaponRangebands.Short     = "Short",
+    WeaponRangebands.Medium    = "Medium",
+    WeaponRangebands.Long      = "Long",
+    WeaponRangebands.Extreme   = "Extreme",
     WeaponRangebands.Strategic = "Strategic",
 }
 
 WeaponSkillStrings := [WeaponSkill]string{
-    WeaponSkill.Light = "Light",
-    WeaponSkill.Heavy = "Heavy",
-    WeaponSkill.Gunnery = "Gunnery",
-    WeaponSkill.Brawl = "Brawl",
-    WeaponSkill.Melee = "Melee",
+    WeaponSkill.Light     = "Light",
+    WeaponSkill.Heavy     = "Heavy",
+    WeaponSkill.Gunnery   = "Gunnery",
+    WeaponSkill.Brawl     = "Brawl",
+    WeaponSkill.Melee     = "Melee",
     WeaponSkill.Mechanics = "Mechanics",
 }
 
 WeaponScaleStrings := [WeaponScale]string{
-    WeaponScale.Personal = "Personal",
+    WeaponScale.Personal  = "Personal",
     WeaponScale.Planetary = "Planetary",
+}
+
+ArmorSubCategoryStrings := [ArmorSubCategory]string{
+    ArmorSubCategory.Sealed    = "Sealed",
+    ArmorSubCategory.Full_Body = "Full Body",
+    ArmorSubCategory.Half_Body = "Half Body",
+    ArmorSubCategory.Powered   = "Powered",
+    ArmorSubCategory.Clothing  = "Clothing",
+    ArmorSubCategory.Gear      = "Gear",
 }
 
 ItemQualityString :: proc(quality: Quality) -> string {
@@ -130,6 +143,8 @@ CreateItemCstring :: proc(item: ^Item, debug: bool) -> ItemCstring {
         return CreateItemContainerCstring(item, base, debug)
     case GearData:
         return CreateItemGearCstring(item, base, debug)
+    case ArmorData:
+        return CreateItemArmorCstring(item, base, debug)
     }
 
     dbug.Debug(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
@@ -238,4 +253,24 @@ CreateItemGearCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> It
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
     return Gear
+}
+
+CreateItemArmorCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> ItemCstring {
+    Armor := base
+    itemData, ok := item.data.(ArmorData)
+    if !ok {
+        dbug.Warn(fmt.tprint(args = {"Item data type not recognized for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+        return base
+    }
+
+    Armor.category = "Armor"
+    Armor.sub_category = str.clone_to_cstring(ArmorSubCategoryString(itemData.sub_category), context.allocator)
+    Armor.data = ArmorDataCstring{
+        soak           = str.clone_to_cstring(fmt.tprint(itemData.Soak), context.allocator),
+        defense_ranged = str.clone_to_cstring(fmt.tprint(itemData.defense_ranged), context.allocator),
+        defense_melee  = str.clone_to_cstring(fmt.tprint(itemData.defense_melee), context.allocator),
+    }
+
+    if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))
+    return Armor
 }
