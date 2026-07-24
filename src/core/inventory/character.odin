@@ -20,7 +20,8 @@ Character :: struct{
     id:   string,
     name: string,
 
-    equipment: CharacterEquipment
+    equipment: CharacterEquipment,
+    credits:   i64,
 }
 
 CharacterEquipment :: struct{

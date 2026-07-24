@@ -581,6 +581,7 @@ TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, ins
     char := new(Character)
     char.name = "Lord Holcrub"
     char.id = "1"
+    char.credits = 600000
 
     char.equipment.slots = make(map[EquipmentSlot]^ItemInstance)
     char.equipment.slots[.Backpack] = backpack
