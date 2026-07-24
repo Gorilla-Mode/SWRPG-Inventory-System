@@ -476,9 +476,78 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     .category_clothing)
     armoredClothing, _ := MakeItemArmor(
     armoredClothingBase,
-    2,
+    1,
     1,
     ArmorSubCategory.Half_Body
+    )
+
+    heavyClothingBase, _ := MakeItemBase("HEAVY_CLOTHING",
+    "Heavy Clothing",
+    "Clothing with built-in armor for protection.",
+    4,
+    4,
+    1,
+    1,
+    false,
+    50,
+    {  },
+    { "Average perception check to detect that the clothing is armored" },
+    ItemCategory.Armor,
+    {  },
+    600,
+    debug,
+    .category_clothing)
+    heavyClothing, _ := MakeItemArmor(
+    heavyClothingBase,
+    1,
+    0,
+    ArmorSubCategory.Half_Body
+    )
+
+    mandalorianArmorBase, _ := MakeItemBase("MANDALORIAN_ARMOR",
+    "Mandalorian Armor",
+    "A set of armor worn by the Mandalorians, known for its durability and protection.",
+    5,
+    5,
+    8,
+    5,
+    true,
+    6000,
+    {  },
+    {  },
+    ItemCategory.Armor,
+    {  },
+    20000,
+    debug,
+    .category_clothing)
+    mandalorianArmor, _ := MakeItemArmor(
+    mandalorianArmorBase,
+    2,
+    1,
+    ArmorSubCategory.Full_Body
+    )
+
+    heavyBattleArmorBase, _ := MakeItemBase("HEAVY_BATTLE_ARMOR",
+    "Heavy Battle Armor",
+    "A set of heavy armor designed for maximum protection in combat.",
+    5,
+    5,
+    7,
+    4,
+    true,
+    5000,
+    {  },
+    {  },
+    ItemCategory.Armor,
+    {  },
+    20000,
+    debug,
+    .category_clothing)
+    heavyBattleArmor, _ := MakeItemArmor(
+    heavyBattleArmorBase,
+    2,
+    1,
+    ArmorSubCategory.Full_Body
     )
 
     AddItemRegistry(registry, strReg, rapier, debug)
@@ -499,6 +568,9 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     AddItemRegistry(registry, strReg, Lightsaber, debug)
     AddItemRegistry(registry, strReg, ShotoLightsaber, debug)
     AddItemRegistry(registry, strReg, armoredClothing, debug)
+    AddItemRegistry(registry, strReg, heavyClothing, debug)
+    AddItemRegistry(registry, strReg, mandalorianArmor, debug)
+    AddItemRegistry(registry, strReg, heavyBattleArmor, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {
