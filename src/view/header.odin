@@ -117,7 +117,10 @@ DrawHeader :: proc(style: ^ui.style, state: ^st.state) {
 
     for i in 0..<len(buttons) {
         if co.DrawButton(&buttons[i], style, state.page == pages[i]) {
-            state.page = pages[i]
+            if state.page != pages[i] {
+                state.page = pages[i]
+                if state.page == .Catalog do CatalogResetPurchaseState(state)
+            }
         }
     }
 

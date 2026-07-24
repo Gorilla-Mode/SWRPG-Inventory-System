@@ -7,6 +7,8 @@ import rl "vendor:raylib"
 import comp "../ui/component"
 import inv "../core/inventory"
 import str "core:strings"
+import "core:strconv"
+import "core:fmt"
 import cstr "../utils/cstrings"
 import m "core:math"
 
@@ -179,6 +181,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         state.catalog.selected_item == definition) {
             if state.catalog.selected_item == definition do state.catalog.selected_item = nil
             else do state.catalog.selected_item = definition
+            CatalogResetPurchaseState(state)
         }
 
         posY += entryHeight + paddingElement
@@ -264,6 +267,7 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
         dataBounds     := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
         sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, boxesBounds.width, state.debug)
         _ = DrawCatalogDescription(state, style, sectionsBounds, layout, boxesBounds.width, state.debug)
+        _ = DrawCatalogPurchaseControls(state, style, boundsView)
     }
 }
 
@@ -705,4 +709,191 @@ DrawCatalogArmorData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
+}
+
+@(private="file")
+CatalogUpdateTextFields :: proc(state: ^st.state) {
+	priceStr := fmt.tprintf("%d", state.catalog.purchase_at)
+	markupStr := fmt.tprintf("%.0f", state.catalog.purchase_markup)
+
+	if _, ok := state.textFields[.Catalog_Purchase_Price]; !ok {
+		state.textFields[.Catalog_Purchase_Price] = {
+			is_active              = false,
+			backspace_repeat_timer = 0.05,
+			backspace_timer        = 0.5,
+		}
+	}
+	if _, ok := state.textFields[.Catalog_Purchase_Markup]; !ok {
+		state.textFields[.Catalog_Purchase_Markup] = {
+			is_active              = false,
+			backspace_repeat_timer = 0.05,
+			backspace_timer        = 0.5,
+		}
+	}
+
+	fieldPrice := comp.TextField{
+		state = &state.textFields[.Catalog_Purchase_Price],
+	}
+	comp.TextFieldSet(&fieldPrice, priceStr)
+
+	fieldMarkup := comp.TextField{
+		state = &state.textFields[.Catalog_Purchase_Markup],
+	}
+	comp.TextFieldSet(&fieldMarkup, markupStr)
+}
+
+CatalogResetPurchaseState :: proc(state: ^st.state) {
+	if state.catalog.selected_item != nil {
+		state.catalog.purchase_rarity = state.catalog.selected_item.base_rarity
+		if state.catalog.purchase_rarity < 1 do state.catalog.purchase_rarity = 1
+		state.catalog.purchase_restricted = state.catalog.selected_item.restricted
+		state.catalog.purchase_markup = 100
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+	} else {
+		state.catalog.purchase_rarity = 1
+		state.catalog.purchase_restricted = false
+		state.catalog.purchase_markup = 100
+		state.catalog.purchase_at = 0
+	}
+	CatalogUpdateTextFields(state)
+}
+
+@(private="file")
+CalculatePurchasePrice :: proc(state: ^st.state) -> i64 {
+	item := state.catalog.selected_item
+	if item == nil do return 0
+
+	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity)
+	return i64(f32(base) * (state.catalog.purchase_markup / 100.0))
+}
+
+@(private="file")
+DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle) -> rl.Rectangle {
+	padding: f32 = 2
+	item := state.catalog.selected_item
+	if item == nil do return rl.Rectangle{}
+
+	controlHeight: f32 = 32
+	labelHeight := f32(ui.font_size.label)
+	labelFont := style.fonts.semibold[ui.font_size.label]
+
+	innerPadding: f32 = 2
+
+	h: f32 = innerPadding
+	h += labelHeight + padding + controlHeight
+	h += padding
+	h += labelHeight + padding + 32
+	h += padding
+	h += labelHeight + padding + controlHeight
+	h += padding
+	h += controlHeight
+	h += innerPadding
+
+	bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, h}
+
+	rl.DrawRectangleRec(bounds, style.colors.secondary)
+
+	currentY := bounds.y + innerPadding
+	currentX := bounds.x + innerPadding
+	innerWidth := bounds.width - innerPadding * 2
+
+    priceLabelText: cstring = "Price"
+    priceLabelTextSize := rl.MeasureTextEx(labelFont, priceLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, priceLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, priceLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	resetBtnWidth: f32 = 72
+	priceFieldRect := rl.Rectangle{currentX, currentY, innerWidth - resetBtnWidth - padding, controlHeight}
+	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit])
+	if comp.UpdateTextField(&priceField) {
+		val, ok := strconv.parse_i64(comp.TextFieldToString(&priceField))
+		if ok {
+			state.catalog.purchase_at = val
+		}
+	}
+	comp.DrawTextField(&priceField, style, "Price")
+
+	resetBtn := comp.ButtonCreate("Reset", {currentX + priceFieldRect.width + padding + resetBtnWidth / 2, currentY + controlHeight / 2}, resetBtnWidth, controlHeight)
+	if comp.DrawButtonCol(&resetBtn, style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		CatalogResetPurchaseState(state)
+	}
+	currentY += controlHeight + padding
+
+    rarityLabelStr := fmt.tprintf("Rarity - %d", state.catalog.purchase_rarity)
+    rarityLabelText := str.clone_to_cstring(rarityLabelStr, context.temp_allocator)
+    rarityLabelTextSize := rl.MeasureTextEx(labelFont, rarityLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, rarityLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, rarityLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	btnSize: f32 = 32
+
+	restrictedIconCol := state.catalog.purchase_restricted ? style.colors.error : style.colors.text
+	btnRestricted := comp.ButtonCreate("", {currentX + innerWidth - btnSize / 2, currentY + btnSize / 2}, btnSize, btnSize, style.icons[.economy_restricted])
+
+    remainingWidth := innerWidth - btnSize - padding
+    rarityBtnWidth := (remainingWidth - padding) / 2
+    
+    btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize)
+    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize)
+    
+    rarityButtons := make([dynamic]comp.Button, context.temp_allocator)
+    append(&rarityButtons, btnDown, btnUp)
+    comp.LayoutButtonsHorizontalRect(rarityButtons, {currentX, currentY, remainingWidth, btnSize}, currentY + btnSize / 2, padding, 0, 0)
+
+	if comp.DrawButtonCol(&rarityButtons[0], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_rarity -= 1
+		if state.catalog.purchase_rarity < 1 do state.catalog.purchase_rarity = 1
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+
+    if comp.DrawButtonCol(&rarityButtons[1], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_rarity += 1
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+
+	if comp.DrawButtonCol(&btnRestricted, style, state.catalog.purchase_restricted, style.colors.surface, restrictedIconCol, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_restricted = !state.catalog.purchase_restricted
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+	currentY += btnSize + padding
+
+    markupLabelText: cstring = "Markup"
+    markupLabelTextSize := rl.MeasureTextEx(labelFont, markupLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, markupLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, "Markup", {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	markupFieldRect := rl.Rectangle{currentX, currentY, innerWidth, controlHeight}
+	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity])
+	if comp.UpdateTextField(&markupField) {
+		val, ok := strconv.parse_f32(comp.TextFieldToString(&markupField))
+		if ok {
+            if val < 0 {
+                val = 0
+                comp.TextFieldSet(&markupField, "0")
+            }
+			state.catalog.purchase_markup = val
+			state.catalog.purchase_at = CalculatePurchasePrice(state)
+
+			pStr := fmt.tprintf("%d", state.catalog.purchase_at)
+			pField := comp.TextField{
+				state = &state.textFields[.Catalog_Purchase_Price],
+			}
+			comp.TextFieldSet(&pField, pStr)
+		}
+	}
+	comp.DrawTextField(&markupField, style, "Markup %")
+	currentY += controlHeight + padding
+
+	purchaseBtn := comp.ButtonCreate("Purchase", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_buy])
+	if comp.DrawButtonCol(&purchaseBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
+		// Implementation later
+	}
+
+	return bounds
 }
