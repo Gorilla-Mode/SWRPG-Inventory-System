@@ -62,6 +62,11 @@ CheckSubCategory :: proc(item: ^ItemInstance, rule: EquipmentSlotRule) -> bool {
 
         if (rule.blacklist_gear & gear_mask) != 0 do return false
         return (rule.gear & gear_mask) != 0
+    case ArmorData:
+        armor_mask := ArmorSubCategoryMask(1 << u32(data.sub_category))
+
+        if (rule.blacklist_armor & armor_mask) != 0 do return false
+        return (rule.armor & armor_mask) != 0
     }
 
     return false

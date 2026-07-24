@@ -63,7 +63,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 7, paddingElement)
     buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
     buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
-    buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
+    buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 6, paddingElement)
 
     searchBar := comp.TextFieldCreate(
     rl.Rectangle{
@@ -218,6 +218,10 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
                     continue
                 }
             case inv.GearData:
+                if state.catalog.sub_category != data.sub_category {
+                    continue
+                }
+            case inv.ArmorData:
                 if state.catalog.sub_category != data.sub_category {
                     continue
                 }
@@ -550,7 +554,7 @@ CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
         }
     case inv.GearData:
         return ui.Icons.category_gear
-    case:
+    case inv.ArmorData:
         return ui.Icons.category_clothing
     }
     return ui.Icons.gui_info
@@ -622,6 +626,8 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
         return DrawCatalogContainerData(state, style, item, bounds, layout, boxSize, debug)
     case inv.GearData:
         return DrawCatalogGearData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.ArmorData:
+        return DrawCatalogArmorData(state, style, item, bounds, layout, boxSize, debug)
     case:
         return bounds
     }
@@ -678,6 +684,22 @@ DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item,
 //    gearDataStr := itemStrings.data.(inv.ContainerDataCstring)
 
     comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug)
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogArmorData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    armorDataStr := itemStrings.data.(inv.ArmorDataCstring)
+
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Soak", armorDataStr.soak, debug)
+    bounds.width += padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Defense", armorDataStr.defense, debug).width
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds

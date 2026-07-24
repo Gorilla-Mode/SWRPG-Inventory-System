@@ -69,6 +69,7 @@ subCategory :: union {
     inv.WeaponSubCategory,
     inv.GearSubCategory,
     inv.ContainerSubCategory,
+    inv.ArmorSubCategory
 }
 
 page :: enum{

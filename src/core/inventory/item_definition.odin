@@ -24,7 +24,8 @@ Item :: struct{
 ItemData :: union{
     WeaponData,
     ContainerData,
-    GearData
+    GearData,
+    ArmorData
 }
 
 WeaponData :: struct{
@@ -46,6 +47,13 @@ ContainerData :: struct{
 
 GearData :: struct{
     sub_category: GearSubCategory
+}
+
+ArmorData :: struct{
+    Soak:    i16,
+    defense: i8,
+
+    sub_category: ArmorSubCategory
 }
 
 ItemCstring :: struct{
@@ -73,7 +81,8 @@ ItemCstring :: struct{
 ItemCstringData :: union{
     WeaponDataCstring,
     ContainerDataCstring,
-    GearDataCstring
+    GearDataCstring,
+    ArmorDataCstring
 }
 
 WeaponDataCstring :: struct{
@@ -92,4 +101,9 @@ ContainerDataCstring :: struct{
 
 GearDataCstring :: struct{
     //Empty for now, kept for future expansion
+}
+
+ArmorDataCstring :: struct{
+    soak,
+    defense: cstring,
 }

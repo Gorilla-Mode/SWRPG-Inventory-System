@@ -81,3 +81,12 @@ GearSubCategory :: enum{
     Survival,
     Miscellaneous,
 }
+
+ArmorSubCategory :: enum{
+    Sealed,
+    Full_Body,
+    Half_Body,
+    Powered,
+    Clothing,
+    Gear
+}
