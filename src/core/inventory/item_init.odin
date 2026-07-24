@@ -143,19 +143,21 @@ MakeItemContainerGrid :: proc(baseItem: Item,
 
 MakeItemArmor :: proc (baseItem: Item,
     soak: i16,
-    defense: i8,
+    defense_ranged,
+    defense_melee: i8,
     subCategory: ArmorSubCategory
 ) -> (Item, ArmorError) {
     armor := baseItem
 
-    ok := CheckArmorItem(soak, defense)
+    ok := CheckArmorItem(soak, defense_ranged, defense_melee)
     if !ok.success {
         return Item{}, ok
     }
 
     armor.data = ArmorData{
         Soak = soak,
-        defense = defense,
+        defense_ranged = defense_ranged,
+        defense_melee = defense_melee,
         sub_category = subCategory,
     }
 

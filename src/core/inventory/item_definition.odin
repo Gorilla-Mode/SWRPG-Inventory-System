@@ -51,7 +51,8 @@ GearData :: struct{
 
 ArmorData :: struct{
     Soak:    i16,
-    defense: i8,
+    defense_ranged,
+    defense_melee: i8,
 
     sub_category: ArmorSubCategory
 }
@@ -105,5 +106,6 @@ GearDataCstring :: struct{
 
 ArmorDataCstring :: struct{
     soak,
-    defense: cstring,
+    defense_ranged,
+    defense_melee: cstring,
 }

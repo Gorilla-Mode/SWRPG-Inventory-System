@@ -132,13 +132,17 @@ CheckContainerGridItem :: proc(width, height: i16) -> (ContainerError) {
     return ContainerError{ true, .Success, "Success" }
 }
 
-CheckArmorItem :: proc(soak: i16, defense: i8) -> (ArmorError) {
+CheckArmorItem :: proc(soak: i16, defense_ranged, defense_melee: i8) -> (ArmorError) {
     if soak < 0 {
         return ArmorError{ false, .InvalidSoak, "Armor soak must be greater than or equal to 0" }
     }
 
-    if defense < 0 {
-        return ArmorError{ false, .InvalidDefense, "Armor defense must be greater than or equal to 0" }
+    if defense_ranged < 0 {
+        return ArmorError{ false, .InvalidDefense, "Armor ranged defense must be greater than or equal to 0" }
+    }
+
+    if defense_melee < 0 {
+        return ArmorError{ false, .InvalidDefense, "Armor melee defense must be greater than or equal to 0" }
     }
 
     return ArmorError{ true, .Success, "Success" }
@@ -214,7 +218,7 @@ CheckArmorItemItem :: proc(item: Item) -> (ArmorError) {
     }
 
     armor := item.data.(ArmorData)
-    return CheckArmorItem(armor.Soak, armor.defense)
+    return CheckArmorItem(armor.Soak, armor.defense_ranged, armor.defense_melee)
 }
 
 CheckWeaponItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {

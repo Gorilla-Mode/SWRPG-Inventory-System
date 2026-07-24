@@ -266,8 +266,9 @@ CreateItemArmorCstring :: proc(item: ^Item, base: ItemCstring, debug: bool) -> I
     Armor.category = "Armor"
     Armor.sub_category = str.clone_to_cstring(ArmorSubCategoryString(itemData.sub_category), context.allocator)
     Armor.data = ArmorDataCstring{
-        soak = str.clone_to_cstring(fmt.tprint(itemData.Soak), context.allocator),
-        defense = str.clone_to_cstring(fmt.tprint(itemData.defense), context.allocator),
+        soak           = str.clone_to_cstring(fmt.tprint(itemData.Soak), context.allocator),
+        defense_ranged = str.clone_to_cstring(fmt.tprint(itemData.defense_ranged), context.allocator),
+        defense_melee  = str.clone_to_cstring(fmt.tprint(itemData.defense_melee), context.allocator),
     }
 
     if debug do dbug.Debug(fmt.tprint(args = {"Created Gear ItemCstring for item: ", dbug.HIGHLIGHT_DEBUG, item.id, dbug.HIGHLIGHT_DEBUG_END}, sep = ""))

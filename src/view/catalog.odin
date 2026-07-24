@@ -615,7 +615,7 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
     boxSize: f32 = 68
     rl.DrawTextEx(style.fonts.semibold[.default], headerText, {bounds.x + padding, bounds.y}, f32(ui.font_size.default), 2, style.colors.text)
     bounds.height += rl.MeasureTextEx(style.fonts.semibold[.default], headerText, f32(ui.font_size.default), 2).y + padding
-    rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
+//  rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
 
@@ -699,7 +699,9 @@ DrawCatalogArmorData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item
 
     comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Soak", armorDataStr.soak, debug)
     bounds.width += padding
-    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Defense", armorDataStr.defense, debug).width
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Ranged Def", armorDataStr.defense_ranged, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Melee Def", armorDataStr.defense_melee, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds

@@ -478,6 +478,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     armoredClothingBase,
     1,
     1,
+    1,
     ArmorSubCategory.Half_Body
     )
 
@@ -500,6 +501,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     heavyClothing, _ := MakeItemArmor(
     heavyClothingBase,
     1,
+    0,
     0,
     ArmorSubCategory.Half_Body
     )
@@ -524,6 +526,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     mandalorianArmorBase,
     2,
     1,
+    1,
     ArmorSubCategory.Full_Body
     )
 
@@ -546,6 +549,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     heavyBattleArmor, _ := MakeItemArmor(
     heavyBattleArmorBase,
     2,
+    1,
     1,
     ArmorSubCategory.Full_Body
     )
