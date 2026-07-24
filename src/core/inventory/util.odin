@@ -458,6 +458,29 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     1,
     ContainerSubCategory.Belt)
 
+    armoredClothingBase, _ := MakeItemBase("ARMORED_CLOTHING",
+    "Armored Clothing",
+    "Clothing with built-in armor for protection.",
+    4,
+    4,
+    6,
+    1,
+    false,
+    1000,
+    {  },
+    { "Average perception check to detect that the clothing is armored" },
+    ItemCategory.Armor,
+    {  },
+    2000,
+    debug,
+    .category_clothing)
+    armoredClothing, _ := MakeItemArmor(
+    armoredClothingBase,
+    2,
+    1,
+    ArmorSubCategory.Half_Body
+    )
+
     AddItemRegistry(registry, strReg, rapier, debug)
     AddItemRegistry(registry, strReg, rifle, debug)
     AddItemRegistry(registry, strReg, knife, debug)
@@ -475,6 +498,7 @@ TestRegistry :: proc(registry: ^ItemDefinitionRegistry, strReg: ^ItemCstringRegi
     AddItemRegistry(registry, strReg, gaffiStickInstance, debug)
     AddItemRegistry(registry, strReg, Lightsaber, debug)
     AddItemRegistry(registry, strReg, ShotoLightsaber, debug)
+    AddItemRegistry(registry, strReg, armoredClothing, debug)
 }
 
 TestCharacter :: proc(backpack: ^ItemInstance, reg: ^ItemDefinitionRegistry, instanceReg: ^ItemInstanceRegistry, debug: bool) -> ^Character {

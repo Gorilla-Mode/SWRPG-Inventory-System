@@ -30,6 +30,12 @@ InstanceError :: struct{
     message: string,
 }
 
+ArmorError :: struct{
+    success: bool,
+    error: ArmorErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -55,6 +61,13 @@ GearErrors :: enum{
 
 ContainerErrors :: enum{
     Success,
+    InvalidData,
+}
+
+ArmorErrors :: enum{
+    Success,
+    InvalidSoak,
+    InvalidDefense,
     InvalidData,
 }
 
@@ -119,6 +132,18 @@ CheckContainerGridItem :: proc(width, height: i16) -> (ContainerError) {
     return ContainerError{ true, .Success, "Success" }
 }
 
+CheckArmorItem :: proc(soak: i16, defense: i8) -> (ArmorError) {
+    if soak < 0 {
+        return ArmorError{ false, .InvalidSoak, "Armor soak must be greater than or equal to 0" }
+    }
+
+    if defense < 0 {
+        return ArmorError{ false, .InvalidDefense, "Armor defense must be greater than or equal to 0" }
+    }
+
+    return ArmorError{ true, .Success, "Success" }
+}
+
 CheckGearItem :: proc(item: Item) -> (GearError) {
 //fr no checks for gear items, but to add later, and consistency with other item types, we have this function
     return GearError{ true, .Success, "Success" }
@@ -176,6 +201,20 @@ CheckContainerGridItemItem :: proc(item: Item) -> (ContainerError) {
     }
 
     return CheckContainerGridItem(containerGrid.width, containerGrid.height)
+}
+
+CheckArmorItemItem :: proc(item: Item) -> (ArmorError) {
+    baseItem := CheckBaseItemItem(item)
+    if baseItem.success != true {
+        return ArmorError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
+    if item.category != .Armor {
+        return ArmorError{ false, .InvalidData, "Item is not an armor item" }
+    }
+
+    armor := item.data.(ArmorData)
+    return CheckArmorItem(armor.Soak, armor.defense)
 }
 
 CheckWeaponItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {
