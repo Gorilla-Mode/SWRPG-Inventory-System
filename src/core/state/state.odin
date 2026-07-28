@@ -58,6 +58,10 @@ catalogState :: struct{
     selected_item: ^inv.Item,
 
     scroll_offset: f32,
+    purchase_at:  i64,
+    purchase_rarity: i8,
+    purchase_markup: f32,
+    purchase_restricted: bool,
 }
 
 NoSubCategory :: enum {
@@ -84,6 +88,8 @@ page :: enum{
 
 textField :: enum {
     Catalog_Search,
+    Catalog_Purchase_Price,
+    Catalog_Purchase_Markup,
 }
 
 UpdateWindowState :: proc(state: ^state) {
