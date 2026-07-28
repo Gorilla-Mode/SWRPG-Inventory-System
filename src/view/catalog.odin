@@ -267,7 +267,7 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
         dataBounds     := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
         sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, boxesBounds.width, state.debug)
         _ = DrawCatalogDescription(state, style, sectionsBounds, layout, boxesBounds.width, state.debug)
-        _ = DrawCatalogPurchaseControls(state, style, boundsView)
+        _ = DrawCatalogPurchaseControls(state, style, boundsView, state.debug)
     }
 }
 
@@ -768,7 +768,7 @@ CalculatePurchasePrice :: proc(state: ^st.state) -> i64 {
 }
 
 @(private="file")
-DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle) -> rl.Rectangle {
+DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, debug: bool = false) -> rl.Rectangle {
 	padding: f32 = 2
 	item := state.catalog.selected_item
 	if item == nil do return rl.Rectangle{}
@@ -814,8 +814,8 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	}
 	comp.DrawTextField(&priceField, style, "Price")
 
-	resetBtn := comp.ButtonCreate("Reset", {currentX + priceFieldRect.width + padding + resetBtnWidth / 2, currentY + controlHeight / 2}, resetBtnWidth, controlHeight)
-	if comp.DrawButtonCol(&resetBtn, style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+	resetBtn := comp.ButtonCreate("Reset", {currentX + priceFieldRect.width + padding + resetBtnWidth / 2, currentY + controlHeight / 2}, resetBtnWidth, controlHeight, style.icons[.gui_reset])
+	if comp.DrawButtonCol(&resetBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.secondary_hover, style.colors.primary) {
 		CatalogResetPurchaseState(state)
 	}
 	currentY += controlHeight + padding
@@ -835,27 +835,27 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
     remainingWidth := innerWidth - btnSize - padding
     rarityBtnWidth := (remainingWidth - padding) / 2
     
-    btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize)
-    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize)
+    btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
+    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
     
     rarityButtons := make([dynamic]comp.Button, context.temp_allocator)
     append(&rarityButtons, btnDown, btnUp)
     comp.LayoutButtonsHorizontalRect(rarityButtons, {currentX, currentY, remainingWidth, btnSize}, currentY + btnSize / 2, padding, 0, 0)
 
-	if comp.DrawButtonCol(&rarityButtons[0], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+	if comp.DrawButtonCol(&rarityButtons[0], style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.secondary_hover, style.colors.primary) {
 		state.catalog.purchase_rarity -= 1
 		if state.catalog.purchase_rarity < 1 do state.catalog.purchase_rarity = 1
 		state.catalog.purchase_at = CalculatePurchasePrice(state)
 		CatalogUpdateTextFields(state)
 	}
 
-    if comp.DrawButtonCol(&rarityButtons[1], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+    if comp.DrawButtonCol(&rarityButtons[1], style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.secondary_hover, style.colors.primary) {
 		state.catalog.purchase_rarity += 1
 		state.catalog.purchase_at = CalculatePurchasePrice(state)
 		CatalogUpdateTextFields(state)
 	}
 
-	if comp.DrawButtonCol(&btnRestricted, style, state.catalog.purchase_restricted, style.colors.surface, restrictedIconCol, style.colors.surface, style.colors.primary, style.colors.primary) {
+	if comp.DrawButtonCol(&btnRestricted, style, state.catalog.purchase_restricted, style.colors.surface, restrictedIconCol, style.colors.secondary, style.colors.secondary_hover, style.colors.surface) {
 		state.catalog.purchase_restricted = !state.catalog.purchase_restricted
 		state.catalog.purchase_at = CalculatePurchasePrice(state)
 		CatalogUpdateTextFields(state)
@@ -894,6 +894,8 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	if comp.DrawButtonCol(&purchaseBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
 		// Implementation later
 	}
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
 
 	return bounds
 }
