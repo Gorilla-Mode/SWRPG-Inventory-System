@@ -3,7 +3,7 @@
 import rl "vendor:raylib"
 import ui ".."
 
-ToolTipVec2 :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style: ^ui.style) {
+ToolTipVec2 :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style: ^ui.style, top_align: bool = true) {
     messageSize := rl.MeasureTextEx(style.fonts.regular[.default], text, f32(ui.font_size.default), 0)
     rect := rl.Rectangle{
         x = pos.x,
@@ -18,6 +18,11 @@ ToolTipVec2 :: proc(text: cstring, pos: rl.Vector2, textSize: rl.Vector2, style:
         height = messageSize.y + 6,
     }
     mousePos := rl.GetMousePosition()
+
+    if !top_align{
+        rect.y -= rect.height / 2
+        backGroundRect.y -= backGroundRect.height / 2
+    }
 
     if rl.CheckCollisionPointRec(mousePos, rect) {
         rl.DrawRectangleRec(backGroundRect, style.colors.surface)

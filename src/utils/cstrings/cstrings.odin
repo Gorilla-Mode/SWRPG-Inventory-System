@@ -99,3 +99,44 @@ FormatArray :: proc(arr: [dynamic]cstring,
 IntToCString :: proc(num: i32, allocator := context.allocator) -> cstring {
     return str.clone_to_cstring(fmt.tprint(num), allocator)
 }
+
+@private
+FormatCurrencyI32 :: proc(amount: i32, allocator := context.allocator) -> cstring {
+    if amount < 0 do return nil
+    if amount == 0 do return str.clone_to_cstring("0", allocator)
+
+    buf := make([dynamic]u8, 0, 16, allocator)
+    num_str := fmt.tprint(amount)
+    len := len(num_str)
+
+    for i in 0..<len {
+        append(&buf, num_str[i])
+        if (len - i - 1) % 3 == 0 && i != len - 1 do append(&buf, ',')
+    }
+
+    append(&buf, 0)
+    return cstring(&buf[0])
+}
+
+@private
+FormatCurrencyI64 :: proc(amount: i64, allocator := context.allocator) -> cstring {
+    if amount < 0 do return nil
+    if amount == 0 do return str.clone_to_cstring("0", allocator)
+
+    buf := make([dynamic]u8, 0, 32, allocator)
+    num_str := fmt.tprint(amount)
+    len := len(num_str)
+
+    for i in 0..<len {
+        append(&buf, num_str[i])
+        if (len - i - 1) % 3 == 0 && i != len - 1 do append(&buf, ',')
+    }
+
+    append(&buf, 0)
+    return cstring(&buf[0])
+}
+
+FormatCurrency :: proc{
+    FormatCurrencyI32,
+    FormatCurrencyI64
+}

@@ -106,9 +106,6 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
 
     if field.state.buffer_length == 0 do textCol.a = 128
 
-    if boxRectCollision && !clearRectCollision do rl.SetMouseCursor(.IBEAM)
-    else do rl.SetMouseCursor(.DEFAULT)
-
     rl.DrawRectangleRec(field.rect, style.colors.surface)
     rl.DrawRectangleLinesEx(field.rect, 2, outlineCol)
     rl.DrawRectangleRec(field.rect_image, style.colors.secondary)
@@ -163,7 +160,9 @@ TextFieldClear :: proc(field: ^TextField){
 }
 
 TextFieldSet :: proc(field: ^TextField, text: string){
-    panic("Not implemented yet")
+    resize(&field.state.buffer, len(text))
+    copy(field.state.buffer[:], text)
+    field.state.buffer_length = i32(len(text))
 }
 
 TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state, image: rl.Texture2D) -> TextField {

@@ -30,6 +30,12 @@ InstanceError :: struct{
     message: string,
 }
 
+ArmorError :: struct{
+    success: bool,
+    error: ArmorErrors,
+    message: string,
+}
+
 ItemErrors :: enum{
     Success,
     InvalidRarity,
@@ -58,6 +64,13 @@ ContainerErrors :: enum{
     InvalidData,
 }
 
+ArmorErrors :: enum{
+    Success,
+    InvalidSoak,
+    InvalidDefense,
+    InvalidData,
+}
+
 InstanceErrors :: enum{
     Success,
     InvalidData,
@@ -65,7 +78,7 @@ InstanceErrors :: enum{
 
 CheckBaseItem :: proc(base_rarity, hardpoints: i8, base_price: i32, mass: f32, width, height: i16) -> (ItemError) {
     if base_rarity < 1 || base_rarity > 10 {
-        return ItemError{ false, .InvalidRarity, "Base rarity must be between 1 and 5" }
+        return ItemError{ false, .InvalidRarity, "Base rarity must be between 1 and 10" }
     }
 
     if base_price < 0 {
@@ -117,6 +130,22 @@ CheckContainerGridItem :: proc(width, height: i16) -> (ContainerError) {
     }
 
     return ContainerError{ true, .Success, "Success" }
+}
+
+CheckArmorItem :: proc(soak: i16, defense_ranged, defense_melee: i8) -> (ArmorError) {
+    if soak < 0 {
+        return ArmorError{ false, .InvalidSoak, "Armor soak must be greater than or equal to 0" }
+    }
+
+    if defense_ranged < 0 {
+        return ArmorError{ false, .InvalidDefense, "Armor ranged defense must be greater than or equal to 0" }
+    }
+
+    if defense_melee < 0 {
+        return ArmorError{ false, .InvalidDefense, "Armor melee defense must be greater than or equal to 0" }
+    }
+
+    return ArmorError{ true, .Success, "Success" }
 }
 
 CheckGearItem :: proc(item: Item) -> (GearError) {
@@ -176,6 +205,20 @@ CheckContainerGridItemItem :: proc(item: Item) -> (ContainerError) {
     }
 
     return CheckContainerGridItem(containerGrid.width, containerGrid.height)
+}
+
+CheckArmorItemItem :: proc(item: Item) -> (ArmorError) {
+    baseItem := CheckBaseItemItem(item)
+    if baseItem.success != true {
+        return ArmorError{ false, .InvalidData, "Base item data is invalid" }
+    }
+
+    if item.category != .Armor {
+        return ArmorError{ false, .InvalidData, "Item is not an armor item" }
+    }
+
+    armor := item.data.(ArmorData)
+    return CheckArmorItem(armor.Soak, armor.defense_ranged, armor.defense_melee)
 }
 
 CheckWeaponItemInstance :: proc(itemDefinition: ^Item) -> (InstanceError) {

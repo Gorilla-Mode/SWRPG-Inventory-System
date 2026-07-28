@@ -7,8 +7,9 @@ import rl "vendor:raylib"
 import comp "../ui/component"
 import inv "../core/inventory"
 import str "core:strings"
+import "core:strconv"
+import "core:fmt"
 import cstr "../utils/cstrings"
-import fmt "core:fmt"
 import m "core:math"
 
 @(private)
@@ -64,7 +65,7 @@ DrawCatalogExplorer :: proc (state: ^st.state, style: ^ui.style, layout: app.Cat
     buttonWidthWeapon    := CalcButtonWidth(buttonWidthBase, 7, paddingElement)
     buttonWidthContainer := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
     buttonWidthGear      := CalcButtonWidth(buttonWidthBase, 5, paddingElement)
-    buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 1, paddingElement)
+    buttonWidthClothing  := CalcButtonWidth(buttonWidthBase, 6, paddingElement)
 
     searchBar := comp.TextFieldCreate(
     rl.Rectangle{
@@ -180,6 +181,7 @@ DrawCatalogItemResults :: proc(state: ^st.state, style: ^ui.style, layout: app.C
         state.catalog.selected_item == definition) {
             if state.catalog.selected_item == definition do state.catalog.selected_item = nil
             else do state.catalog.selected_item = definition
+            CatalogResetPurchaseState(state)
         }
 
         posY += entryHeight + paddingElement
@@ -222,6 +224,10 @@ GetQueryRegistryKeys :: proc(state: ^st.state) -> [dynamic]string{
                 if state.catalog.sub_category != data.sub_category {
                     continue
                 }
+            case inv.ArmorData:
+                if state.catalog.sub_category != data.sub_category {
+                    continue
+                }
             }
         }
 
@@ -256,10 +262,12 @@ DrawCatalogItemStat :: proc(state: ^st.state, style: ^ui.style, rect_right: rl.R
 
     boundsHeader, itemSelected := DrawItemCatalogHeader(bounds, style, state, layout, state.debug)
     if itemSelected {
-        boundsView := DrawCatalogItemView(boundsHeader, style, state, state.debug)
-        baseBounds := DrawCatalogBaseItemStat(state, style, boundsView, layout, state.debug)
-        _ = DrawCatalogItemData(state, style, baseBounds, layout, state.debug)
-
+        boundsView     := DrawCatalogItemView(boundsHeader, style, state, state.debug)
+        boxesBounds    := DrawCatalogStatBoxes(state, style, boundsView, layout, state.debug)
+        dataBounds     := DrawCatalogItemData(state, style, boxesBounds, layout, state.debug)
+        sectionsBounds := DrawCatalogQualitiesAndFeatures(state, style, dataBounds, layout, boxesBounds.width, state.debug)
+        _ = DrawCatalogDescription(state, style, sectionsBounds, layout, boxesBounds.width, state.debug)
+        _ = DrawCatalogPurchaseControls(state, style, boundsView)
     }
 }
 
@@ -325,7 +333,7 @@ DrawCatalogItemView :: proc(rect: rl.Rectangle, style: ^ui.style, state: ^st.sta
 }
 
 @(private="file")
-DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle{
+DrawCatalogStatBoxes :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, debug: bool = false) -> rl.Rectangle {
     item            := state.catalog.selected_item
     padding         : f32 = 2
     textCol         := style.colors.text
@@ -378,15 +386,16 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     defer comp.ToolTipVec2("Projected price calculated from rarity, legality and base price\nPrice = (Base price * rarity) / 4 or 2 if restricted",
     {economyTextPos.x, economyTextPos.y + (defaultFontSize + padding) * 3 + padding},
     rl.MeasureTextEx(defaultFont, economyStrings.proj_price, defaultFontSize, 0) + defaultFontSize,
-    style)
+    style,
+    false)
 
     rl.DrawRectangleLinesEx(itemSizeRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Size", {itemSizeRect.x + (padding * 2), itemSizeRect.y + padding }, captionFontSize, 2, textCol)
     sizeTextPos := ui.SnapVector2({itemSizeRect.x + (padding * 2), itemSizeRect.y + padding + captionFontSize + padding})
     CatalogItemStatDrawField(style, .item_generic_width, defaultFont, sizeStrings.width, sizeTextPos, textCol, textCol)
     CatalogItemStatDrawField(style, .item_generic_height, defaultFont, sizeStrings.height, {sizeTextPos.x, sizeTextPos.y + defaultFontSize + padding}, textCol, textCol)
-    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
-    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  sizeStrings.area, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 3}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_area, defaultFont,  sizeStrings.area, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 2}, textCol, textCol)
+    CatalogItemStatDrawField(style, .item_generic_mass, defaultFont,  massStr, {sizeTextPos.x, sizeTextPos.y + (defaultFontSize + padding) * 3}, textCol, textCol)
 
     rl.DrawRectangleLinesEx(itemMetaRect, 2, style.colors.primary)
     rl.DrawTextEx(captionFont, "Meta", {itemMetaRect.x + (padding * 2), itemMetaRect.y + padding }, captionFontSize, 2, textCol)
@@ -398,12 +407,36 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     if (itemSizeRect.x + itemSizeRect.width) > contentRight do contentRight = itemSizeRect.x + itemSizeRect.width
     if (itemMetaRect.x + itemMetaRect.width) > contentRight do contentRight = itemMetaRect.x + itemMetaRect.width
 
-    sectionsY := itemEconomyRect.y + itemEconomyRect.height + (padding * 2)
+    bounds := rl.Rectangle{
+        x = textPos.x,
+        y = textPos.y,
+        width = contentRight - textPos.x,
+        height = baseItemDataHeight,
+    }
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogQualitiesAndFeatures :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, max_width: f32, debug: bool = false) -> rl.Rectangle {
+    item            := state.catalog.selected_item
+    itemStr         := state.CStringRegistry.items[item.id]
+    padding         : f32 = 2
+    textCol         := style.colors.text
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
+    captionFont     := style.fonts.regular[ui.font_size.caption]
+    captionFontSize := f32(captionFont.baseSize)
+
+    sectionsY := rect.y + rect.height + (padding * 2)
     sectionBottom: f32 = 0
     hasSections := false
 
+    columnWidth := max_width / 3
+
     if len(itemStr.qualities) > 0 {
-        qualitiesTextPos := ui.SnapVector2({itemEconomyRect.x + padding, sectionsY})
+        qualitiesTextPos := ui.SnapVector2({rect.x + padding, sectionsY})
         qualitiesText := cstr.FormatArray(itemStr.qualities, "- ", "\n", context.temp_allocator)
         qualitiesTextSize := rl.MeasureTextEx(defaultFont, qualitiesText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Qualities", {qualitiesTextPos.x, qualitiesTextPos.y + padding}, captionFontSize, 2, textCol)
@@ -413,8 +446,8 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
     }
 
     if len(itemStr.features) > 0 {
-        featuresTextPos := ui.SnapVector2({itemSizeRect.x + padding, sectionsY})
-        featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (itemMetaRect.width + itemSizeRect.width), defaultFont, 2)
+        featuresTextPos := ui.SnapVector2({rect.x + columnWidth + padding, sectionsY})
+        featuresText := cstr.FormatArray(itemStr.features, "", "\n", context.temp_allocator, (columnWidth * 2 - padding * 2), defaultFont, 2)
         featuresTextSize := rl.MeasureTextEx(defaultFont, featuresText, defaultFontSize, 0)
         rl.DrawTextEx(captionFont, "Features", {featuresTextPos.x, featuresTextPos.y + padding}, captionFontSize, 2, textCol)
         rl.DrawTextEx(defaultFont, featuresText, {featuresTextPos.x + rl.MeasureTextEx(defaultFont, "-", defaultFontSize, 0).x, featuresTextPos.y + captionFontSize + padding }, defaultFontSize, 0, textCol)
@@ -423,26 +456,44 @@ DrawCatalogBaseItemStat :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rec
         hasSections = true
     }
 
-    separatorY := itemEconomyRect.y + itemEconomyRect.height
-    if hasSections {
-        separatorY += sectionBottom
-        rl.DrawLineEx({textPos.x, separatorY}, {contentRight, separatorY}, 2, style.colors.primary)
-    }
+    if !hasSections do return rl.Rectangle{rect.x, rect.y + rect.height, rect.width, 0}
 
-    descriptionText := cstr.WrapMono(itemStr.description, baseItemDataWidth * 3, defaultFont, 0, context.temp_allocator)
-    descriptionTextY := separatorY + padding
-    descriptionPos := rl.Vector2{textPos.x + padding * 2, descriptionTextY + captionFontSize}
-    descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
-    rl.DrawTextEx(captionFont, "Description", {textPos.x + padding, descriptionTextY}, captionFontSize, 2, textCol)
-    rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
-
-    if (descriptionPos.x + descriptionSize.x) > contentRight do contentRight = descriptionPos.x + descriptionSize.x
+    rl.DrawLineEx({rect.x, rect.y + rect.height + sectionBottom}, {rect.x + max_width, rect.y + rect.height + sectionBottom}, 2, style.colors.primary)
 
     bounds := rl.Rectangle{
-        x = textPos.x,
-        y = textPos.y,
-        width = contentRight - textPos.x,
-        height = (descriptionPos.y + descriptionSize.y) - textPos.y,
+        x = rect.x,
+        y = sectionsY,
+        width = max_width,
+        height = sectionBottom,
+    }
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+DrawCatalogDescription :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle, layout: app.CatalogPageLayout, max_width: f32, debug: bool = false) -> rl.Rectangle {
+    item            := state.catalog.selected_item
+    itemStr         := state.CStringRegistry.items[item.id]
+    padding         : f32 = 2
+    textCol         := style.colors.text
+    defaultFont     := style.fonts.regular[ui.font_size.default]
+    defaultFontSize := f32(defaultFont.baseSize)
+    captionFont     := style.fonts.regular[ui.font_size.caption]
+    captionFontSize := f32(captionFont.baseSize)
+
+    descriptionText := cstr.WrapMono(itemStr.description, max_width, defaultFont, 0, context.temp_allocator)
+    descriptionTextY := rect.y + rect.height + padding
+    descriptionPos := rl.Vector2{rect.x + padding * 2, descriptionTextY + captionFontSize}
+    descriptionSize := rl.MeasureTextEx(defaultFont, descriptionText, defaultFontSize, 0)
+    rl.DrawTextEx(captionFont, "Description", {rect.x + padding, descriptionTextY}, captionFontSize, 2, textCol)
+    rl.DrawTextEx(defaultFont, descriptionText, descriptionPos, defaultFontSize, 0, textCol)
+
+    bounds := rl.Rectangle{
+        x = rect.x,
+        y = descriptionTextY,
+        width = max_width,
+        height = (descriptionPos.y + descriptionSize.y) - descriptionTextY,
     }
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
@@ -507,7 +558,7 @@ CatalogItemStatGetSubCategoryIcon :: proc(item: ^inv.Item) -> ui.Icons {
         }
     case inv.GearData:
         return ui.Icons.category_gear
-    case:
+    case inv.ArmorData:
         return ui.Icons.category_clothing
     }
     return ui.Icons.gui_info
@@ -522,11 +573,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
 }{
     return {
         base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected:",
-        str.clone_to_cstring(fmt.tprint(inv.ItemTotalPrice(item, item.base_rarity)),
-        context.temp_allocator), context.temp_allocator),
-        "cr",
-        context.temp_allocator), // Milde moses
+        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
         rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
@@ -572,7 +619,7 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
     boxSize: f32 = 68
     rl.DrawTextEx(style.fonts.semibold[.default], headerText, {bounds.x + padding, bounds.y}, f32(ui.font_size.default), 2, style.colors.text)
     bounds.height += rl.MeasureTextEx(style.fonts.semibold[.default], headerText, f32(ui.font_size.default), 2).y + padding
-    rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
+//  rl.DrawLineEx({bounds.x, bounds.y + bounds.height - padding / 2}, {bounds.x + bounds.width, bounds.y + bounds.height - padding / 2}, 2, style.colors.primary)
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
 
@@ -583,6 +630,8 @@ DrawCatalogItemData :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectang
         return DrawCatalogContainerData(state, style, item, bounds, layout, boxSize, debug)
     case inv.GearData:
         return DrawCatalogGearData(state, style, item, bounds, layout, boxSize, debug)
+    case inv.ArmorData:
+        return DrawCatalogArmorData(state, style, item, bounds, layout, boxSize, debug)
     case:
         return bounds
     }
@@ -607,9 +656,6 @@ DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Ite
     bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Band", weaponDataStr.rangeband, debug).width + padding
     bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontText, "Scale", weaponDataStr.scale, debug).width
 
-
-
-
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
 }
@@ -618,7 +664,16 @@ DrawCatalogWeaponData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Ite
 DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
     bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    containerDataStr := itemStrings.data.(inv.ContainerDataCstring)
+    containerData := item.data.(inv.ContainerData).containerDef.storage.(inv.ContainerGrid)
 
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Width", containerDataStr.width, debug)
+    bounds.width += padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Height", containerDataStr.height, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Area", cstr.IntToCString(i32(containerData.width * containerData.height), context.temp_allocator), debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
@@ -628,8 +683,217 @@ DrawCatalogContainerData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.
 DrawCatalogGearData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
     padding: f32 = 2
     bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+//    gearDataStr := itemStrings.data.(inv.ContainerDataCstring)
 
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug)
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
     return bounds
+}
+
+@(private="file")
+DrawCatalogArmorData :: proc(state: ^st.state, style: ^ui.style, item: ^inv.Item, rect: rl.Rectangle, layout: app.CatalogPageLayout, box_size: f32, debug: bool = false) -> rl.Rectangle {
+    padding: f32 = 2
+    bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, box_size, box_size}
+    itemStrings := state.CStringRegistry.items[item.id]
+    fontCount := style.fonts.bold[.title]
+    armorDataStr := itemStrings.data.(inv.ArmorDataCstring)
+
+    comp.DrawStatBox({bounds.x, bounds.y}, style, box_size, fontCount, "Soak", armorDataStr.soak, debug)
+    bounds.width += padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Ranged Def", armorDataStr.defense_ranged, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Melee Def", armorDataStr.defense_melee, debug).width + padding
+    bounds.width += comp.DrawStatBox({bounds.x + bounds.width, bounds.y}, style, box_size, fontCount, "Hardpoint", itemStrings.hardpoints, debug).width
+
+    if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
+    return bounds
+}
+
+@(private="file")
+CatalogUpdateTextFields :: proc(state: ^st.state) {
+	priceStr := fmt.tprintf("%d", state.catalog.purchase_at)
+	markupStr := fmt.tprintf("%.0f", state.catalog.purchase_markup)
+
+	if _, ok := state.textFields[.Catalog_Purchase_Price]; !ok {
+		state.textFields[.Catalog_Purchase_Price] = {
+			is_active              = false,
+			backspace_repeat_timer = 0.05,
+			backspace_timer        = 0.5,
+		}
+	}
+	if _, ok := state.textFields[.Catalog_Purchase_Markup]; !ok {
+		state.textFields[.Catalog_Purchase_Markup] = {
+			is_active              = false,
+			backspace_repeat_timer = 0.05,
+			backspace_timer        = 0.5,
+		}
+	}
+
+	fieldPrice := comp.TextField{
+		state = &state.textFields[.Catalog_Purchase_Price],
+	}
+	comp.TextFieldSet(&fieldPrice, priceStr)
+
+	fieldMarkup := comp.TextField{
+		state = &state.textFields[.Catalog_Purchase_Markup],
+	}
+	comp.TextFieldSet(&fieldMarkup, markupStr)
+}
+
+CatalogResetPurchaseState :: proc(state: ^st.state) {
+	if state.catalog.selected_item != nil {
+		state.catalog.purchase_rarity = state.catalog.selected_item.base_rarity
+		if state.catalog.purchase_rarity < 1 do state.catalog.purchase_rarity = 1
+		state.catalog.purchase_restricted = state.catalog.selected_item.restricted
+		state.catalog.purchase_markup = 100
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+	} else {
+		state.catalog.purchase_rarity = 1
+		state.catalog.purchase_restricted = false
+		state.catalog.purchase_markup = 100
+		state.catalog.purchase_at = 0
+	}
+	CatalogUpdateTextFields(state)
+}
+
+@(private="file")
+CalculatePurchasePrice :: proc(state: ^st.state) -> i64 {
+	item := state.catalog.selected_item
+	if item == nil do return 0
+
+	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity)
+	return i64(f32(base) * (state.catalog.purchase_markup / 100.0))
+}
+
+@(private="file")
+DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl.Rectangle) -> rl.Rectangle {
+	padding: f32 = 2
+	item := state.catalog.selected_item
+	if item == nil do return rl.Rectangle{}
+
+	controlHeight: f32 = 32
+	labelHeight := f32(ui.font_size.label)
+	labelFont := style.fonts.semibold[ui.font_size.label]
+
+	innerPadding: f32 = 2
+
+	h: f32 = innerPadding
+	h += labelHeight + padding + controlHeight
+	h += padding
+	h += labelHeight + padding + 32
+	h += padding
+	h += labelHeight + padding + controlHeight
+	h += padding
+	h += controlHeight
+	h += innerPadding
+
+	bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, h}
+
+	rl.DrawRectangleRec(bounds, style.colors.secondary)
+
+	currentY := bounds.y + innerPadding
+	currentX := bounds.x + innerPadding
+	innerWidth := bounds.width - innerPadding * 2
+
+    priceLabelText: cstring = "Price"
+    priceLabelTextSize := rl.MeasureTextEx(labelFont, priceLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, priceLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, priceLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	resetBtnWidth: f32 = 72
+	priceFieldRect := rl.Rectangle{currentX, currentY, innerWidth - resetBtnWidth - padding, controlHeight}
+	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit])
+	if comp.UpdateTextField(&priceField) {
+		val, ok := strconv.parse_i64(comp.TextFieldToString(&priceField))
+		if ok {
+			state.catalog.purchase_at = val
+		}
+	}
+	comp.DrawTextField(&priceField, style, "Price")
+
+	resetBtn := comp.ButtonCreate("Reset", {currentX + priceFieldRect.width + padding + resetBtnWidth / 2, currentY + controlHeight / 2}, resetBtnWidth, controlHeight)
+	if comp.DrawButtonCol(&resetBtn, style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		CatalogResetPurchaseState(state)
+	}
+	currentY += controlHeight + padding
+
+    rarityLabelStr := fmt.tprintf("Rarity - %d", state.catalog.purchase_rarity)
+    rarityLabelText := str.clone_to_cstring(rarityLabelStr, context.temp_allocator)
+    rarityLabelTextSize := rl.MeasureTextEx(labelFont, rarityLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, rarityLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, rarityLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	btnSize: f32 = 32
+
+	restrictedIconCol := state.catalog.purchase_restricted ? style.colors.error : style.colors.text
+	btnRestricted := comp.ButtonCreate("", {currentX + innerWidth - btnSize / 2, currentY + btnSize / 2}, btnSize, btnSize, style.icons[.economy_restricted])
+
+    remainingWidth := innerWidth - btnSize - padding
+    rarityBtnWidth := (remainingWidth - padding) / 2
+    
+    btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize)
+    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize)
+    
+    rarityButtons := make([dynamic]comp.Button, context.temp_allocator)
+    append(&rarityButtons, btnDown, btnUp)
+    comp.LayoutButtonsHorizontalRect(rarityButtons, {currentX, currentY, remainingWidth, btnSize}, currentY + btnSize / 2, padding, 0, 0)
+
+	if comp.DrawButtonCol(&rarityButtons[0], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_rarity -= 1
+		if state.catalog.purchase_rarity < 1 do state.catalog.purchase_rarity = 1
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+
+    if comp.DrawButtonCol(&rarityButtons[1], style, false, style.colors.surface, style.colors.text, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_rarity += 1
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+
+	if comp.DrawButtonCol(&btnRestricted, style, state.catalog.purchase_restricted, style.colors.surface, restrictedIconCol, style.colors.surface, style.colors.primary, style.colors.primary) {
+		state.catalog.purchase_restricted = !state.catalog.purchase_restricted
+		state.catalog.purchase_at = CalculatePurchasePrice(state)
+		CatalogUpdateTextFields(state)
+	}
+	currentY += btnSize + padding
+
+    markupLabelText: cstring = "Markup"
+    markupLabelTextSize := rl.MeasureTextEx(labelFont, markupLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, markupLabelTextSize.y}, style.colors.surface)
+	rl.DrawTextEx(labelFont, "Markup", {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+	currentY += labelHeight + padding
+
+	markupFieldRect := rl.Rectangle{currentX, currentY, innerWidth, controlHeight}
+	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity])
+	if comp.UpdateTextField(&markupField) {
+		val, ok := strconv.parse_f32(comp.TextFieldToString(&markupField))
+		if ok {
+            if val < 0 {
+                val = 0
+                comp.TextFieldSet(&markupField, "0")
+            }
+			state.catalog.purchase_markup = val
+			state.catalog.purchase_at = CalculatePurchasePrice(state)
+
+			pStr := fmt.tprintf("%d", state.catalog.purchase_at)
+			pField := comp.TextField{
+				state = &state.textFields[.Catalog_Purchase_Price],
+			}
+			comp.TextFieldSet(&pField, pStr)
+		}
+	}
+	comp.DrawTextField(&markupField, style, "Markup %")
+	currentY += controlHeight + padding
+
+	purchaseBtn := comp.ButtonCreate("Purchase", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_buy])
+	if comp.DrawButtonCol(&purchaseBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
+		// Implementation later
+	}
+
+	return bounds
 }
