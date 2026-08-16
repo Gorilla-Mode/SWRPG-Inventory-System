@@ -785,9 +785,11 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	h += labelHeight + padding + 32
 	h += padding
 	h += labelHeight + padding + controlHeight
-	h += padding
-	h += controlHeight
+	h += controlHeight + padding + labelHeight
 	h += innerPadding
+    h += controlHeight
+    h += innerPadding
+    h += padding
 
 	bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, h}
 
@@ -890,10 +892,22 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	comp.DrawTextField(&markupField, style, "Markup %")
 	currentY += controlHeight + padding
 
+    buyLabelText: cstring = "Purchase Options"
+    buyLabelTextSize := rl.MeasureTextEx(labelFont, buyLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, buyLabelTextSize.y}, style.colors.surface)
+    rl.DrawTextEx(labelFont, buyLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+    currentY += labelHeight + padding
+
 	purchaseBtn := comp.ButtonCreate("Purchase", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_buy])
 	if comp.DrawButtonCol(&purchaseBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
 		// Implementation later
 	}
+    currentY += controlHeight + padding
+
+    addBtn := comp.ButtonCreate("Add", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_add])
+    if comp.DrawButtonCol(&addBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
+        // Implementation later
+    }
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
 
