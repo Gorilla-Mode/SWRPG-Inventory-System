@@ -573,7 +573,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
 }{
     return {
         base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
+        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity, item.restricted)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
         rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
@@ -763,7 +763,7 @@ CalculatePurchasePrice :: proc(state: ^st.state) -> i64 {
 	item := state.catalog.selected_item
 	if item == nil do return 0
 
-	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity)
+	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity, state.catalog.purchase_restricted)
 	return i64(f32(base) * (state.catalog.purchase_markup / 100.0))
 }
 
