@@ -805,7 +805,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 
 	resetBtnWidth: f32 = 72
 	priceFieldRect := rl.Rectangle{currentX, currentY, innerWidth - resetBtnWidth - padding, controlHeight}
-	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit])
+	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit], false)
 	if comp.UpdateTextField(&priceField) {
 		val, ok := strconv.parse_i64(comp.TextFieldToString(&priceField))
 		if ok {
@@ -869,7 +869,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	currentY += labelHeight + padding
 
 	markupFieldRect := rl.Rectangle{currentX, currentY, innerWidth, controlHeight}
-	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity])
+	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity], false)
 	if comp.UpdateTextField(&markupField) {
 		val, ok := strconv.parse_f32(comp.TextFieldToString(&markupField))
 		if ok {
