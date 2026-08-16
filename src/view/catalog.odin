@@ -838,7 +838,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
     rarityBtnWidth := (remainingWidth - padding) / 2
     
     btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
-    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
+    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow], 180)
     
     rarityButtons := make([dynamic]comp.Button, context.temp_allocator)
     append(&rarityButtons, btnDown, btnUp)
