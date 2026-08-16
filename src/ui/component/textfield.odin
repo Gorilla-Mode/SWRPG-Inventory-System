@@ -12,7 +12,8 @@ TextField :: struct {
     rect:       rl.Rectangle,
     rect_clear: rl.Rectangle,
     rect_image: rl.Rectangle,
-    max_length: i32
+    max_length: i32,
+    has_clear:  bool
 }
 
 UpdateTextField :: proc(field: ^TextField) -> bool{
@@ -21,7 +22,7 @@ UpdateTextField :: proc(field: ^TextField) -> bool{
 
     if rl.IsMouseButtonPressed(.LEFT)
     {
-        if rl.CheckCollisionPointRec(mousePos, field.rect_clear) {
+        if field.has_clear && rl.CheckCollisionPointRec(mousePos, field.rect_clear) {
             TextFieldClear(field)
             return true
         }
@@ -90,11 +91,11 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
 
     iconSearchPos := ui.IconGetCenterPos(field.rect_image, field.rect_image.height - iconPadding / 2)
     iconClearPos := ui.IconGetCenterPos(field.rect_clear, field.rect_clear.height - iconPadding / 2)
-    IconClearCol := rl.CheckCollisionPointRec(mousePos, field.rect_clear) && field.state.buffer_length != 0 ? style.colors.error : style.colors.text
+    IconClearCol := field.has_clear && rl.CheckCollisionPointRec(mousePos, field.rect_clear) && field.state.buffer_length != 0 ? style.colors.error : style.colors.text
     iconClearPos.y -= 2 // Offset, looks goofy when properly aligned
 
     boxRectCollision := rl.CheckCollisionPointRec(mousePos, field.rect)
-    clearRectCollision := rl.CheckCollisionPointRec(mousePos, {field.rect_clear.x - 2, field.rect_clear.y - 2, field.rect_clear.width + 4, field.rect_clear.height + 4})
+    clearRectCollision := field.has_clear && rl.CheckCollisionPointRec(mousePos, {field.rect_clear.x - 2, field.rect_clear.y - 2, field.rect_clear.width + 4, field.rect_clear.height + 4})
 
     if (boxRectCollision &&
     !field.state.is_active &&
@@ -109,14 +110,14 @@ DrawTextField :: proc(field: ^TextField, style: ^ui.style, temp: cstring){
     rl.DrawRectangleRec(field.rect, style.colors.surface)
     rl.DrawRectangleLinesEx(field.rect, 2, outlineCol)
     rl.DrawRectangleRec(field.rect_image, style.colors.secondary)
-    rl.DrawRectangleRec(field.rect_clear, style.colors.secondary)
+    if field.has_clear do rl.DrawRectangleRec(field.rect_clear, style.colors.secondary)
 
     rl.DrawTextureEx(field.image, iconSearchPos, 0, iconScale, style.colors.text)
-    rl.DrawTextureEx(style.icons[ui.Icons.gui_trash], iconClearPos, 0, iconScale, IconClearCol)
+    if field.has_clear do rl.DrawTextureEx(style.icons[ui.Icons.gui_trash], iconClearPos, 0, iconScale, IconClearCol)
 
     rl.DrawTextEx(style.fonts.regular[ui.font_size.default], text, textPos, f32(ui.font_size.default), 0, textCol)
 
-    if clearRectCollision && field.state.buffer_length != 0 {
+    if field.has_clear && clearRectCollision && field.state.buffer_length != 0 {
         rl.DrawTextEx(style.fonts.regular[ui.font_size.label], "Clear?",
         {mousePos.x + 4, mousePos.y - (f32(ui.font_size.label) / 2) - 4},
         f32(ui.font_size.label),
@@ -165,7 +166,7 @@ TextFieldSet :: proc(field: ^TextField, text: string){
     field.state.buffer_length = i32(len(text))
 }
 
-TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state, image: rl.Texture2D) -> TextField {
+TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textField, state: ^st.state, image: rl.Texture2D, has_clear: bool = true) -> TextField {
     _, ok := state.textFields[field]
     if !ok {
         new_field := st.textFieldState{
@@ -176,6 +177,8 @@ TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textFiel
         state.textFields[field] = new_field
     }
     iconRectSize: f32 = 28
+
+    max_len_width := has_clear ? (rect.width - (iconRectSize + 4) * 2 - 8) : (rect.width - (iconRectSize + 4) - 8)
 
     return TextField{
         state = &state.textFields[field],
@@ -193,6 +196,7 @@ TextFieldCreate :: proc(rect: rl.Rectangle, style: ^ui.style, field: st.textFiel
             width = iconRectSize,
             height = iconRectSize,
         },
-        max_length = i32(rect.width - (iconRectSize + 4) * 2 - 8) / rl.MeasureText("_", i32(ui.font_size.default)),
+        max_length = i32(max_len_width) / rl.MeasureText("_", i32(ui.font_size.default)),
+        has_clear = has_clear,
     }
 }

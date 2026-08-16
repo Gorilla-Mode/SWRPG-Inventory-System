@@ -8,6 +8,7 @@ Button :: struct {
     text: string,
     rect: rl.Rectangle,
     image: rl.Texture2D,
+    rot: f32,
 }
 
 DrawButton :: proc(
@@ -156,12 +157,32 @@ ButtonGetDraw :: proc(
     }
 
     rl.DrawRectangleRec(icon_rect, col_icon_bg)
+ 
+    source := rl.Rectangle{
+        x = 0,
+        y = 0,
+        width = f32(button.image.width),
+        height = f32(button.image.height),
+    }
 
-    rl.DrawTextureEx(
+    destination := rl.Rectangle{
+        x = icon_pos.x + f32(button.image.width) * scale / 2,
+        y = icon_pos.y + f32(button.image.height) * scale / 2,
+        width = f32(button.image.width) * scale,
+        height = f32(button.image.height) * scale,
+    }
+
+    origin := rl.Vector2{
+        f32(button.image.width) * scale / 2,
+        f32(button.image.height) * scale / 2,
+    }
+
+    rl.DrawTexturePro(
     button.image,
-    icon_pos,
-    0,
-    scale,
+    source,
+    destination,
+    origin,
+    button.rot,
     col_icon,
     )
 
@@ -181,7 +202,8 @@ ButtonCreate :: proc(
     text: string,
     center: rl.Vector2,
     width, height: f32,
-    image: rl.Texture2D = rl.Texture2D{}
+    image: rl.Texture2D = rl.Texture2D{},
+    rot: f32 = 0
 ) -> Button {
     return Button{
         text = text,
@@ -192,6 +214,7 @@ ButtonCreate :: proc(
             height = height,
         },
         image = image,
+        rot = rot,
     }
 }
 

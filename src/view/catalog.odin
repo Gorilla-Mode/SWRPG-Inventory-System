@@ -573,7 +573,7 @@ CatalogItemStatGetEconomyStrings :: proc(itemStr: inv.ItemCstring, item: ^inv.It
 }{
     return {
         base_price = cstr.Concat("Price:    ", itemStr.base_price, context.temp_allocator),
-        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
+        proj_price = cstr.Concat(cstr.Concat("Projected:", cstr.FormatCurrency(inv.ItemTotalPrice(item, item.base_rarity, item.restricted)), context.temp_allocator), "cr", context.temp_allocator), // Milde moses
         rarity     = cstr.Concat("Rarity:   ", itemStr.base_rarity, context.temp_allocator),
         restricted = cstr.Concat("Status:   ", itemStr.restricted, context.temp_allocator)
     }
@@ -763,7 +763,7 @@ CalculatePurchasePrice :: proc(state: ^st.state) -> i64 {
 	item := state.catalog.selected_item
 	if item == nil do return 0
 
-	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity)
+	base := inv.ItemTotalPrice(item, state.catalog.purchase_rarity, state.catalog.purchase_restricted)
 	return i64(f32(base) * (state.catalog.purchase_markup / 100.0))
 }
 
@@ -785,9 +785,11 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	h += labelHeight + padding + 32
 	h += padding
 	h += labelHeight + padding + controlHeight
-	h += padding
-	h += controlHeight
+	h += controlHeight + padding + labelHeight
 	h += innerPadding
+    h += controlHeight
+    h += innerPadding
+    h += padding
 
 	bounds := rl.Rectangle{rect.x, rect.y + rect.height + padding, rect.width, h}
 
@@ -805,7 +807,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 
 	resetBtnWidth: f32 = 72
 	priceFieldRect := rl.Rectangle{currentX, currentY, innerWidth - resetBtnWidth - padding, controlHeight}
-	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit])
+	priceField := comp.TextFieldCreate(priceFieldRect, style, .Catalog_Purchase_Price, state, style.icons[.economy_credit], false)
 	if comp.UpdateTextField(&priceField) {
 		val, ok := strconv.parse_i64(comp.TextFieldToString(&priceField))
 		if ok {
@@ -836,7 +838,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
     rarityBtnWidth := (remainingWidth - padding) / 2
     
     btnDown := comp.ButtonCreate("Decrease", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
-    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow])
+    btnUp := comp.ButtonCreate("Increase", {0, 0}, rarityBtnWidth, btnSize, style.icons[.gui_arrow], 180)
     
     rarityButtons := make([dynamic]comp.Button, context.temp_allocator)
     append(&rarityButtons, btnDown, btnUp)
@@ -869,7 +871,7 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	currentY += labelHeight + padding
 
 	markupFieldRect := rl.Rectangle{currentX, currentY, innerWidth, controlHeight}
-	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity])
+	markupField := comp.TextFieldCreate(markupFieldRect, style, .Catalog_Purchase_Markup, state, style.icons[.economy_rarity], false)
 	if comp.UpdateTextField(&markupField) {
 		val, ok := strconv.parse_f32(comp.TextFieldToString(&markupField))
 		if ok {
@@ -890,10 +892,22 @@ DrawCatalogPurchaseControls :: proc(state: ^st.state, style: ^ui.style, rect: rl
 	comp.DrawTextField(&markupField, style, "Markup %")
 	currentY += controlHeight + padding
 
+    buyLabelText: cstring = "Purchase Options"
+    buyLabelTextSize := rl.MeasureTextEx(labelFont, buyLabelText, labelHeight, 1)
+    rl.DrawRectangleRec({currentX, currentY, innerWidth, buyLabelTextSize.y}, style.colors.surface)
+    rl.DrawTextEx(labelFont, buyLabelText, {currentX + padding, currentY}, labelHeight, 1, style.colors.text)
+    currentY += labelHeight + padding
+
 	purchaseBtn := comp.ButtonCreate("Purchase", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_buy])
 	if comp.DrawButtonCol(&purchaseBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
 		// Implementation later
 	}
+    currentY += controlHeight + padding
+
+    addBtn := comp.ButtonCreate("Add", {currentX + innerWidth / 2, currentY + controlHeight / 2}, innerWidth, controlHeight, style.icons[.gui_add])
+    if comp.DrawButtonCol(&addBtn, style, false, style.colors.surface, style.colors.text, style.colors.secondary, style.colors.success, style.colors.success, true) {
+        // Implementation later
+    }
 
     if debug do rl.DrawRectangleRec(bounds, {255, 0, 0, 64})
 
