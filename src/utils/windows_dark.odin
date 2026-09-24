@@ -1,4 +1,6 @@
-﻿package utils
+﻿#+build windows
+
+package utils
 
 import win32 "core:sys/windows"
 import rl "vendor:raylib"
