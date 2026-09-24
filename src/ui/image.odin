@@ -65,6 +65,7 @@ Get_Icons :: proc(icon_paths: ^map[Icons]IconMetadata, icon_dir: string) {
             }
 
             Get_Icons(icon_paths, sub_dir) // Recursively search subdirectories for icons
+            continue
         }
 
         filename := strings.trim_suffix(file.name, filepath.ext(file.name))
